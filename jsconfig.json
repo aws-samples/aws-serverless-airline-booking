@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2017",
+        "jsx": "preserve",
+        "checkJs": true
+    },
+    "include": [
+        "src/**/*.js",
+        "src/**/*.vue"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/node_modules/*",
+        "docs",
+        "amplify",
+        "public",
+        "src/styles"
+    ]
+}
