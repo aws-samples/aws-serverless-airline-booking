@@ -1,6 +1,9 @@
 <template>
   <div class="row">
-    <amplify-authenticator class="authenticator__form"></amplify-authenticator>
+    <amplify-authenticator
+      class="authenticator__form"
+      v-bind:authConfig="authConfig"
+    ></amplify-authenticator>
   </div>
 </template>
 
@@ -30,6 +33,33 @@ export default {
         this.$router.push({ name: this.redirectTo });
       }
     });
+  },
+  data() {
+    return {
+      authConfig: {
+        signUpConfig: [
+          {
+            label: "First name",
+            key: "given_name",
+            required: true,
+            displayOrder: 0
+          },
+          {
+            label: "Family name",
+            key: "family_name",
+            required: true,
+            displayOrder: 1
+          },
+          {
+            label: "Luggage preference",
+            key: "luggage_preference",
+            required: true,
+            displayOrder: 2,
+            custom: true
+          }
+        ]
+      }
+    };
   }
 };
 </script>
