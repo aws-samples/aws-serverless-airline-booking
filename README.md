@@ -4,6 +4,8 @@ Airline Booking is a complete web application that provides Flight Search, Fligh
 
 ![Serverless Airline Booking sample](./media/prototype-web.png)
 
+![Serverless Airline Initial Architecture](./media/prototype-architecture.png)
+
 ## FAQ
 
 **Q: Will the README be updated with more info?**
