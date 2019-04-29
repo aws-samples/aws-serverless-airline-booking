@@ -37,27 +37,23 @@ export default {
   data() {
     return {
       authConfig: {
-        signUpConfig: [
-          {
-            label: "First name",
-            key: "given_name",
-            required: true,
-            displayOrder: 0
-          },
-          {
-            label: "Family name",
-            key: "family_name",
-            required: true,
-            displayOrder: 1
-          },
-          {
-            label: "Luggage preference",
-            key: "luggage_preference",
-            required: true,
-            displayOrder: 2,
-            custom: true
-          }
-        ]
+        signUpConfig: {
+          defaultCountryCode: "44",
+          signUpFields: [
+            {
+              label: "First name",
+              key: "given_name",
+              required: true,
+              displayOrder: 0
+            },
+            {
+              label: "Family name",
+              key: "family_name",
+              required: true,
+              displayOrder: 1
+            }
+          ]
+        }
       }
     };
   }
