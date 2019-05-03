@@ -6,6 +6,18 @@ Airline Booking is a complete web application that provides Flight Search, Fligh
 
 ![Serverless Airline Initial Architecture](./media/prototype-architecture.png)
 
+<p align="center">
+    <a href="https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/aws-samples/aws-serverless-airline-booking">
+        <img src="https://oneclick.amplifyapp.com/button.svg" alt="Deploy to Amplify Console">
+    </a>
+</p>
+
+---
+
+**NOTE**: 1-click deploy button will deploy the latest version from **develop** branch - After deployed, do click on **Connect Branch** and use this branch to specifically start from here.
+
+---
+
 ## FAQ
 
 **Q: Will the README be updated with more info?**
