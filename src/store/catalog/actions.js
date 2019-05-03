@@ -1,6 +1,6 @@
 import Flight from "../../shared/models/FlightClass";
 import axios from "axios";
-import Amplify, { API, graphqlOperation } from "aws-amplify";
+import { API, graphqlOperation } from "aws-amplify";
 import { listFlights } from "../../graphql/queries";
 
 /**
@@ -32,46 +32,42 @@ import { listFlights } from "../../graphql/queries";
  *    this.filteredFlights = this.sortByDeparture(this.flights);
  * }
  */
-export function fetchFlights({ commit }, { date, departure, arrival }) {
-  return new Promise(async (resolve, reject) => {
-    commit("SET_LOADER", true);
-    try {
-      // flight filter
-
-      const flightFilter = {
-        filter: {
-          departureDate: {
-            beginsWith: date
-          },
-          departureAirportCode: {
-            eq: departure
-          },
-          arrivalAirportCode: {
-            eq: arrival
-          }
+export async function fetchFlights({ commit }, { date, departure, arrival }) {
+  commit("SET_LOADER", true);
+  try {
+    // listFlights query filter
+    const flightFilter = {
+      filter: {
+        departureDate: {
+          beginsWith: date
+        },
+        departureAirportCode: {
+          eq: departure
+        },
+        arrivalAirportCode: {
+          eq: arrival
         }
-      };
+      }
+    };
 
-      // graphQL API
-      const {
-        data: {
-          listFlights: { items: flightData }
-        }
-      } = await API.graphql(graphqlOperation(listFlights, flightFilter));
+    const {
+      // @ts-ignore
+      data: {
+        listFlights: { items: flightData }
+      }
+    } = await API.graphql(graphqlOperation(listFlights, flightFilter));
 
-      console.log(flightData);
+    // data mutations happen within a Flight class
+    // here we convert graphQL results into an array of Flights
+    // before comitting to Vuex State Management
+    const flights = flightData.map(flight => new Flight(flight));
 
-      const flights = flightData.map(flight => new Flight(flight));
-
-      commit("SET_FLIGHTS", flights);
-      commit("SET_LOADER", false);
-      resolve();
-    } catch (error) {
-      console.error(error);
-      commit("SET_LOADER", false);
-      reject(error);
-    }
-  });
+    commit("SET_FLIGHTS", flights);
+    commit("SET_LOADER", false);
+  } catch (error) {
+    console.error(error);
+    commit("SET_LOADER", false);
+  }
 }
 
 /**
