@@ -91,7 +91,7 @@
         :to="{
           name: 'selectedFlight',
           params: { flight: flight },
-          query: { flightNumber: flight.flightNumber, date, departure, arrival }
+          query: { flightId: flight.id }
         }"
         v-for="flight in filteredFlights"
         :key="flight.id"
