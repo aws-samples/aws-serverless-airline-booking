@@ -1,0 +1,83 @@
+{
+    "userPoolName": "serverlessairlinecognitouserpool",
+    "autoVerifiedAttributes": [
+        "email"
+    ],
+    "mfaConfiguration": "OPTIONAL",
+    "mfaTypes": [
+        "SMS Text Message",
+        "TOTP"
+    ],
+    "roleName": "serverlessaairlineauth_sns-role",
+    "roleExternalId": "serverlessaairlineauth_role_external_id",
+    "policyName": "serverlessaairlineauth-sns-policy",
+    "smsAuthenticationMessage": "Your authentication code is {####}",
+    "smsVerificationMessage": "Your verification code is {####}",
+    "emailVerificationSubject": "Your verification code",
+    "emailVerificationMessage": "Your verification code is {####}",
+    "defaultPasswordPolicy": false,
+    "passwordPolicyMinLength": 8,
+    "passwordPolicyCharacters": [
+        "Requires Lowercase",
+        "Requires Uppercase",
+        "Requires Numbers",
+        "Requires Symbols"
+    ],
+    "requiredAttributes": [
+        "family_name",
+        "given_name",
+        "phone_number",
+        "email"
+    ],
+    "userpoolClientName": "serverlessaairlineauth_app_client",
+    "userpoolClientGenerateSecret": true,
+    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientReadAttributes": [
+        "email",
+        "family_name",
+        "given_name",
+        "phone_number",
+        "preferred_username",
+        "email_verified",
+        "phone_number_verified",
+        "custom:luggage_preference",
+        "custom:meal_preference"
+    ],
+    "mfaLambdaRole": "serverlessaairlineauth_totp_lambda_role",
+    "mfaLambdaLogPolicy": "serverlessaairlineauth_totp_lambda_log_policy",
+    "mfaPassRolePolicy": "serverlessaairlineauth_totp_pass_role_policy",
+    "mfaLambdaIAMPolicy": "serverlessaairlineauth_totp_lambda_iam_policy",
+    "userpoolClientLambdaRole": "serverlessaairlineauth_userpoolclient_lambda_role",
+    "userpoolClientLogPolicy": "serverlessaairlineauth_userpoolclient_lambda_log_policy",
+    "userpoolClientLambdaPolicy": "serverlessaairlineauth_userpoolclient_lambda_iam_policy",
+    "userpoolClientSetAttributes": true,
+    "useDefault": "manual",
+    "authSelections": "userPoolOnly",
+    "resourceName": "serverlessaairlineauth",
+    "userpoolClientWriteAttributes": [
+        "email",
+        "family_name",
+        "given_name",
+        "phone_number",
+        "custom:luggage_preference",
+        "custom:meal_preference"
+    ],
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    },
+    "unauthRoleArn": {
+        "Fn::GetAtt": [
+            "UnauthRole",
+            "Arn"
+        ]
+    }
+}

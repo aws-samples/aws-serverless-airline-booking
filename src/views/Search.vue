@@ -157,7 +157,7 @@ export default {
       this.$router.push({
         name: "searchResults",
         query: {
-          date: date.formatDate(this.departureDate, "DD-MM-YYYY"),
+          date: date.formatDate(this.departureDate, "YYYY-MM-DD"),
           departure: this.departureCity,
           arrival: this.arrivalCity
         }

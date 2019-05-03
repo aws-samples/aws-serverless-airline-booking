@@ -1,0 +1,16 @@
+projects:
+  awsserverlessairline:
+    schemaPath: src/graphql/schema.json
+    includes:
+      - src/graphql/**/*.js
+    excludes:
+      - ./amplify/**
+    extensions:
+      amplify:
+        codeGenTarget: javascript
+        generatedFileName: ''
+        docsFilePath: src/graphql
+        graphQLApiId: p3jpzjnkcjfnnjs2qcd7rafkum
+      endpoints:
+        prod: >-
+          https://2byom2uph5gpzixmozba5rdsky.appsync-api.eu-west-1.amazonaws.com/graphql
