@@ -67,6 +67,7 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
   } catch (error) {
     console.error(error);
     commit("SET_LOADER", false);
+    throw error;
   }
 }
 
