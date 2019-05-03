@@ -1,7 +1,6 @@
 import Flight from "../../shared/models/FlightClass";
-import axios from "axios";
 import { API, graphqlOperation } from "aws-amplify";
-import { listFlights } from "../../graphql/queries";
+import { listFlights, getFlight } from "../../graphql/queries";
 
 /**
  *
@@ -73,17 +72,14 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
 
 /**
  *
- * Catalog [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchByFlightNumber retrieves a flight given a flight number identification from Catalog service.
+ * Catalog [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchByFlightId retrieves a unique flight from Catalog service. Flight Number may be reused but not ID.
  *
  * Similarly to fetchFlights, it also controls Flight Loader when fetching data from Catalog service.
  *
  * **NOTE**: It doesn't mutate the store
  * @param {object} context - Vuex action context (context.commit, context.getters, context.state, context.dispatch)
  * @param {object} obj - Object containing params to filter flights from catalog
- * @param {Date} obj.date - Date in DD-MM-YYYY format
- * @param {string} obj.departure - Airport IATA to be filtered as departure
- * @param {string} obj.arrival - Airport IATA to be filtered as arrival
- * @param {number} obj.flightNumber - Flight Number
+ * @param {string} obj.flightId - Flight Unique Identifier
  * @returns {promise} - Promise representing flight from Catalog service.
  * @see {@link SET_LOADER} for more info on mutation
  * @example
@@ -91,34 +87,27 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
  * async beforeMount() {
  *    if (this.isAuthenticated) {
  *        if (!this.flight) {
- *            this.selectedFlight = await this.$store.dispatch("catalog/fetchByFlightNumber", {
- *              date: this.date,
- *              departure: this.departure,
- *              arrival: this.arrival,
- *              flightNumber: parseInt(this.flightNumber)
+ *            this.selectedFlight = await this.$store.dispatch("catalog/fetchByFlightId", {
+ *              flightId: this.flightId
  *            });
  *        }
  *    }
  * },
  */
-export function fetchByFlightNumber(
-  { commit },
-  { date, departure, arrival, flightNumber }
-) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      commit("SET_LOADER", true);
-      const { data: flightData } = await axios.get("/mocks/flights.json");
-      const flight = new Flight(
-        flightData.find(flight => flight.flightNumber === flightNumber)
-      );
+export async function fetchByFlightId({ commit }, { flightId }) {
+  try {
+    commit("SET_LOADER", true);
+    const {
+      // @ts-ignore
+      data: { getFlight: flightData }
+    } = await API.graphql(graphqlOperation(getFlight, { id: flightId }));
 
-      commit("SET_LOADER", false);
-      resolve(flight);
-    } catch (error) {
-      console.error(error);
-      commit("SET_LOADER", false);
-      reject(error);
-    }
-  });
+    const flight = new Flight(flightData);
+    commit("SET_LOADER", false);
+    return flight;
+  } catch (error) {
+    console.error(error);
+    commit("SET_LOADER", false);
+    throw error;
+  }
 }

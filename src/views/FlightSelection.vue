@@ -118,16 +118,11 @@ export default {
   name: "FlightSelection",
   /**
    * @param {Flight} flight - Selected Flight
-   * @param {number} flightNumber - Selected Flight Number
-   * @param {string} date - Selected departure date
-   * @param {string} date - Selected arrival date
+   * @param {string} flightId - Selected Flight Unique Identifier
    */
   props: {
     flight: { type: FlightClass },
-    flightNumber: { type: [Number, String], required: true }, // depending on browser flightNumber may come as string
-    date: { type: String, required: true },
-    departure: { type: String, required: true },
-    arrival: { type: String, required: true }
+    flightId: { type: String, required: true }
   },
   components: {
     FlightCard,
@@ -168,12 +163,9 @@ export default {
     if (this.isAuthenticated) {
       if (!this.flight) {
         this.selectedFlight = await this.$store.dispatch(
-          "catalog/fetchByFlightNumber",
+          "catalog/fetchByFlightId",
           {
-            date: this.date,
-            departure: this.departure,
-            arrival: this.arrival,
-            flightNumber: parseInt(this.flightNumber)
+            flightId: this.flightId
           }
         );
       }
