@@ -35,3 +35,17 @@ enum BookingStatus {
     CONFIRMED
     CANCELLED
 }
+
+input CreateBookingInput {
+  id: ID
+  status: BookingStatus
+  paymentToken: String!
+  checkedIn: Boolean
+  customer: String
+  bookingInboundFlightId: ID
+  bookingOutboundFlightId: ID!
+}
+
+type Mutation {
+    processBooking(input: CreateBookingInput!): Booking
+}
