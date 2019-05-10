@@ -17,6 +17,7 @@ export const getFlight = `query GetFlight($id: ID!) {
     ticketPrice
     ticketCurrency
     flightNumber
+    seatAllocation
   }
 }
 `;
@@ -41,6 +42,102 @@ export const listFlights = `query ListFlights(
       ticketPrice
       ticketCurrency
       flightNumber
+      seatAllocation
+    }
+    nextToken
+  }
+}
+`;
+export const getBooking = `query GetBooking($id: ID!) {
+  getBooking(id: $id) {
+    id
+    status
+    inboundFlight {
+      id
+      departureDate
+      departureAirportCode
+      departureAirportName
+      departureCity
+      departureLocale
+      arrivalDate
+      arrivalAirportCode
+      arrivalAirportName
+      arrivalCity
+      arrivalLocale
+      ticketPrice
+      ticketCurrency
+      flightNumber
+      seatAllocation
+    }
+    outboundFlight {
+      id
+      departureDate
+      departureAirportCode
+      departureAirportName
+      departureCity
+      departureLocale
+      arrivalDate
+      arrivalAirportCode
+      arrivalAirportName
+      arrivalCity
+      arrivalLocale
+      ticketPrice
+      ticketCurrency
+      flightNumber
+      seatAllocation
+    }
+    paymentToken
+    checkedIn
+    customer
+  }
+}
+`;
+export const listBookings = `query ListBookings(
+  $filter: ModelBookingFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listBookings(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      status
+      inboundFlight {
+        id
+        departureDate
+        departureAirportCode
+        departureAirportName
+        departureCity
+        departureLocale
+        arrivalDate
+        arrivalAirportCode
+        arrivalAirportName
+        arrivalCity
+        arrivalLocale
+        ticketPrice
+        ticketCurrency
+        flightNumber
+        seatAllocation
+      }
+      outboundFlight {
+        id
+        departureDate
+        departureAirportCode
+        departureAirportName
+        departureCity
+        departureLocale
+        arrivalDate
+        arrivalAirportCode
+        arrivalAirportName
+        arrivalCity
+        arrivalLocale
+        ticketPrice
+        ticketCurrency
+        flightNumber
+        seatAllocation
+      }
+      paymentToken
+      checkedIn
+      customer
     }
     nextToken
   }
