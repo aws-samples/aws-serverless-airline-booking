@@ -18,7 +18,7 @@ type Flight @model {
 }
 
 type Booking @model @auth(rules: [
-      {allow: owner, ownerField: "customer", identityField: "sub"},
+      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
       {allow: groups, groups: ["Admin"]}
     ]) {
     id: ID!
