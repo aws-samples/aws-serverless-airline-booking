@@ -24,12 +24,118 @@
 		"S3DeploymentRootKey": {
 			"Type": "String",
 			"Description": "An S3 key relative to the S3DeploymentBucket that points to the root\nof the deployment directory."
+		},
+		"FlightDataSource": {
+			"Type": "String",
+			"Description": "Flight Data Source Name",
+			"Default": "FlightTable"
+		},
+		"BookingDataSource": {
+			"Type": "String",
+			"Description": "Booking Data Source Name",
+			"Default": "BookingTable"
 		}
 	},
 	"Resources": {
-		"EmptyResource": {
-			"Type": "Custom::EmptyResource",
-			"Condition": "AlwaysFalse"
+		"PaymentApiDatasource": {
+			"Type": "AWS::AppSync::DataSource",
+			"Properties": {
+				"Description": "Payment API to collect, verify and refund payments",
+				"Type": "HTTP",
+				"Name": "PaymentApi",
+				"ApiId": {
+					"Ref": "AppSyncApiId"
+				},
+				"HttpConfig": {
+					"Endpoint": "https://httpbin.org"
+				}
+			}
+		},
+		"ReserveFlightFunction": {
+			"Type": "AWS::AppSync::FunctionConfiguration",
+			"Properties": {
+				"ApiId": {
+					"Ref": "AppSyncApiId"
+				},
+				"Name": "ReserveFlight",
+				"Description": "Updates Flight Table and decreases Seat Allocation for a given flight",
+				"DataSourceName": {
+					"Ref": "FlightDataSource"
+				},
+				"RequestMappingTemplate": "## Decreases Seat allocation as a mean to reserve a booking\n## while booking isn't confirmed and payment verified\n## Do fail immediately if we cannot reserve a flight\n{\n    \"version\": \"2017-02-28\",\n    \"operation\": \"UpdateItem\",\n    \"key\": {\n        \"id\": $util.dynamodb.toDynamoDBJson($ctx.stash.outboundFlightId) \n    },\n    \"update\": {\n      \"expression\": \"SET seatAllocation = seatAllocation - :dec\",\n      \"expressionValues\": {\n          \":dec\": {\"N\": \"1\"}\n      }\n    },\n    \"condition\": {\n        \"expression\": \"seatAllocation > :noSeat\",\n        \"expressionValues\": {\n            \":noSeat\": {\"N\": \"0\"}\n        }\n    }\n}\n",
+				"ResponseMappingTemplate": "## Raise a GraphQL field error in case of a datasource invocation error\n#if($ctx.error)\n    $util.error(\"No seats left....\", $ctx.error.message, $ctx.error.type)\n#end\n## Pass back the result from DynamoDB. **\n$util.toJson($ctx.result)\n",
+				"FunctionVersion": "2018-05-29"
+			}
+		},
+		"ReserveBookingFunction": {
+			"Type": "AWS::AppSync::FunctionConfiguration",
+			"Properties": {
+				"ApiId": {
+					"Ref": "AppSyncApiId"
+				},
+				"Name": "ReserveBooking",
+				"Description": "Creates a new Booking in the Booking Table with status UNCONFIRMED",
+				"DataSourceName": {
+					"Ref": "BookingDataSource"
+				},
+				"RequestMappingTemplate": "## [Start] Prepare DynamoDB PutItem Request.**\n### Add default values\n$util.qr($context.args.input.put(\"createdAt\", $util.time.nowISO8601()))\n$util.qr($context.args.input.put(\"updatedAt\", $util.time.nowISO8601()))\n$util.qr($context.args.input.put(\"__typename\", \"Booking\"))\n$util.qr($context.args.input.put(\"checkedIn\", false))\n### Add logged in customer as the value\n$util.qr($context.args.input.put(\"customer\", $ctx.identity.sub))\n$util.qr($context.args.input.put(\"status\", 'UNCONFIRMED'))\n\n## Missing outbound flight ID\n{\n  \"version\": \"2017-02-28\",\n  \"operation\": \"PutItem\",\n  \"key\": {\n      \"id\":     $util.dynamodb.toDynamoDBJson($util.defaultIfNullOrBlank($ctx.args.input.id, $util.autoId()))\n  },\n  \"attributeValues\": $util.dynamodb.toMapValuesJson($context.args.input),\n  \"condition\": {\n      \"expression\": \"attribute_not_exists(#id)\",\n      \"expressionNames\": {\n          \"#id\": \"id\"\n    }\n  }\n}\n## [End] Prepare DynamoDB PutItem Request. **\n",
+				"ResponseMappingTemplate": "## Raise a GraphQL field error in case of a datasource invocation error\n#if($ctx.error)\n    $util.error($ctx.error.message, $ctx.error.type)\n    $util.error(\"Unable to reserve booking....\", $ctx.error.message, $ctx.error.type)\n#end\n## Pass back the result from DynamoDB. **\n$util.toJson($ctx.result)\n",
+				"FunctionVersion": "2018-05-29"
+			}
+		},
+		"VerifyPaymentFunction": {
+			"Type": "AWS::AppSync::FunctionConfiguration",
+			"Properties": {
+				"ApiId": {
+					"Ref": "AppSyncApiId"
+				},
+				"Name": "VerifyPayment",
+				"Description": "Verifies collected payment with flight information",
+				"DataSourceName": {
+					"Fn::GetAtt": [
+						"PaymentApiDatasource",
+						"Name"
+					]
+				},
+				"RequestMappingTemplate": "##\n## Make arbitrary HTTP GET request to HTTP Data Source, pass Authorization Cognito JWT and send Payment token as Query String\n##\n{\n  \"method\": \"GET\",\n  ## E.G. if full path is https://api.xxxxxxxxx.com/posts then resourcePath would be /posts **\n  \"resourcePath\": \"/status/200\",\n  \"params\":{\n      \"query\": {\n        \"token\": $util.toJson($ctx.stash.paymentToken)\n      },\n      \"headers\": {\n          \"Authorization\": \"$ctx.request.headers.Authorization\"\n      }\n  }\n}\n## [End] Prepare DynamoDB PutItem Request. **\n",
+				"ResponseMappingTemplate": "## Raise a GraphQL field error in case of a data source invocation error\n#if($ctx.error)\n    $util.error($ctx.error.message, $ctx.error.type)\n#end\n## Pass back the result from DynamoDB. **\n$util.toJson($ctx.result)\n",
+				"FunctionVersion": "2018-05-29"
+			}
+		},
+		"ProcessBookingResolver": {
+			"Type": "AWS::AppSync::Resolver",
+			"Properties": {
+				"ApiId": {
+					"Ref": "AppSyncApiId"
+				},
+				"TypeName": "Mutation",
+				"FieldName": "processBooking",
+				"RequestMappingTemplate": "$util.qr($ctx.stash.put(\"outboundFlightId\", $ctx.args.input.bookingOutboundFlightId))\n$util.qr($ctx.stash.put(\"paymentToken\", $ctx.args.input.paymentToken))\n$util.qr($ctx.stash.put(\"customer\", $ctx.identity.sub))\n\n{}\n",
+				"ResponseMappingTemplate": "$util.toJson($ctx.result)\n",
+				"Kind": "PIPELINE",
+				"PipelineConfig": {
+					"Functions": [
+						{
+							"Fn::GetAtt": [
+								"VerifyPaymentFunction",
+								"FunctionId"
+							]
+						},
+						{
+							"Fn::GetAtt": [
+								"ReserveFlightFunction",
+								"FunctionId"
+							]
+						},
+						{
+							"Fn::GetAtt": [
+								"ReserveBookingFunction",
+								"FunctionId"
+							]
+						}
+					]
+				}
+			}
 		}
 	},
 	"Conditions": {
