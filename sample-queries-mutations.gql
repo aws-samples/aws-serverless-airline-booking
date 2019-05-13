@@ -1,0 +1,129 @@
+## Add a bunch of flights
+### Aviation-edge Open API could come handy in here as an ETL process
+
+mutation flight1 {
+    createFlight(input:{
+        departureDate: "2019-05-08T08:00+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-05-08T10:15+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 100,
+        ticketCurrency: "EUR",
+        flightNumber: 1830
+    }) {
+        id
+    }
+} 
+
+mutation flight2 {
+    createFlight(input:{
+        departureDate: "2019-01-16T10:30+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-01-16T12:45+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 200,
+        ticketCurrency: "EUR",
+        flightNumber: 1813,
+        seatAllocation: 2
+    }) {
+        id
+    }
+}
+
+mutation flight3 {
+    createFlight(input:{
+        departureDate: "2019-01-16T12:00+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-01-16T14:15+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 1000,
+        ticketCurrency: "EUR",
+        flightNumber: 1814,
+        seatAllocation: 2
+    }) {
+        id
+    }
+}
+
+mutation flight4 {
+    createFlight(input:{
+        departureDate: "2019-01-16T17:00+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-01-16T19:15+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 500,
+        ticketCurrency: "EUR",
+        flightNumber: 1815,
+        seatAllocation: 2
+    }) {
+        id
+    }
+}
+
+## Fetch all flights leaving at 10am
+
+query {
+  listFlights(limit:2, filter: {
+    departureDate: {
+      beginsWith: "2019-01-16T10"
+    }
+  }){
+    items {
+      id,
+      departureDate
+    }
+  }
+}
+
+## Make a booking
+###
+
+mutation {
+  createBooking(input:{
+     status:UNCONFIRMED,
+     paymentToken: "adasdasd",
+     bookingOutboundFlightId: "flight-UUID-here"
+  }) {
+    id
+  }
+}
+
+## Fetch a booking
+### TODO: departureCity in mock will no longer be needed
+
+query {
+  getBooking(id:"b46baf62-f9fe-4b0b-b2e3-741f5e11589d") 
+  # selection set
+  {
+    id
+	  outboundFlight {
+	    id
+      departureDate
+    }
+  }
+}
+

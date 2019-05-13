@@ -161,15 +161,10 @@ Resources:
           Mutable: true
         
         -
-          Name: phone_number
-          Required: true
-          Mutable: true
-        
-        -
           Name: email
           Required: true
           Mutable: true
-        
+
         -
           Name: luggage_preference
           Required: false
@@ -181,8 +176,6 @@ Resources:
           Required: false
           Mutable: true
           AttributeDataType: String
-
-        
       
       AutoVerifiedAttributes: !Ref autoVerifiedAttributes
       
@@ -210,7 +203,7 @@ Resources:
   # Depends on UserPool for ID reference
     Type: "AWS::Cognito::UserPoolClient"
     Properties:
-      ClientName: serverlessaairlineauth_app_clientWeb
+      ClientName: cognitoa7d29d9d_app_clientWeb
       
       ReadAttributes: !Ref userpoolClientReadAttributes
       WriteAttributes: !Ref userpoolClientWriteAttributes
@@ -358,7 +351,7 @@ Resources:
             - Effect: Allow
               Action:
                 - 'iam:PassRole'
-              Resource: !If [ShouldNotCreateEnvResources, 'arn:aws:iam:::role/serverlessaairlineauth_totp_lambda_role', !Join ['',['arn:aws:iam:::role/serverlessaairlineauth_totp_lambda_role', '-', !Ref env]]]
+              Resource: !If [ShouldNotCreateEnvResources, 'arn:aws:iam:::role/cognitoa7d29d9d_totp_lambda_role', !Join ['',['arn:aws:iam:::role/cognitoa7d29d9d_totp_lambda_role', '-', !Ref env]]]
   MFALambda:
   # Lambda which sets MFA config values
   # Depends on MFALambdaRole for role ARN

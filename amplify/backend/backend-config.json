@@ -1,6 +1,6 @@
 {
 	"auth": {
-		"serverlessaairlineauth": {
+		"cognitoa7d29d9d": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation"
 		}
