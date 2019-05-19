@@ -4,6 +4,7 @@ backend:
     preBuild:
       commands:
         - npm install -g @aws-amplify/cli # install latest amplify-CLI
+        - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
     build:
       commands:
         - '# Execute Amplify CLI with the helper script'
