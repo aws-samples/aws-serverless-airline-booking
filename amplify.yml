@@ -9,16 +9,34 @@ backend:
       commands:
         - '# Execute Amplify CLI with the helper script'
         - amplifyPush --simple
+        ##
+        # Extract Environment data
+        ##
+        - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
+        - export GRAPHQL_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
+        ##
+        # List all data sources and capture DynamoDB table created from @model
+        ##
+        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --region ${AWS_REGION} > datasources.json
+        - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
+        - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
+        ##
+        # Deploy SAM based back-end
+        ##
+        - make deploy
 frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - cd src/frontend
+        - npm install
     build:
       commands:
         - npm run build
   artifacts:
-    baseDirectory: dist
+    baseDirectory: src/frontend/dist
     files:
       - '**/*'
   cache:
