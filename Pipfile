@@ -1,0 +1,19 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+# Linters and dev tools used across multiple services written in Python
+[dev-packages]
+flake8 = "*"
+autopep8 = "*"
+cfn-lint = "*"
+aws-sam-cli = "*"
+awscli = "*"
+pytest = "*"
+pytest-mock = "*"
+pytest-cov = "*"
+
+[requires]
+python_version = "3.6"
