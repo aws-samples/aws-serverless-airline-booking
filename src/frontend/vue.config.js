@@ -15,12 +15,12 @@ module.exports = {
     config
       .entry("app")
       .clear()
-      .add("./src/frontend/main.js")
+      .add("./main.js")
       .end();
-    config.resolve.alias.set("@", path.join(__dirname, "./src/frontend"));
+    config.resolve.alias.set("@", __dirname);
     config.resolve.alias.set(
       "variables",
-      path.join(__dirname, "./src/frontend/styles/quasar.variables.styl")
+      path.join(__dirname, "./styles/quasar.variables.styl")
     );
   }
 };
