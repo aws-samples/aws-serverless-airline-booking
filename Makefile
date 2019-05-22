@@ -18,6 +18,7 @@ deploy: ##=> Deploy services
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
 	cd src/backend/booking && \
+		sam build && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
 			--region $${AWS_REGION} \
@@ -36,11 +37,9 @@ deploy.booking: ##=> Deploy booking service using SAM
 
 _install_os_packages:
 	$(info [*] Installing Python and OS deps...)
-	yum install jq python36 python36-devel python36-pip gcc glibc-headers -y
-	$(info [*] Upgrading Python PIP...)
-	python36 -m pip install --upgrade pip
-	$(info [*] Installing SAM CLI and other tools...)
-	python36 -m pip install cfn-lint aws-sam-cli
+	yum install jq python36 python36-devel python36-pip -y
+	$(info [*] Upgrading Python PIP, and installing SAM CLI and CloudFormation linter...)
+	python36 -m pip install --upgrade pip cfn-lint aws-sam-cli
 
 define HELP_MESSAGE
 	Common usage:

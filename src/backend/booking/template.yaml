@@ -25,8 +25,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: collect.lambda_handler
-      Runtime: python3.7
-      CodeUri: src/
+      Runtime: python3.6
+      CodeUri: src/collect-payment
       Timeout: 10
       Environment:
         Variables:
@@ -36,8 +36,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: confirm.lambda_handler
-      CodeUri: src/
-      Runtime: python3.7
+      CodeUri: src/confirm-booking
+      Runtime: python3.6
       Timeout: 10
       Environment:
         Variables:
@@ -50,8 +50,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: refund.lambda_handler
-      CodeUri: src/
-      Runtime: python3.7
+      CodeUri: src/refund-payment
+      Runtime: python3.6
       Timeout: 10
       Environment:
         Variables:
