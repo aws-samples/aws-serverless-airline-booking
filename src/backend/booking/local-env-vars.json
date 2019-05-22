@@ -1,0 +1,11 @@
+{
+    "ConfirmBooking": {
+        "BOOKING_TABLE_NAME": "BOOKING_TABLE"
+    },
+    "CollectPayment": {
+        "PAYMENT_API_URL": "PAYMENT_API_URL"
+    },
+    "RefundPayment": {
+        "PAYMENT_API_URL": "PAYMENT_API_URL"
+    }
+}
