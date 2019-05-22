@@ -1,10 +1,10 @@
 import json
 import os
-import random
-import string
 
 import boto3
 from botocore.exceptions import ClientError
+
+import shortuuid
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
@@ -15,13 +15,9 @@ class BookingConfirmationException(Exception):
     pass
 
 
-def generate_booking_reference(length):
-    return "".join(random.choices(string.ascii_uppercase + string.digits, k=length))
-
-
 def confirm_booking(booking_id):
     try:
-        reference = generate_booking_reference(6)
+        reference = shortuuid.ShortUUID().random(length=6)
         table.update_item(
             Key={"id": booking_id},
             ConditionExpression="id = :idVal",
