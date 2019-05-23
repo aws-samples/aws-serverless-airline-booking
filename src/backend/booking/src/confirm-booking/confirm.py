@@ -15,6 +15,23 @@ class BookingConfirmationException(Exception):
 
 
 def confirm_booking(booking_id):
+    """Update existing booking to CONFIRMED and generates a Booking reference
+
+    Parameters
+    ----------
+    booking_id : string
+        Unique Booking ID
+
+    Returns
+    -------
+    dict
+        bookingReference: string
+
+    Raises
+    ------
+    BookingConfirmationException
+        Booking Confirmation Exception including error message upon failure
+    """
     try:
         reference = secrets.token_urlsafe(4)
         table.update_item(
@@ -37,6 +54,30 @@ def confirm_booking(booking_id):
 
 
 def lambda_handler(event, context):
+    """AWS Lambda Function entrypoint to confirm booking
+
+    Parameters
+    ----------
+    event: dict, required
+        Step Functions State Machine event
+
+        bookingId: string
+            Unique Booking ID of an unconfirmed booking
+
+    context: object, required
+        Lambda Context runtime methods and attributes
+        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
+
+    Returns
+    -------
+    string
+        JSON Stringified data containing bookingReference
+
+    Raises
+    ------
+    BookingConfirmationException
+        Booking Confirmation Exception including error message upon failure
+    """
 
     if "bookingId" not in event:
         raise BookingConfirmationException("Invalid booking ID")
