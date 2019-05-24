@@ -55,7 +55,7 @@ def lambda_handler(event, context):
         Booking Cancellation Exception including error message upon failure
     """
     if 'bookingId' not in event:
-        raise BookingCancellationException('Invalid booking ID')
+        raise ValueError('Invalid booking ID')
 
     try:
         ret = cancel_booking(event['bookingId'])
