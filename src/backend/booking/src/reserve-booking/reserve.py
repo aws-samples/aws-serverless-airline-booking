@@ -107,7 +107,7 @@ def lambda_handler(event, context):
         Booking Reservation Exception including error message upon failure
     """
     if not is_booking_request_valid(event):
-        raise BookingReservationException("Invalid booking request")
+        raise ValueError("Invalid booking request")
 
     try:
         ret = reserve_booking(event)
