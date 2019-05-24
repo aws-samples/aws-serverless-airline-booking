@@ -355,3 +355,16 @@ Outputs:
   StateMachineARN: 
     Value: !Ref ProcessBooking
     Description: The ARN of the Process Booking StateMachine
+
+  PaymentCaptureUrl:
+    Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
+    Description: Payment Endpoint for capturing payments
+  
+  PaymentChargeUrl:
+    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+    Description: Payment Endpoint for collecting payments
+  
+  RefundApiUrl:
+    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+    Description: Payment Endpoint for refunding payments
+
