@@ -17,8 +17,5 @@ def collect_payment(payment):
         return paymentApiResponse.content
     raise PaymentException('Payment failed', paymentApiResponse.status_code)
 
-
 def lambda_handler(event, context):
     collect_payment(event)
-
-
