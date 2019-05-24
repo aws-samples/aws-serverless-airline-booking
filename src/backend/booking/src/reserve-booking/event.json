@@ -1,0 +1,6 @@
+{
+    "stateExecutionId": "value1",
+    "chargeId": "value2",
+    "customer": "value3",
+    "bookingOutboundFlightId": "flightId12345"
+  }

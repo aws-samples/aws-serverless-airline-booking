@@ -7,5 +7,17 @@
     },
     "RefundPayment": {
         "PAYMENT_API_URL": "PAYMENT_API_URL"
+    },
+    "CancelBooking": {
+        "BOOKING_TABLE_NAME": "Booking-2pa2xn3qzzdi7ntbhdozirkmiy-twitch"
+    },
+    "ReserveBooking": {
+        "BOOKING_TABLE_NAME": "Booking-2pa2xn3qzzdi7ntbhdozirkmiy-twitch"
+    },
+    "ReserveFlightSeat": {
+        "FLIGHT_TABLE_NAME": "Flight-2pa2xn3qzzdi7ntbhdozirkmiy-twitch"
+    },
+    "ReleaseFlightSeat": {
+        "FLIGHT_TABLE_NAME": "Flight-2pa2xn3qzzdi7ntbhdozirkmiy-twitch"
     }
 }
