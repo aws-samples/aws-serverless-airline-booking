@@ -45,6 +45,20 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
+  
+  CancelBooking:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: cancel.lambda_handler
+      CodeUri: src/cancel-booking
+      Runtime: python3.6
+      Timeout: 10
+      Environment:
+        Variables:
+          BOOKING_TABLE_NAME: !Ref BookingTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingTable
 
   RefundPayment:
     Type: AWS::Serverless::Function
