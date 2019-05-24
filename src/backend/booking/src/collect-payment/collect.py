@@ -11,7 +11,7 @@ class PaymentException(Exception):
         self.status_code = status_code
 
 def collect_payment(payment):
-    paymentApiResponse = requests.post(os.environ['PAYMENT_API_URL'], json = { "chargeId":event["chargeId"]})
+    paymentApiResponse = requests.post(os.environ['PAYMENT_API_URL'], json = { "chargeId":payment["chargeId"]})
     print(paymentApiResponse.content)
     if paymentApiResponse.status_code == 200:
         return paymentApiResponse.content
