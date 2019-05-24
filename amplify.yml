@@ -32,6 +32,10 @@ frontend:
       commands:
         - cd src/frontend
         - npm install
+        ##
+        # Retrieve Payment Endpoints for front-end
+        ##
+        - aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query 'Stacks[0].Outputs' --region ${AWS_REGION} | jq -r '.[] | { (.OutputKey): .OutputValue }' | jq -s 'add' > env.json
     build:
       commands:
         - npm run build
