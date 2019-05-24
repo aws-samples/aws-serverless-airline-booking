@@ -59,6 +59,20 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
+  
+  ReserveBooking:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: reserve.lambda_handler
+      CodeUri: src/reserve-booking
+      Runtime: python3.6
+      Timeout: 10
+      Environment:
+        Variables:
+          BOOKING_TABLE_NAME: !Ref BookingTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BookingTable
 
   RefundPayment:
     Type: AWS::Serverless::Function

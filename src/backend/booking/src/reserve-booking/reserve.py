@@ -1,50 +1,113 @@
+import datetime
 import json
 import os
-import datetime
+import uuid
 
 import boto3
 from botocore.exceptions import ClientError
-import uuid
 
 session = boto3.Session()
-dynamodb = session.resource('dynamodb')
-table = dynamodb.Table(os.environ['BOOKING_TABLE_NAME'])
+dynamodb = session.resource("dynamodb")
+table = dynamodb.Table(os.environ["BOOKING_TABLE_NAME"])
 
 
 class BookingReservationException(Exception):
     pass
 
+
 def is_booking_request_valid(booking):
-    return True
+    return all(
+        x in booking
+        for x in ["stateExecutionId", "bookingOutboundFlightId", "customer", "chargeId"]
+    )
+
 
 def reserve_booking(booking):
+    """Creates a new booking as UNCONFIRMED
+
+    Parameters
+    ----------
+    booking: dict
+        chargeId: string
+            pre-authorization charge ID
+
+        stateExecutionId: string
+            Step Functions Process Booking Execution ID
+
+        chargeId: string
+            Pre-authorization payment token 
+
+        customer: string
+            Customer unique identifier
+
+        bookingOutboundFlightId: string
+            Outbound flight unique identifier     
+
+    Returns
+    -------
+    dict
+        bookingId: string
+    """
     try:
         id = str(uuid.uuid4())
-        table.put_item(
-            Item={
-                'id': id, 
-                'stateExecutionId': booking['stateExecutionId'],
-                '__typename': 'Booking',
-                'bookingOutboundFlightId': booking['bookingOutboundFlightId'],
-                'checkedIn': False,
-                'customer': booking['customer'],
-                'paymentToken': booking['chargeId'],
-                'status': 'UNCONFIRMED',
-                'createdAt': str(datetime.datetime.now())
-            }
-        )
-
-        return {
-            'bookingId': id
+        booking_item = {
+            "id": id,
+            "stateExecutionId": booking["stateExecutionId"],
+            "__typename": "Booking",
+            "bookingOutboundFlightId": booking["bookingOutboundFlightId"],
+            "checkedIn": False,
+            "customer": booking["customer"],
+            "paymentToken": booking["chargeId"],
+            "status": "UNCONFIRMED",
+            "createdAt": str(datetime.datetime.now()),
         }
+
+        table.put_item(Item=booking_item)
+
+        return {"bookingId": id}
     except ClientError as e:
-        raise BookingReservationException(e.response['Error']['Message'])
-        
+        raise BookingReservationException(e.response["Error"]["Message"])
+
 
 def lambda_handler(event, context):
+    """AWS Lambda Function entrypoint to reserve a booking
 
+    Parameters
+    ----------
+    event: dict, required
+        Step Functions State Machine event
+
+        chargeId: string
+            pre-authorization charge ID
+
+        stateExecutionId: string
+            Step Functions Process Booking Execution ID
+
+        chargeId: string
+            Pre-authorization payment token 
+
+        customer: string
+            Customer unique identifier
+
+        bookingOutboundFlightId: string
+            Outbound flight unique identifier
+
+    context: object, required
+        Lambda Context runtime methods and attributes
+        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
+
+    Returns
+    -------
+    bookingId: string
+        JSON Stringified booking ID
+
+    Raises
+    ------
+    BookingReservationException
+        Booking Reservation Exception including error message upon failure
+    """
     if not is_booking_request_valid(event):
-        raise BookingReservationException('Invalid booking request')
+        raise BookingReservationException("Invalid booking request")
 
     try:
         ret = reserve_booking(event)
@@ -52,4 +115,3 @@ def lambda_handler(event, context):
         raise BookingReservationException(e)
 
     return json.dumps(ret)
-
