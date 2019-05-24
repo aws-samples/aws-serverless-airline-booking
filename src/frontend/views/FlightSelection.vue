@@ -246,7 +246,7 @@ export default {
 
         await this.$store.dispatch("bookings/createBooking", {
           paymentToken: this.token,
-          outboundFlight: this.flight
+          outboundFlight: this.selectedFlight
         });
 
         this.$q.loading.hide();
