@@ -30,12 +30,12 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd src/frontend
-        - npm install
         ##
         # Retrieve SAM Stack outputs and merge into a single ./env.json
         ##
         - make outputs
+        - cd src/frontend
+        - npm install
     build:
       commands:
         - npm run build
