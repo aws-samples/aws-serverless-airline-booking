@@ -65,8 +65,8 @@ def lambda_handler(event, context):
 
     Raises
     ------
-    BookingConfirmationException
-        Booking Confirmation Exception including error message upon failure
+    RefundException
+        Refund Exception including error message upon failure
     """
     if "chargeId" not in event:
         raise RefundException(message="Invalid Charge ID", status_code=400)
