@@ -33,9 +33,9 @@ frontend:
         - cd src/frontend
         - npm install
         ##
-        # Retrieve Payment Endpoints for front-end
+        # Retrieve SAM Stack outputs and merge into a single ./env.json
         ##
-        - aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query 'Stacks[0].Outputs' --region ${AWS_REGION} | jq -r '.[] | { (.OutputKey): .OutputValue }' | jq -s 'add' > env.json
+        - make outputs
     build:
       commands:
         - npm run build

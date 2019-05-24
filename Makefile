@@ -11,6 +11,9 @@ init: ##=> Install OS deps, python3.6 and dev tools
 	$(info [*] Bootstrapping CI system...)
 	@$(MAKE) _install_os_packages
 
+outputs: ##=> Fetch SAM stack outputs and stores into ./env.json
+	aws cloudformation describe-stacks --stack-name $${STACK_NAME} --query 'Stacks[0].Outputs' --region $${AWS_REGION} | jq -r '.[] | { (.OutputKey): .OutputValue }' | jq -s 'add' > env.json
+
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
 	$(MAKE) deploy.booking
