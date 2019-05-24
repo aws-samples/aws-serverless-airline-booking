@@ -1,10 +1,9 @@
 import json
 import os
+import secrets
 
 import boto3
 from botocore.exceptions import ClientError
-
-import shortuuid
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
@@ -17,7 +16,7 @@ class BookingConfirmationException(Exception):
 
 def confirm_booking(booking_id):
     try:
-        reference = shortuuid.ShortUUID().random(length=6)
+        reference = secrets.token_urlsafe(4)
         table.update_item(
             Key={"id": booking_id},
             ConditionExpression="id = :idVal",
