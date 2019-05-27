@@ -18,7 +18,7 @@ class BookingReservationException(Exception):
 def is_booking_request_valid(booking):
     return all(
         x in booking
-        for x in ["stateExecutionId", "bookingOutboundFlightId", "customer", "chargeId"]
+        for x in ["outboundFlightId", "customerId", "chargeId"]
     )
 
 
@@ -52,11 +52,11 @@ def reserve_booking(booking):
         id = str(uuid.uuid4())
         booking_item = {
             "id": id,
-            "stateExecutionId": booking["stateExecutionId"],
+            "stateExecutionId": booking["name"],
             "__typename": "Booking",
-            "bookingOutboundFlightId": booking["bookingOutboundFlightId"],
+            "bookingOutboundFlightId": booking["outboundFlightId"],
             "checkedIn": False,
-            "customer": booking["customer"],
+            "customer": booking["customerId"],
             "paymentToken": booking["chargeId"],
             "status": "UNCONFIRMED",
             "createdAt": str(datetime.datetime.now()),
