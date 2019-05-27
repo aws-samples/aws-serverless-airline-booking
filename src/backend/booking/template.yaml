@@ -9,29 +9,20 @@ Parameters:
     FlightTable:
         Type: String
         Description: Flight Table
+    
+    Stage:
+        Type: String
+        Description: Environment stage or git branch
 
+    CollectPaymentFunction:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Collect Payment Function ARN 
+    
+    RefundPaymentFunction:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Refund Payment Function ARN 
 
 Resources:
-  StripePaymentApplication:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location:
-        ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge
-        SemanticVersion: 4.0.0
-      Parameters:
-        EnableInstantCapture: "false"
-
-  CollectPayment:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: collect.lambda_handler
-      Runtime: python3.6
-      CodeUri: src/collect-payment
-      Timeout: 10
-      Environment:
-        Variables:
-          PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.CaptureApiUrl
-
   ConfirmBooking:
     Type: AWS::Serverless::Function
     Properties:
@@ -74,17 +65,6 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
 
-  RefundPayment:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: refund.lambda_handler
-      CodeUri: src/refund-payment
-      Runtime: python3.6
-      Timeout: 10
-      Environment:
-        Variables:
-          PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
-
   StatesExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -117,7 +97,7 @@ Resources:
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
 
-                
+
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
     Properties: 
@@ -249,7 +229,7 @@ Resources:
                 },
                 "Collect Payment": {
                     "Type": "Task",
-                    "Resource": "${CollectPayment.Arn}",
+                    "Resource": "${CollectPaymentFunction}",
                     "Catch": [
                         {
                             "ErrorEquals": [
@@ -312,7 +292,7 @@ Resources:
                 },
                 "Refund Payment": {
                     "Type": "Task",
-                    "Resource": "${RefundPayment.Arn}",
+                    "Resource": "${RefundPaymentFunction}",
                     "ResultPath": null,
                     "Next": "Cancel Booking"
                 },
@@ -335,20 +315,15 @@ Resources:
         }
       RoleArn: !Sub ${StatesExecutionRole.Arn}
 
+  ProcessBookingParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties: 
+        Name: !Sub /service/booking/process-booking-state-machine/${Stage}
+        Description: Step Functions State Machine ARN
+        Type: String
+        Value: !Ref ProcessBooking
+
 Outputs:
-  StateMachineARN: 
+  ProcessBookingStateMachine: 
     Value: !Ref ProcessBooking
     Description: The ARN of the Process Booking StateMachine
-
-  PaymentCaptureUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
-    Description: Payment Endpoint for capturing payments
-  
-  PaymentChargeUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
-    Description: Payment Endpoint for collecting payments
-  
-  RefundApiUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
-    Description: Payment Endpoint for refunding payments
-

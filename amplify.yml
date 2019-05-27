@@ -26,14 +26,17 @@ backend:
         # Deploy SAM based back-end
         ##
         - make deploy
+    postBuild:
+      commands:
+        - make outputs
 frontend:
   phases:
     preBuild:
       commands:
         ##
-        # Retrieve SAM Stack outputs and merge into a single ./env.json
+        # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
         ##
-        - make outputs
+        - make outputs.vue
         - cd src/frontend
         - npm install
     build:

@@ -2,12 +2,6 @@
     "ConfirmBooking": {
         "BOOKING_TABLE_NAME": "Booking-2pa2xn3qzzdi7ntbhdozirkmiy-twitch"
     },
-    "CollectPayment": {
-        "PAYMENT_API_URL": "https://9r0e3py9t9.execute-api.eu-west-1.amazonaws.com/prod/capture"
-    },
-    "RefundPayment": {
-        "PAYMENT_API_URL": "https://9r0e3py9t9.execute-api.eu-west-1.amazonaws.com/prod/refund"
-    },
     "CancelBooking": {
         "BOOKING_TABLE_NAME": "Booking-2pa2xn3qzzdi7ntbhdozirkmiy-twitch"
     },
