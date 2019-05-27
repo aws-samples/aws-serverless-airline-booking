@@ -382,7 +382,6 @@ Resources:
         #set( $payload = {
             "outboundFlightId": $ctx.stash.outboundFlightId,
             "customerId": $context.identity.sub,
-            "bookingId": $ctx.stash.bookingId,
             "chargeId": $ctx.stash.paymentToken,
             "bookingTable": "${BookingTable}",
             "flightTable": "${FlightTable}",
