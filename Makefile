@@ -40,8 +40,9 @@ deploy.booking: ##=> Deploy booking service using SAM
 			--parameter-overrides \
 				BookingTable=$${BOOKING_TABLE_NAME} \
 				FlightTable=$${FLIGHT_TABLE_NAME} \
-				CollectPaymentFunction=/service/payment/collect-function/${AWS_BRANCH} \
-				RefundPaymentFunction=/service/payment/refund-function/${AWS_BRANCH} \
+				CollectPaymentFunction=/service/payment/collect-function/$${AWS_BRANCH} \
+				RefundPaymentFunction=/service/payment/refund-function/$${AWS_BRANCH} \
+				AppsyncApiId=$${GRAPHQL_API_ID} \
 				Stage=$${AWS_BRANCH} \
 			--region $${AWS_REGION}
 

@@ -21,6 +21,10 @@ Parameters:
     RefundPaymentFunction:
         Type: AWS::SSM::Parameter::Value<String>
         Description: Parameter Name for Refund Payment Function ARN 
+    
+    AppsyncApiId:
+        Type: String
+        Description: AWS AppSync API ID
 
 Resources:
   ConfirmBooking:
@@ -96,7 +100,6 @@ Resources:
                 Resource:
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
-
 
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
@@ -322,6 +325,93 @@ Resources:
         Description: Step Functions State Machine ARN
         Type: String
         Value: !Ref ProcessBooking
+
+ # Resources for Step Functions integration with AppSync
+
+  AppsyncStepFunctionsIamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+                - Effect: Allow
+                  Principal:
+                      Service: 
+                      - !Sub appsync.${AWS::Region}.amazonaws.com
+                  Action: sts:AssumeRole
+        Path: /
+        Policies:
+            - PolicyName: StatesExecutionPolicy
+              PolicyDocument:
+                  Version: 2012-10-17
+                  Statement:
+                  - Effect: Allow
+                    Action:
+                      - states:StartExecution
+                    Resource: !Ref ProcessBooking
+
+  AppsyncStepFunctionsDataSource:
+      Type: AWS::AppSync::DataSource
+      Properties:
+        ApiId: !Ref AppsyncApiId
+        Name: ProcessBookingSFN
+        Description: Step Functions State Machine for Booking
+        Type: HTTP
+        # IAM role defined elsewhere in AWS CloudFormation template
+        ServiceRoleArn: !GetAtt AppsyncStepFunctionsIamRole.Arn
+        HttpConfig:
+            Endpoint: !Sub https://states.${AWS::Region}.amazonaws.com/
+            AuthorizationConfig:
+                AuthorizationType: AWS_IAM
+                AwsIamConfig:
+                    SigningRegion: !Ref AWS::Region
+                    SigningServiceName: states
+
+  ProcessBookingMutationResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppsyncApiId
+      TypeName: "Mutation"
+      FieldName: "processBooking"
+      DataSourceName: !Ref AppsyncStepFunctionsDataSource
+      RequestMappingTemplate: !Sub |
+        $util.qr($ctx.stash.put("outboundFlightId", $ctx.args.input.bookingOutboundFlightId))
+        $util.qr($ctx.stash.put("paymentToken", $ctx.args.input.paymentToken))
+        $util.qr($ctx.stash.put("customer", $ctx.identity.sub))
+        $util.qr($ctx.stash.put("executionId", $util.autoId()))
+        $util.qr($ctx.stash.put("createdAt", $util.time.nowISO8601()))
+
+        #set( $payload = {
+            "outboundFlightId": $ctx.stash.outboundFlightId,
+            "customerId": $context.identity.sub,
+            "bookingId": $ctx.stash.bookingId,
+            "chargeId": $ctx.stash.paymentToken,
+            "bookingTable": "${BookingTable}",
+            "flightTable": "${FlightTable}",
+            "name": $ctx.stash.executionId,
+            "createdAt": $ctx.stash.createdAt
+        })
+
+        {
+            "version": "2018-05-29",
+            "method": "POST",
+            "resourcePath": "/",
+            "params": {
+                "headers": {
+                "content-type": "application/x-amz-json-1.0",
+                "x-amz-target":"AWSStepFunctions.StartExecution"
+                },
+                "body": {
+                "stateMachineArn": "${ProcessBooking}",
+                "input": "$util.escapeJavaScript($util.toJson($payload))"
+                }
+            }
+        }
+      ResponseMappingTemplate: !Sub |
+        {
+        "id": "${ctx.stash.executionId}",
+        "status": "PENDING"
+        }
 
 Outputs:
   ProcessBookingStateMachine: 
