@@ -4,6 +4,9 @@ import Flight from "../../shared/models/FlightClass";
 import { Loading } from "quasar";
 import axios from "axios";
 
+import { API, graphqlOperation } from "aws-amplify";
+import { processBooking as processBookingMutation } from "./graphql";
+
 /**
  *
  * Booking [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchBooking retrieves all bookings for current authenticated customer.
@@ -85,71 +88,138 @@ export function fetchBooking({ commit }) {
  *
  *            await this.$store.dispatch("bookings/createBooking", {
  *              paymentToken: this.token,
- *              outboundFlight: this.flight
+ *              outboundFlight: this.selectedFlight
  *            });
  *        ...
  *        }
  */
-export function createBooking(
-  { commit },
-  { paymentToken, outboundFlight, inboundFlight }
+export async function createBooking(
+  { rootState },
+  { paymentToken, outboundFlight }
 ) {
-  const processPayment = () => {
+  try {
+    let paymentEndpoint = process.env.VUE_APP_PaymentChargeUrl;
+    const customerEmail = rootState.profile.user.attributes.email;
+    let chargeToken = await processPayment({
+      endpoint: paymentEndpoint,
+      paymentToken,
+      outboundFlight,
+      customerEmail
+    });
+
     Loading.show({
-      message: "Processing payment..."
+      message: "Payment authorized successfully..."
     });
 
-    return new Promise((resolve, reject) => {
-      if (!paymentToken) reject("Invalid payment token");
-
-      setTimeout(() => {
-        let response = {
-          data: {
-            createPayment: {
-              token: paymentToken,
-              status: "CONFIRMED"
-            }
-          }
-        };
-        resolve(response);
-      }, 1000);
-    });
-  };
-
-  const processBooking = () => {
-    Loading.show({
-      message: "Booking confirmed! Redirecting to Bookings"
+    let bookingProcessId = await processBooking({
+      chargeToken,
+      outboundFlight
     });
 
-    return new Promise(resolve => {
-      setTimeout(() => {
-        let response = {
-          data: {
-            createBooking: {
-              id: "FK1ZL18",
-              departureCity: "London",
-              transactionDate: new Date().toISOString(),
-              inboundFlight: inboundFlight,
-              outboundFlight: outboundFlight
-            }
-          }
-        };
-        resolve(response);
-      }, 1000);
-    });
-  };
+    return bookingProcessId;
+  } catch (err) {
+    throw err;
+  }
+}
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      await processPayment();
-
-      let {
-        data: { createBooking: bookingData }
-      } = await processBooking();
-      let booking = new Booking(bookingData);
-      resolve(booking);
-    } catch (err) {
-      reject(err);
-    }
+/**
+ *
+ * Process Payment function - processPayment calls Payment endpoint to pre-authorize charge upon tokenized payment details
+ *
+ * @param {object} obj - Object containing params to process payment
+ * @param {string} obj.endpoint - Payment endpoint
+ * @param {object} obj.paymentToken - Tokenized payment info
+ * @param {object} obj.paymentToken.details - Tokenized payment details including last4, id, etc.
+ * @param {object} obj.paymentToken.id - Payment token
+ * @param {Flight} obj.outboundFlight - Outbound flight
+ * @param {string} obj.customerEmail - Customer Email address for payment notification
+ * @returns {promise} - Promise representing whether payment was successfully pre-authorized
+ * @example
+ *   let chargeToken = await processPayment({
+ *      endpoint: paymentEndpoint,
+ *      paymentToken,
+ *      outboundFlight,
+ *      customerEmail
+ *   });
+ */
+async function processPayment({
+  endpoint,
+  paymentToken,
+  outboundFlight,
+  customerEmail
+}) {
+  Loading.show({
+    message: "Charging a pre-authorization..."
   });
+
+  if (!paymentToken) throw "Invalid payment token";
+
+  const chargeData = {
+    amount: outboundFlight.ticketPrice,
+    currency: outboundFlight.ticketCurrency,
+    stripeToken: paymentToken.details.id,
+    description: `Payment by ${customerEmail}`,
+    email: customerEmail
+  };
+
+  try {
+    const data = await axios.post(endpoint, chargeData);
+    const {
+      data: {
+        createdCharge: { id: chargeId }
+      }
+    } = data;
+
+    return chargeId;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+/**
+ *
+ * Process Booking function - processBooking uses processBooking mutation to kick off an async Booking Workflow that ultimatelly reserves flight seat, creates a booking reference, collect payment, etc.
+ *
+ * @param {object} obj - Object containing params to process payment
+ * @param {string} obj.chargeToken - Pre-authorized payment token
+ * @param {Flight} obj.outboundFlight - Outbound flight
+ * @returns {promise} - Promise representing whether Booking Workflow was successfully initiated
+ * @example
+ *   const {
+ *   // @ts-ignore
+ *     data: {
+ *      processBooking: { id: bookingProcessId }
+ *     }
+ *   } = await API.graphql(
+ *     graphqlOperation(processBookingMutation, processBookingInput)
+ *   );
+ */
+async function processBooking({ chargeToken, outboundFlight }) {
+  const processBookingInput = {
+    input: {
+      paymentToken: chargeToken,
+      bookingOutboundFlightId: outboundFlight.id
+    }
+  };
+
+  try {
+    Loading.show({
+      message: "Creating a new booking..."
+    });
+
+    const {
+      // @ts-ignore
+      data: {
+        processBooking: { id: bookingProcessId }
+      }
+    } = await API.graphql(
+      graphqlOperation(processBookingMutation, processBookingInput)
+    );
+
+    return bookingProcessId;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 }

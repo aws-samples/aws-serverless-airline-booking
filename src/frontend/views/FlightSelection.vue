@@ -151,7 +151,8 @@ export default {
   computed: {
     ...mapGetters("profile", ["isAuthenticated"]),
     ...mapState({
-      loading: state => state.catalog.loading
+      loading: state => state.catalog.loading,
+      customer: state => state.profile.user
     })
   },
   async beforeMount() {
@@ -249,8 +250,15 @@ export default {
           outboundFlight: this.selectedFlight
         });
 
-        this.$q.loading.hide();
-        this.$router.push({ name: "bookings" });
+        this.$q.loading.show({
+          message: `Your booking is being processed - We'll soon contact you via ${
+            this.customer.attributes.email
+          }.`
+        });
+        setTimeout(() => {
+          this.$q.loading.hide();
+          this.$router.push({ name: "bookings" });
+        }, 6000);
       } catch (err) {
         this.$q.loading.hide();
         console.error(err);
