@@ -77,8 +77,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service:
-                - !Sub states.${AWS::Region}.amazonaws.com
+              Service: states.amazonaws.com
             Action: sts:AssumeRole
       Path: /
       Policies:
@@ -336,8 +335,7 @@ Resources:
             Statement:
                 - Effect: Allow
                   Principal:
-                      Service: 
-                      - !Sub appsync.${AWS::Region}.amazonaws.com
+                      Service: appsync.amazonaws.com
                   Action: sts:AssumeRole
         Path: /
         Policies:
@@ -371,9 +369,9 @@ Resources:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !Ref AppsyncApiId
-      TypeName: "Mutation"
-      FieldName: "processBooking"
-      DataSourceName: !Ref AppsyncStepFunctionsDataSource
+      TypeName: Mutation
+      FieldName: processBooking
+      DataSourceName: !Sub ${AppsyncStepFunctionsDataSource.Name}
       RequestMappingTemplate: !Sub |
         $util.qr($ctx.stash.put("outboundFlightId", $ctx.args.input.bookingOutboundFlightId))
         $util.qr($ctx.stash.put("paymentToken", $ctx.args.input.paymentToken))
@@ -407,10 +405,10 @@ Resources:
                 }
             }
         }
-      ResponseMappingTemplate: !Sub |
+      ResponseMappingTemplate: |
         {
-        "id": "${ctx.stash.executionId}",
-        "status": "PENDING"
+            "id": "$ctx.stash.executionId",
+            "status": "PENDING"
         }
 
 Outputs:
