@@ -6,7 +6,5 @@
             "authcognitoa7d29d9d",
             "Outputs.UserPoolId"
         ]
-    },
-    "FlightDataSource": "FlightTable",
-    "BookingDataSource": "BookingTable"
+    }
 }
