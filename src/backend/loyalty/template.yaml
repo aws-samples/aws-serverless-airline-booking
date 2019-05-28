@@ -9,7 +9,7 @@ Globals:
 
 Parameters:
   BookingSNSTopic:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
     Description: Booking SVC SNS Topic
 
 Resources:
@@ -36,12 +36,8 @@ Resources:
               KeyType: RANGE
           Projection:
               ProjectionType: ALL
-              
       SSESpecification:
         SSEEnabled:  yes
-      Tags:
-        - Key: OHHAI
-          Value: MUM
 
   IngestFunc:
     Type: AWS::Serverless::Function

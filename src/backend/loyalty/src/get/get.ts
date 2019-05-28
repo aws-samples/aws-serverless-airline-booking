@@ -30,10 +30,11 @@ export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRe
       ':hkey': user_id,
       ':rkey': 'active'
     }
-  }, function(err , data) { zomg = data }).promise();
+  }, function (err, data) { zomg = data }).promise();
 
   let points = 0;
 
+  // @ts-ignore
   for (let v of zomg.Items) {
     points += v.points;
   }
@@ -57,5 +58,5 @@ const level = (points: number): string => {
       return "silver"
     default:
       return "bronze";
-  } 
+  }
 }

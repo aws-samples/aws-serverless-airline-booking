@@ -28,6 +28,7 @@ deploy: ##=> Deploy services
 delete: ##=> Delete services
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.payment
+	$(MAKE) deploy.loyalty
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} --region $${AWS_REGION}
@@ -73,6 +74,23 @@ deploy.payment: ##=> Deploy payment service using SAM
 				StripeKey=$${STRIPE_SECRET_KEY} \
 			--region $${AWS_REGION}
 
+deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
+	$(info [*] Packaging and deploying Loyalty service...)
+	cd src/backend/loyalty && \
+		npm install && \
+		npm run build && \
+		sam package \
+			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
+			--region $${AWS_REGION} \
+			--output-template-file packaged.yaml && \
+		sam deploy \
+			--template-file packaged.yaml \
+			--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
+			--capabilities CAPABILITY_IAM \
+			--parameter-overrides \
+				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
+				Stage=$${AWS_BRANCH} \
+			--region $${AWS_REGION}
 
 #############
 #  Helpers  #
