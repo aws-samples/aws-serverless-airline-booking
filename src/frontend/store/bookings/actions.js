@@ -5,7 +5,10 @@ import { Loading } from "quasar";
 import axios from "axios";
 
 import { API, graphqlOperation } from "aws-amplify";
-import { processBooking as processBookingMutation } from "./graphql";
+import {
+  processBooking as processBookingMutation,
+  listBookings
+} from "./graphql";
 
 /**
  *
@@ -38,7 +41,20 @@ export function fetchBooking({ commit }) {
     });
 
     try {
-      const { data: bookingData } = await axios.get("/mocks/bookings.json");
+      const bookingFilter = {
+        filter: {
+          status: {
+            eq: "CONFIRMED"
+          }
+        }
+      };
+      const {
+        // @ts-ignore
+        data: {
+          processBooking: { items: bookingData }
+        }
+      } = await API.graphql(graphqlOperation(listBookings, bookingFilter));
+
       const bookings = bookingData.map(booking => new Booking(booking));
       bookings.map(booking => {
         booking.inboundFlight = new Flight(booking.inboundFlight);
