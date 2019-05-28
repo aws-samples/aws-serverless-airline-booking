@@ -1,31 +1,63 @@
 import { APIGatewayEvent, APIGatewayProxyResult, APIGatewayEventRequestContext } from 'aws-lambda';
-import * as aws from 'aws-sdk';
+import { DocumentClient, ItemList } from 'aws-sdk/clients/dynamodb';
 
-const tableName = process.env.TABLE_NAME;
-const client = new aws.DynamoDB.DocumentClient();
+const dataTableName = process.env.DATA_TABLE_NAME;
+const memberTableName = process.env.MEMBER_TABLE_NAME;
+const client = new DocumentClient();
 
 interface Result {
   Points: number;
-  level: string;
+  MembershipId: string;
+  Level: string;
 }
 
-export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRequestContext): Promise<APIGatewayProxyResult> => {
-  if (!event.pathParameters || !event.pathParameters.customerId) {
-    throw new Error('customerId not defined');
+export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+  if (!event.pathParameters || !event.pathParameters.CustomerId) {
+    throw new Error('CustomerId not defined');
   }
 
-  if (!tableName) {
+  if (!dataTableName || !memberTableName) {
     throw new Error('Table name is undefined');
   }
 
-  const customerId = event.pathParameters.customerId;
+  const customerId = event.pathParameters.CustomerId;
 
-  let items: aws.DynamoDB.DocumentClient.ItemList = [];
+  let membershipId = "";
+
+  try {
+    await client.get({
+      TableName: memberTableName,
+      Key: {
+        CustomerId: customerId
+      }
+    }, (err, data) => {
+      if (err) {
+        throw err;
+      }
+
+      if (data.Item) {
+        membershipId = data.Item.MembershipId
+      }
+    }).promise();
+  } catch(err) {
+    throw new Error(`GET: Unable to query table: ${memberTableName}: ${err}`);
+  }
+
+  if (membershipId.length === 0) {
+    return {
+      statusCode: 409,
+      body: JSON.stringify({
+        message: "customer is not a member"
+      })
+    };
+  }
+
+  let items: ItemList = [];
 
   await client.query({
-    TableName: tableName,
+    TableName: dataTableName,
     IndexName: "customer-flag",
-    KeyConditionExpression: 'customerId = :hkey and flag = :rkey',
+    KeyConditionExpression: 'CustomerId = :hkey and Flag = :rkey',
     ExpressionAttributeValues: {
       ':hkey': customerId,
       ':rkey': 'active'
@@ -44,19 +76,20 @@ export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRe
   let points = 0;
 
   for (let v of items) {
-    points += v.points;
+    console.log(v);
+    points += v.Points;
   }
 
-  const result = {
-    points: points,
-    level: level(points)
+  const result: Result = {
+    Points: points,
+    MembershipId: membershipId,
+    Level: level(points)
   }
 
   return {
     statusCode: 200,
     body: JSON.stringify(result as Object)
   };
-
 }
 
 const level = (points: number): string => {
