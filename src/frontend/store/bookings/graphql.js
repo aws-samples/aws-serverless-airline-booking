@@ -14,6 +14,7 @@ export const listBookings = `query ListBookings(
     items {
       id
       status
+      bookingReference
       outboundFlight {
         id
         departureDate
