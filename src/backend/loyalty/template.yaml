@@ -44,7 +44,7 @@ Resources:
     Properties:
       CodeUri: build/ingest/
       Handler: ingest.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyTable
@@ -62,7 +62,7 @@ Resources:
     Properties:
       CodeUri: build/get/
       Handler: get.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyTable
