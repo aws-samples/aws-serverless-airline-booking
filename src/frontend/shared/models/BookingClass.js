@@ -8,10 +8,8 @@ export default class Booking {
    * Creates an instance of Booking.
    * @param {Object} Booking
    * @param {string} [Booking.id] - Booking unique ID
-   * @param {string} Booking.departureCity - Booking Departure City
    * @param {string} Booking.createdAt - Effective booking was created
    * @param {string} Booking.bookingReference - Booking reference
-   * @param {Flight} Booking.inboundFlight - Inbound flight
    * @param {Flight} Booking.outboundFlight - Outbound flight
    *
    * @todo Move to TS and create a Flight Interface
@@ -33,44 +31,16 @@ export default class Booking {
    *    flightNumber: 1812
    * };
    *
-   * let inbound = {
-   *    id: "f976e763-5e43-45d0-83b2-8190698b2cdc",
-   *    departureDate: "2019-01-17T08:00+0000",
-   *    departureAirportCode: "MAD",
-   *    departureAirportName: "Madrid Barajas",
-   *    departureCity: "Madrid",
-   *    departureLocale: "Europe/Madrid",
-   *    arrivalDate: "2019-01-16T10:15+0000",
-   *    arrivalAirportCode: "LGW",
-   *    arrivalAirportName: "London Gatwick",
-   *    arrivalCity: "London",
-   *    arrivalLocale: "Europe/London",
-   *    ticketPrice: 400,
-   *    ticketCurrency: "EUR",
-   *    flightNumber: 1813
-   * };
-   *
    * let booking = new Booking({
    *    id: "uuid",
-   *    departureCity: outbound.departureCity,
    *    createdAt: new Date().toUTCString(),
-   *    inboundFlight: new Flight(inbound),
    *    outboundFlight: new Flight(outbound),
    *    bookingReference: "Flkuc6"
    * });
    */
-  constructor({
-    id,
-    departureCity,
-    createdAt,
-    inboundFlight,
-    outboundFlight,
-    bookingReference
-  }) {
+  constructor({ id, createdAt, outboundFlight, bookingReference }) {
     this.id = id;
-    this.departureCity = departureCity;
     this.createdAt = new Date(createdAt);
-    this.inboundFlight = inboundFlight;
     this.outboundFlight = outboundFlight;
     this.bookingReference = bookingReference;
   }
