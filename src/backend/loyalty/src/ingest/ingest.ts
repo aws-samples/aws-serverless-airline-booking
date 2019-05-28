@@ -24,7 +24,6 @@ enum LoyaltyStatus {
 }
 
 export const handler = async (event: SNSEvent, context: Context): Promise<Result> => {
-  console.log(tableName);
   if (!tableName) {
     throw new Error(`Table name not set`);
   }
@@ -41,10 +40,14 @@ export const handler = async (event: SNSEvent, context: Context): Promise<Result
     date: new Date().toISOString()
   };
 
-  await client.put({
-    TableName: tableName,
-    Item: item as Object
-  }).promise();
+  try {
+    await client.put({
+      TableName: tableName,
+      Item: item as Object
+    }).promise();
+  } catch(e) {
+    throw new Error(`Unable to write to DynamoDB: {e}`);
+  }
 
   return {
     message: "ok!",
