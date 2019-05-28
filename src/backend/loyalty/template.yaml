@@ -18,21 +18,21 @@ Resources:
     Properties:
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: customerId
+        - AttributeName: CustomerId
           AttributeType: S
-        - AttributeName: flag
+        - AttributeName: Flag
           AttributeType: S
-        - AttributeName: id
+        - AttributeName: Id
           AttributeType: S
       KeySchema:
-        - AttributeName: id
+        - AttributeName: Id
           KeyType: HASH
       GlobalSecondaryIndexes:
         - IndexName: customer-flag
           KeySchema:
-            - AttributeName: customerId
+            - AttributeName: CustomerId
               KeyType: HASH
-            - AttributeName: flag
+            - AttributeName: Flag
               KeyType: RANGE
           Projection:
               ProjectionType: ALL
@@ -55,7 +55,7 @@ Resources:
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: build/ingest/
+      CodeUri: src/ingest/
       Handler: ingest.handler
       Runtime: nodejs8.10
       Policies:
@@ -92,21 +92,24 @@ Resources:
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: build/get/
+      CodeUri: src/get/
       Handler: get.handler
       Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyMemberTable
       Environment:
         Variables:
-          TABLE_NAME: !Ref LoyaltyDataTable
+          DATA_TABLE_NAME: !Ref LoyaltyDataTable
+          MEMBER_TABLE_NAME: !Ref LoyaltyMemberTable
       Events:
         Api:
           Type: Api
           Properties:
             Method: GET
-            Path: /{customerId}
+            Path: /loyalty/{CustomerId}
 
 Outputs:
   LoyaltyDataTable:
