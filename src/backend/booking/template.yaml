@@ -184,7 +184,7 @@ Resources:
                             "Next": "Cancel Booking"
                         }
                     ],
-                    "ResultPath": null,
+                    "ResultPath": "$.bookingId",
                     "Next": "Collect Payment"
                 },
                 "Release Flight Seat": {

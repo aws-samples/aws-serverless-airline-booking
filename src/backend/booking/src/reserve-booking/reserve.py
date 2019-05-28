@@ -114,4 +114,5 @@ def lambda_handler(event, context):
     except BookingReservationException as e:
         raise BookingReservationException(e)
 
-    return json.dumps(ret)
+    # Step Functions use the return to append `bookingId` key into the overall output
+    return ret['bookingId']
