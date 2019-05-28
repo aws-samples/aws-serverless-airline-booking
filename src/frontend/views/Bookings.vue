@@ -13,16 +13,13 @@
           >
             <h5 slot="subtitle" class="q-timeline-subtitle">
               <span>
-                {{ booking.departureCity }} &mdash; {{ booking.bookingDate }}
+                {{ booking.outboundFlight.departureCity }} &mdash;
+                {{ booking.bookingDate }}
               </span>
             </h5>
             <booking-flight
-              :bookingID="booking.id"
+              :bookingID="booking.bookingReference"
               :flight="booking.outboundFlight"
-            />
-            <booking-flight
-              :bookingID="booking.id"
-              :flight="booking.inboundFlight"
             />
           </q-timeline-entry>
         </div>

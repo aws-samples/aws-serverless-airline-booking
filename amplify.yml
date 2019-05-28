@@ -1,0 +1,51 @@
+version: 0.1
+backend:
+  phases:
+    preBuild:
+      commands:
+        - npm install -g @aws-amplify/cli # install latest amplify-CLI
+        - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
+    build:
+      commands:
+        - '# Execute Amplify CLI with the helper script'
+        - amplifyPush --simple
+        ##
+        # Extract Environment data
+        ##
+        - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
+        - export GRAPHQL_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
+        ##
+        # List all data sources and capture DynamoDB table created from @model
+        ##
+        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --region ${AWS_REGION} > datasources.json
+        - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
+        - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
+        ##
+        # Deploy SAM based back-end
+        ##
+        - make deploy
+    postBuild:
+      commands:
+        - make outputs
+frontend:
+  phases:
+    preBuild:
+      commands:
+        ##
+        # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
+        ##
+        - make outputs.vue
+        - cd src/frontend
+        - npm install
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: src/frontend/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
