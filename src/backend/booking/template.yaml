@@ -348,6 +348,14 @@ Resources:
         Type: String
         Value: !Ref ProcessBooking
 
+  BookingTopicParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties: 
+        Name: !Sub /service/booking/booking-topic/${Stage}
+        Description: Booking SNS Topic ARN
+        Type: String
+        Value: !Ref BookingTopic
+
  # Resources for Step Functions integration with AppSync
 
   AppsyncStepFunctionsIamRole:
@@ -437,3 +445,7 @@ Outputs:
   ProcessBookingStateMachine: 
     Value: !Ref ProcessBooking
     Description: The ARN of the Process Booking StateMachine
+
+  BookingTopic: 
+    Value: !Ref BookingTopic
+    Description: Booking SNS Topic ARN
