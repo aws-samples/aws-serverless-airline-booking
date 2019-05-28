@@ -45,6 +45,9 @@ Resources:
       CodeUri: build/ingest/
       Handler: ingest.handler
       Runtime: nodejs10.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyTable
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyTable
@@ -60,6 +63,9 @@ Resources:
       CodeUri: build/get/
       Handler: get.handler
       Runtime: nodejs10.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyTable
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyTable
