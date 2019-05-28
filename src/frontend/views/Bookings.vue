@@ -17,12 +17,12 @@
               </span>
             </h5>
             <booking-flight
-              :bookingID="booking.id"
+              :bookingID="booking.bookingReference"
               :flight="booking.outboundFlight"
             />
             <booking-flight
               v-if="booking.inboundFlight"
-              :bookingID="booking.id"
+              :bookingID="booking.bookingReference"
               :flight="booking.inboundFlight"
             />
           </q-timeline-entry>
