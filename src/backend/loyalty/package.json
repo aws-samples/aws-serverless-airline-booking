@@ -5,9 +5,11 @@
   "dependencies": {
     "@types/aws-lambda": "^8.10.26",
     "@types/node": "^12.0.2",
-    "aws-sdk": "^2.463.0",
+    "@types/uuid": "^3.4.4",
+    "aws-sdk": "^2.464.0",
     "tslint": "^5.16.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {},
   "scripts": {
