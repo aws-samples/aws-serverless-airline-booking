@@ -21,6 +21,7 @@
               :flight="booking.outboundFlight"
             />
             <booking-flight
+              v-if="booking.inboundFlight"
               :bookingID="booking.id"
               :flight="booking.inboundFlight"
             />
