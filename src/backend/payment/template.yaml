@@ -5,6 +5,10 @@ Parameters:
     Stage:
         Type: String
         Description: Environment stage or git branch
+    
+    StripeKey:
+        Type: String
+        Description: Stripe Secret Key for SAR App
 
 Resources:
   StripePaymentApplication:
@@ -53,6 +57,14 @@ Resources:
         Description: Refund Payment Lambda ARN
         Type: String
         Value: !Sub ${RefundPayment.Arn}
+  
+  StripePaymentApplicationKeyParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties: 
+        Name: /lambda-stripe-charge/stripe-secret-key
+        Description: Stripe Key for SAR App 
+        Type: String
+        Value: !Ref StripeKey
 
 Outputs:
   CollectPaymentFunction:

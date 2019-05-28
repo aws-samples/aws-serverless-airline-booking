@@ -58,7 +58,9 @@ deploy.payment: ##=> Deploy payment service using SAM
 			--template-file packaged.yaml \
 			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides Stage=$${AWS_BRANCH} \
+			--parameter-overrides \
+				Stage=$${AWS_BRANCH} \
+				StripeKey=$${STRIPE_SECRET_KEY} \
 			--region $${AWS_REGION}
 
 
