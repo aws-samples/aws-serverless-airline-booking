@@ -41,7 +41,6 @@ export function fetchBooking({ commit }) {
     });
 
     try {
-      // const { data: bookingData } = await axios.get("/mocks/bookings.json");
       // TODO: Fix Enum value passing
       // const bookingFilter = {
       //   filter: {
@@ -57,11 +56,9 @@ export function fetchBooking({ commit }) {
         }
       } = await API.graphql(graphqlOperation(listBookings));
 
-      // Cannot read property 'id' of undefined (FlightClass)
-      // console.log(bookingData2);
-
       let bookings = bookingData.map(booking => new Booking(booking));
-      console.log(bookings)
+
+      console.log(bookings);
 
       commit("SET_BOOKINGS", bookings);
 
