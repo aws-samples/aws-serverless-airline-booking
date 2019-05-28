@@ -1,11 +1,11 @@
 {
   "body": "eyJ0ZXN0IjoiYm9keSJ9",
-  "resource": "/{user_id+}",
+  "resource": "/{CustomerId+}",
   "path": "/zomg",
   "httpMethod": "GET",
   "isBase64Encoded": true,
   "pathParameters": {
-    "user_id": "zomg"
+    "CustomerId": "foo"
   },
   "stageVariables": {
     "baz": "qux"
