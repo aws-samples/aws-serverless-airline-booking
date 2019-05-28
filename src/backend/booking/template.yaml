@@ -248,7 +248,7 @@ Resources:
                             "Next": "Cancel Booking"
                         }
                     ],
-                    "ResultPath": null,
+                    "ResultPath": "$.receiptUrl",
                     "Next": "Confirm Booking"
                 },
                 "Cancel Booking": {

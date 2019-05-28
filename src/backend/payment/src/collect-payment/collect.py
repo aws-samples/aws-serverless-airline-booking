@@ -40,7 +40,6 @@ def collect_payment(charge_id):
         raise PaymentException("Payment failed", ret.status_code)
 
     return {
-        "chargeId": charge_id,
         "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
     }
 
@@ -63,7 +62,7 @@ def lambda_handler(event, context):
     Returns
     -------
     string
-        JSON Stringified data containing charge ID and receipt URL
+        receipt URL of charge collected
 
     Raises
     ------
@@ -71,8 +70,9 @@ def lambda_handler(event, context):
         Booking Confirmation Exception including error message upon failure
     """
     if "chargeId" not in event:
-        raise PaymentException(message="Invalid Charge ID", status_code=400)
+        raise ValueError(message="Invalid Charge ID", status_code=400)
 
     ret = collect_payment(event["chargeId"])
 
-    return json.dumps(ret)
+    # Step Functions use the return to append `receiptUrl` key into the overall output
+    return ret['receiptUrl']
