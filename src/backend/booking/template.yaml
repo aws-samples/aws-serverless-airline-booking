@@ -102,6 +102,14 @@ Resources:
                 Resource:
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
+        - PolicyName: PublishBookingTopic
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref BookingTopic
 
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
