@@ -69,6 +69,9 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
 
+  BookingTopic:
+    Type: AWS::SNS::Topic
+
   StatesExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -299,14 +302,26 @@ Resources:
                     "Next": "Cancel Booking"
                 },
                 "Notify Booking Failed": {
-                    "Type": "Pass",
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::sns:publish",
+                    "Parameters": {
+                        "TopicArn": "${BookingTopic}",
+                        "Message.$": "$.bookingId",
+                        "Subject": "Unable to process your booking :(" 
+                    },
                     "Next": "Booking Failed"
                 },
                 "Booking Failed": {
                     "Type": "Fail"
                 },
                 "Notify Booking Confirmed": {
-                    "Type": "Pass",
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::sns:publish",
+                    "Parameters": {
+                        "TopicArn": "${BookingTopic}",
+                        "Message.$": "$.bookingReference",
+                        "Subject": "Your booking is now confirmed"
+                    },
                     "Next": "Booking Confirmed"
                 },
                 "Booking Confirmed": {
