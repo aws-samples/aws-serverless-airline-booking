@@ -41,19 +41,21 @@ export function fetchBooking({ commit }) {
     });
 
     try {
-      const bookingFilter = {
-        filter: {
-          status: {
-            eq: "CONFIRMED"
-          }
-        }
-      };
+      // const { data: bookingData } = await axios.get("/mocks/bookings.json");
+      // TODO: Fix Enum value passing
+      // const bookingFilter = {
+      //   filter: {
+      //     status: {
+      //       eq: "CONFIRMED"
+      //     }
+      //   }
+      // };
       const {
         // @ts-ignore
         data: {
-          processBooking: { items: bookingData }
+          listBookings: { items: bookingData }
         }
-      } = await API.graphql(graphqlOperation(listBookings, bookingFilter));
+      } = await API.graphql(graphqlOperation(listBookings));
 
       const bookings = bookingData.map(booking => new Booking(booking));
       bookings.map(booking => {
