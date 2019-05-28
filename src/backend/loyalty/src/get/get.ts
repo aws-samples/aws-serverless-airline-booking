@@ -20,7 +20,7 @@ export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRe
 
   const user_id = event.pathParameters.user_id;
 
-  let zomg: Object = {};
+  let items: aws.DynamoDB.DocumentClient.ItemList = [];
 
   await client.query({
     TableName: tableName,
@@ -30,12 +30,20 @@ export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRe
       ':hkey': user_id,
       ':rkey': 'active'
     }
-  }, function (err, data) { zomg = data }).promise();
+  }, function(err , data) { 
+    if (err) {
+      throw new Error(`Unable to query data`);
+    }
+    if (data.Items) {
+      items = data.Items;
+    } else {
+      throw new Error(`No data returned`);
+    }
+  }).promise();
 
   let points = 0;
 
-  // @ts-ignore
-  for (let v of zomg.Items) {
+  for (let v of items) {
     points += v.points;
   }
 
@@ -48,6 +56,7 @@ export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRe
     statusCode: 200,
     body: JSON.stringify(result as Object)
   };
+
 }
 
 const level = (points: number): string => {
