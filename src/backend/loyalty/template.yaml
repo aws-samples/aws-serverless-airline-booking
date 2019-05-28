@@ -13,7 +13,7 @@ Parameters:
     Description: Booking SVC SNS Topic
 
 Resources:
-  LoyaltyTable:
+  LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
       BillingMode: PAY_PER_REQUEST
@@ -39,6 +39,19 @@ Resources:
       SSESpecification:
         SSEEnabled:  yes
 
+  LoyaltyMemberTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: CustomerId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: CustomerId
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled:  yes
+
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
@@ -47,15 +60,34 @@ Resources:
       Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref LoyaltyTable
+            TableName: !Ref LoyaltyDataTable
       Environment:
         Variables:
-          TABLE_NAME: !Ref LoyaltyTable
+          TABLE_NAME: !Ref LoyaltyDataTable
       Events:
         Listener:
           Type: SNS
           Properties:
             Topic: !Ref BookingSNSTopic
+
+  CreateMemberFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/create
+      Handler: create.handler
+      Runtime: nodejs8.10
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyMemberTable
+      Environment:
+        Variables:
+          MEMBER_TABLE_NAME: !Ref LoyaltyMemberTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Method: PUT
+            Path: /loyalty
 
   GetFunc:
     Type: AWS::Serverless::Function
@@ -65,10 +97,10 @@ Resources:
       Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref LoyaltyTable
+            TableName: !Ref LoyaltyDataTable
       Environment:
         Variables:
-          TABLE_NAME: !Ref LoyaltyTable
+          TABLE_NAME: !Ref LoyaltyDataTable
       Events:
         Api:
           Type: Api
@@ -77,6 +109,6 @@ Resources:
             Path: /{customerId}
 
 Outputs:
-  LoyaltyTable:
-    Value: !GetAtt LoyaltyTable.Arn
-    Description: Loyalty Table ARN
+  LoyaltyDataTable:
+    Value: !GetAtt LoyaltyDataTable.Arn
+    Description: Loyalty Data Table ARN
