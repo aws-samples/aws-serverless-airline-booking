@@ -7,9 +7,10 @@ export default class Booking {
    *
    * Creates an instance of Booking.
    * @param {Object} Booking
-   * @param {string} [Booking.id] - Booking ID
+   * @param {string} [Booking.id] - Booking unique ID
    * @param {string} Booking.departureCity - Booking Departure City
-   * @param {string} Booking.transactionDate - Effective booking was created
+   * @param {string} Booking.createdAt - Effective booking was created
+   * @param {string} Booking.bookingReference - Booking reference
    * @param {Flight} Booking.inboundFlight - Inbound flight
    * @param {Flight} Booking.outboundFlight - Outbound flight
    *
@@ -50,25 +51,28 @@ export default class Booking {
    * };
    *
    * let booking = new Booking({
-   *    id: "FJ9KLW",
+   *    id: "uuid",
    *    departureCity: outbound.departureCity,
-   *    transactionDate: new Date().toUTCString(),
+   *    createdAt: new Date().toUTCString(),
    *    inboundFlight: new Flight(inbound),
-   *    outboundFlight: new Flight(outbound)
+   *    outboundFlight: new Flight(outbound),
+   *    bookingReference: "Flkuc6"
    * });
    */
   constructor({
     id,
     departureCity,
-    transactionDate,
+    createdAt,
     inboundFlight,
-    outboundFlight
+    outboundFlight,
+    bookingReference
   }) {
     this.id = id;
     this.departureCity = departureCity;
-    this.transactionDate = new Date(transactionDate);
+    this.createdAt = new Date(createdAt);
     this.inboundFlight = inboundFlight;
     this.outboundFlight = outboundFlight;
+    this.bookingReference = bookingReference;
   }
   /**
    * Get the effective booking date
@@ -77,6 +81,6 @@ export default class Booking {
    * @return {string} Formatted booking date (e.g 16 JAN 2019)
    */
   get bookingDate() {
-    return date.formatDate(this.transactionDate, "DD MMM YYYY");
+    return date.formatDate(this.createdAt, "DD MMM YYYY");
   }
 }

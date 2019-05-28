@@ -28,6 +28,8 @@ type Booking @model @auth(rules: [
     paymentToken: String!
     checkedIn: Boolean
     customer: String
+    createdAt: String
+    bookingReference: String
 }
 
 enum BookingStatus {
