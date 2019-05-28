@@ -13,7 +13,8 @@
           >
             <h5 slot="subtitle" class="q-timeline-subtitle">
               <span>
-                {{ booking.departureCity }} &mdash; {{ booking.bookingDate }}
+                {{ booking.outboundFlight.departureCity }} &mdash;
+                {{ booking.bookingDate }}
               </span>
             </h5>
             <booking-flight
