@@ -289,7 +289,7 @@ Resources:
                             "Next": "Refund Payment"
                         }
                     ],
-                    "ResultPath": null,
+                    "ResultPath": "$.bookingReference"
                     "Next": "Notify Booking Confirmed"
                 },
                 "Refund Payment": {

@@ -71,7 +71,7 @@ def lambda_handler(event, context):
     Returns
     -------
     string
-        JSON Stringified data containing bookingReference
+        bookingReference generated
 
     Raises
     ------
@@ -80,11 +80,12 @@ def lambda_handler(event, context):
     """
 
     if "bookingId" not in event:
-        raise BookingConfirmationException("Invalid booking ID")
+        raise ValueError("Invalid booking ID")
 
     try:
         ret = confirm_booking(event["bookingId"])
     except BookingConfirmationException as e:
         raise BookingConfirmationException(e)
 
-    return json.dumps(ret)
+    # Step Functions use the return to append `bookingReference` key into the overall output
+    return ret['bookingReference']
