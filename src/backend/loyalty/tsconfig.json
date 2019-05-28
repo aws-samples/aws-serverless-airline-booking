@@ -1,12 +1,12 @@
 {
     "include": [
         "./src/ingest/*",
-        "./src/get/*"
+        "./src/get/*",
+        "./src/create/*"
     ],
     "compilerOptions": {
       "target": "es2017",
       "module": "commonjs",
-      "outDir": "./build",
       "strict": true,
       "baseUrl": "./",
       "typeRoots": [
