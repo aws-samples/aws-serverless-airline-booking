@@ -27,7 +27,6 @@ def collect_payment(charge_id):
     Returns
     -------
     dict
-        chargeId: string
         receiptUrl: string
             receipt URL containing more details about the successful charge
     """
