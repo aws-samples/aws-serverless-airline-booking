@@ -18,7 +18,7 @@ Resources:
     Properties:
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: user_id
+        - AttributeName: customerId
           AttributeType: S
         - AttributeName: flag
           AttributeType: S
@@ -28,9 +28,9 @@ Resources:
         - AttributeName: id
           KeyType: HASH
       GlobalSecondaryIndexes:
-        - IndexName: user-flag
+        - IndexName: customer-flag
           KeySchema:
-            - AttributeName: user_id
+            - AttributeName: customerId
               KeyType: HASH
             - AttributeName: flag
               KeyType: RANGE
@@ -68,7 +68,7 @@ Resources:
           Type: Api
           Properties:
             Method: GET
-            Path: /{user_id}
+            Path: /{customerId}
 
 Outputs:
   LoyaltyTable:

@@ -10,24 +10,24 @@ interface Result {
 }
 
 export const handler = async (event: APIGatewayEvent, context: APIGatewayEventRequestContext): Promise<APIGatewayProxyResult> => {
-  if (!event.pathParameters || !event.pathParameters.user_id) {
-    throw new Error('user_id not defined');
+  if (!event.pathParameters || !event.pathParameters.customerId) {
+    throw new Error('customerId not defined');
   }
 
   if (!tableName) {
     throw new Error('Table name is undefined');
   }
 
-  const user_id = event.pathParameters.user_id;
+  const customerId = event.pathParameters.customerId;
 
   let items: aws.DynamoDB.DocumentClient.ItemList = [];
 
   await client.query({
     TableName: tableName,
-    IndexName: "user-flag",
-    KeyConditionExpression: 'user_id = :hkey and flag = :rkey',
+    IndexName: "customer-flag",
+    KeyConditionExpression: 'customerId = :hkey and flag = :rkey',
     ExpressionAttributeValues: {
-      ':hkey': user_id,
+      ':hkey': customerId,
       ':rkey': 'active'
     }
   }, function(err , data) { 

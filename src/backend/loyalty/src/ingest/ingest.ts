@@ -11,11 +11,10 @@ interface Result {
 
 interface LoyaltyPoints {
   id: string;
-  user_id: string;
+  customerId: string;
   points: number;
   date: string;
   flag: LoyaltyStatus;
-  flight_id: string;
 }
 
 enum LoyaltyStatus {
@@ -31,17 +30,15 @@ export const handler = async (event: SNSEvent, context: Context): Promise<Result
   }
 
   const record = JSON.parse(event.Records[0].Sns.Message);
-  const user_id = record['user_id'];
+  const customerId = record['customerId'];
   const points = record['price'];
-  const flight_id = record['flight_id'];
 
   const item: LoyaltyPoints = {
     id: '_' + Math.random().toString(36).substr(2, 9),
-    user_id: user_id,
+    customerId: customerId,
     points: points,
     flag: LoyaltyStatus.Active,
-    date: new Date().toISOString(),
-    flight_id: flight_id
+    date: new Date().toISOString()
   };
 
   await client.put({
