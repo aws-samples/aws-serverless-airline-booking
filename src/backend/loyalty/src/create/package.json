@@ -1,0 +1,22 @@
+{
+  "name": "create",
+  "version": "1.0.0",
+  "description": "",
+  "main": "create.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc --watch",
+    "build": "tsc --build tsconfig.json",
+    "lint": "tslint --project tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aws-samples/aws-serverless-airline-booking.git"
+  },
+  "author": "Simon Thulbourn <thulsimo@amazon.com>",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.464.0",
+    "uuid": "^3.3.2"
+  }
+}
