@@ -1,0 +1,21 @@
+{
+    "include": [
+        "./src/ingest/*",
+        "./src/get/*"
+    ],
+    "compilerOptions": {
+      "target": "es2017",
+      "module": "commonjs",
+      "outDir": "./build",
+      "strict": true,
+      "baseUrl": "./",
+      "typeRoots": [
+        "node_modules/@types"
+      ],
+      "types": [
+        "node"
+      ],
+      "esModuleInterop": true,
+      "inlineSourceMap": true
+    }
+  }

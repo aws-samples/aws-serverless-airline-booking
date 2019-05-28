@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  loyalty service
+  
+Globals:
+  Function:
+    Timeout: 100
+
+Parameters:
+  BookingSNSTopic:
+    Type: String
+    Description: Booking SVC SNS Topic
+
+Resources:
+  LoyaltyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: flag
+          AttributeType: S
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: user-flag
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: flag
+              KeyType: RANGE
+          Projection:
+              ProjectionType: ALL
+              
+      SSESpecification:
+        SSEEnabled:  yes
+      Tags:
+        - Key: OHHAI
+          Value: MUM
+
+  IngestFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/ingest/
+      Handler: ingest.handler
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LoyaltyTable
+      Events:
+        Listener:
+          Type: SNS
+          Properties:
+            Topic: !Ref BookingSNSTopic
+
+  GetFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/get/
+      Handler: get.handler
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LoyaltyTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /{user_id}
+
+Outputs:
+  LoyaltyTable:
+    Value: !GetAtt LoyaltyTable.Arn
+    Description: Loyalty Table ARN
