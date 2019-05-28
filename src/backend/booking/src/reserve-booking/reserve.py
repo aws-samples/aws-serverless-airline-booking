@@ -99,7 +99,7 @@ def lambda_handler(event, context):
     Returns
     -------
     bookingId: string
-        JSON Stringified booking ID
+        booking ID generated
 
     Raises
     ------
