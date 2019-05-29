@@ -24,6 +24,7 @@ deploy: ##=> Deploy services
 	$(info [*] Deploying...)
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
+	$(MAKE) deploy.loyalty
 
 delete: ##=> Delete services
 	$(MAKE) deploy.booking
