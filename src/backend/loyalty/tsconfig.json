@@ -17,6 +17,7 @@
       "jest"
     ],
     "esModuleInterop": true,
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "resolveJsonModule": true
   }
 }

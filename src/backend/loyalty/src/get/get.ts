@@ -1,13 +1,11 @@
-import { APIGatewayEvent, APIGatewayProxyResult, APIGatewayEventRequestContext } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient, ItemList } from 'aws-sdk/clients/dynamodb';
 
 const dataTableName = process.env.DATA_TABLE_NAME;
-const memberTableName = process.env.MEMBER_TABLE_NAME;
 const client = new DocumentClient();
 
 interface Result {
   Points: number;
-  MembershipId: string;
   Level: string;
 }
 
@@ -16,41 +14,11 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
     throw new Error('CustomerId not defined');
   }
 
-  if (!dataTableName || !memberTableName) {
+  if (!dataTableName) {
     throw new Error('Table name is undefined');
   }
 
   const customerId = event.pathParameters.CustomerId;
-
-  let membershipId = "";
-
-  try {
-    await client.get({
-      TableName: memberTableName,
-      Key: {
-        CustomerId: customerId
-      }
-    }, (err, data) => {
-      if (err) {
-        throw err;
-      }
-
-      if (data.Item) {
-        membershipId = data.Item.MembershipId
-      }
-    }).promise();
-  } catch(err) {
-    throw new Error(`GET: Unable to query table: ${memberTableName}: ${err}`);
-  }
-
-  if (membershipId.length === 0) {
-    return {
-      statusCode: 409,
-      body: JSON.stringify({
-        message: "customer is not a member"
-      })
-    };
-  }
 
   let items: ItemList = [];
 
@@ -62,7 +30,7 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
       ':hkey': customerId,
       ':rkey': 'active'
     }
-  }, function(err , data) { 
+  }, function (err, data) {
     if (err) {
       throw new Error(`Unable to query data`);
     }
@@ -82,7 +50,6 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
 
   const result: Result = {
     Points: points,
-    MembershipId: membershipId,
     Level: level(points)
   }
 
