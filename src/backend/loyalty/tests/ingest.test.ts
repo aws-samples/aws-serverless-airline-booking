@@ -1,7 +1,5 @@
 
 import { addPoints } from "../src/ingest/ingest"
-import snsEvent from "../src/ingest/event.json"
-import { SNSEvent, Context } from "aws-lambda"
 
 describe('Loyalty Ingest Function tests', () => {
 
@@ -18,10 +16,8 @@ describe('Loyalty Ingest Function tests', () => {
   test('Successful write to Loyalty Table', async () => {
 
     // TODO: How do I make this work? ;)
+    // Environment Variable isn't being recognized by addPoints function
     process.env.DATA_TABLE_NAME = "loyalty-table";
-
-    let event = snsEvent as SNSEvent
-    let ctx = {} as Context
 
     const clientStub = {
       put: () => {
