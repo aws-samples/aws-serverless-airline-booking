@@ -1,8 +1,11 @@
 import { Context, SNSEvent } from 'aws-lambda';
-import * as aws from 'aws-sdk';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import uuidv4 from 'uuid/v4';
 
-const tableName = process.env.TABLE_NAME;
-const client = new aws.DynamoDB.DocumentClient();
+const dataTableName = process.env.DATA_TABLE_NAME;
+const memberTableName = process.env.MEMBER_TABLE_NAME;
+
+const client = new DocumentClient();
 
 interface Result {
   message: string;
@@ -10,11 +13,11 @@ interface Result {
 }
 
 interface LoyaltyPoints {
-  id: string;
-  customerId: string;
-  points: number;
-  date: string;
-  flag: LoyaltyStatus;
+  Id: string;
+  CustomerId: string;
+  Points: number;
+  Date: string;
+  Flag: LoyaltyStatus;
 }
 
 enum LoyaltyStatus {
@@ -23,8 +26,14 @@ enum LoyaltyStatus {
   Expired = "expired"
 }
 
+interface LoyaltyMembership {
+  CustomerId: string;
+  MembershipId?: string;
+}
+
 export const handler = async (event: SNSEvent, context: Context): Promise<Result> => {
-  if (!tableName) {
+  console.log(memberTableName, dataTableName);
+  if (!dataTableName || !memberTableName) {
     throw new Error(`Table name not set`);
   }
 
@@ -32,21 +41,58 @@ export const handler = async (event: SNSEvent, context: Context): Promise<Result
   const customerId = record['customerId'];
   const points = record['price'];
 
+  let customer: LoyaltyMembership | undefined;
+
+  try {
+    await client.get({
+      TableName: memberTableName,
+      Key: {
+        CustomerId: customerId
+      }
+    }, async (err, data) => {
+      if (err) {
+        throw err;
+      }
+
+      if (data.Item) {
+        customer = {
+          CustomerId: customerId,
+          MembershipId: data.Item.MembershipId
+        };
+      } else {
+        try {
+          await client.put({
+            TableName: memberTableName,
+            Item: {
+              CustomerId: customerId,
+              MembershipId: uuidv4()
+            }
+          }).promise();
+        } catch(err) {
+          throw err;
+        }
+      
+      }
+    }).promise();
+  } catch(err) {
+    throw new Error(`GET: Unable to query table: ${memberTableName}: ${err}`);
+  }
+
   const item: LoyaltyPoints = {
-    id: '_' + Math.random().toString(36).substr(2, 9),
-    customerId: customerId,
-    points: points,
-    flag: LoyaltyStatus.Active,
-    date: new Date().toISOString()
+    Id: uuidv4(),
+    CustomerId: customerId,
+    Points: points,
+    Flag: LoyaltyStatus.Active,
+    Date: new Date().toISOString()
   };
 
   try {
     await client.put({
-      TableName: tableName,
+      TableName: dataTableName,
       Item: item as Object
     }).promise();
   } catch(e) {
-    throw new Error(`Unable to write to DynamoDB: {e}`);
+    throw new Error(`Unable to write to DynamoDB: ${e}`);
   }
 
   return {

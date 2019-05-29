@@ -61,9 +61,12 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyMemberTable
       Environment:
         Variables:
-          TABLE_NAME: !Ref LoyaltyDataTable
+          DATA_TABLE_NAME: !Ref LoyaltyDataTable
+          MEMBER_TABLE_NAME: !Ref LoyaltyMemberTable
       Events:
         Listener:
           Type: SNS
