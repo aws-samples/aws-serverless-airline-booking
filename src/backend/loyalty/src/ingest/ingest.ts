@@ -2,8 +2,6 @@ import { Context, SNSEvent } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import uuidv4 from 'uuid/v4';
 
-const dataTableName = process.env.DATA_TABLE_NAME;
-
 const client = new DocumentClient();
 
 interface Result {
@@ -33,7 +31,9 @@ export /**
  * @param {number} points - points that should be added to the customer
  * @param {DocumentClient} client - AWS DynamoDB DocumentClient
  */
-  const addPoints = async (customerId: string, points: number, client: DocumentClient) => {
+  const addPoints = async (customerId: string, points: number, document: any) => {
+
+    const dataTableName: string | undefined = process.env.DATA_TABLE_NAME;
 
     if (!dataTableName) {
       throw new Error(`Table name not set`);
@@ -53,7 +53,7 @@ export /**
     }
 
     try {
-      await client.put(params).promise();
+      await document.put(params).promise();
     } catch (e) {
       throw new Error(`Unable to write to DynamoDB: ${e}`);
     }
