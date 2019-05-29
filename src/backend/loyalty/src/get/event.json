@@ -5,7 +5,7 @@
   "httpMethod": "GET",
   "isBase64Encoded": true,
   "pathParameters": {
-    "CustomerId": "foo"
+    "CustomerId": "zomg"
   },
   "stageVariables": {
     "baz": "qux"

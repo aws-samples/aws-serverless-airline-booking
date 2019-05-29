@@ -76,8 +76,8 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   let points = 0;
 
   for (let v of items) {
-    console.log(v);
-    // points += v.Points;
+    console.log(v.Points);
+    points = points + (v.Points as number);
   }
 
   const result: Result = {
