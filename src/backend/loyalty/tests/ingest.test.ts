@@ -1,6 +1,6 @@
-import * as AWSMock from "aws-sdk-mock";
-import * as AWS from "aws-sdk"; 
-import { addPoints } from "../src/ingest/ingest";
+import * as AWSMock from 'aws-sdk-mock';
+import * as AWS from 'aws-sdk'; 
+import { addPoints } from '../src/ingest/ingest';
 
 describe('Loyalty Ingest Function tests', () => {
   beforeEach(() => {
@@ -10,13 +10,12 @@ describe('Loyalty Ingest Function tests', () => {
   test('Successful write to Loyalty Table', async () => {
     AWSMock.setSDKInstance(AWS);
     AWSMock.mock('DynamoDB.DocumentClient', 'put', (params: AWS.DynamoDB.PutItemInput, callback: Function) => {
-      console.log('DynamoDB', 'putItem', 'mock called');
-      callback(null, {pk: "foo", sk: "bar"});
+      callback(null, {pk: 'foo', sk: 'bar'});
     })
 
     const doc = new AWS.DynamoDB.DocumentClient();
 
     // Assume if there's no Exception it worked.
-    const ret = await addPoints("hooman", 1235, doc, 'loyalty-table');
+    const ret = await addPoints('hooman', 1235, doc, 'loyalty-table');
   });
 });
