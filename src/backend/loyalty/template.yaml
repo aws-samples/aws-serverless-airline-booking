@@ -55,8 +55,8 @@ Resources:
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/ingest/
-      Handler: ingest.handler
+      CodeUri: build/ingest
+      Handler: index.handler
       Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
@@ -76,8 +76,8 @@ Resources:
   CreateMemberFunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/create
-      Handler: create.handler
+      CodeUri: build/create
+      Handler: index.handler
       Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:
@@ -95,8 +95,8 @@ Resources:
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/get/
-      Handler: get.handler
+      CodeUri: build/get
+      Handler: index.handler
       Runtime: nodejs8.10
       Policies:
         - DynamoDBCrudPolicy:

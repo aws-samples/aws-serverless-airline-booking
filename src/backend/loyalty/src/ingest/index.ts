@@ -71,12 +71,14 @@ export /**
  */
   const handler = async (event: SNSEvent, context: Context): Promise<Result> => {
 
+    console.log("Running in SAM CLI....")
+
     try {
       const record = JSON.parse(event.Records[0].Sns.Message);
       const customerId = record['customerId'];
       const points = record['price'];
 
-      await addPoints(customerId, points, client)
+      // await addPoints(customerId, points, client)
     } catch (error) {
       throw error
     }
