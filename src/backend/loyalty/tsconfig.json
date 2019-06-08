@@ -1,8 +1,6 @@
 {
   "include": [
-    "./src/ingest/*",
-    "./src/get/*",
-    "./src/create/*"
+    "./src/**/*.ts"
   ],
   "compilerOptions": {
     "target": "es2017",
