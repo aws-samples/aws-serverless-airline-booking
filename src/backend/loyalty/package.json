@@ -23,8 +23,8 @@
   },
   "scripts": {
     "test": "jest",
-    "watch": "tsc --watch",
-    "build": "tsc --build tsconfig.json",
+    "watch": "webpack --watch --mode=development",
+    "build": "webpack",
     "lint": "tslint --project tsconfig.json"
   },
   "repository": {
