@@ -1,33 +1,21 @@
-
-import { addPoints } from "../src/ingest/ingest"
+import * as AWSMock from 'aws-sdk-mock';
+import * as AWS from 'aws-sdk'; 
+import { addPoints } from '../src/ingest/ingest';
 
 describe('Loyalty Ingest Function tests', () => {
-
-  // Retrieve entire environment variables
-  // and reset it before each test (clear test cache and env vars)
-  const OLD_ENV = process.env;
-
   beforeEach(() => {
     jest.resetModules()
-    process.env = { ...OLD_ENV };
-    delete process.env.NODE_ENV;
   });
 
   test('Successful write to Loyalty Table', async () => {
+    AWSMock.setSDKInstance(AWS);
+    AWSMock.mock('DynamoDB.DocumentClient', 'put', (params: AWS.DynamoDB.PutItemInput, callback: Function) => {
+      callback(null, {pk: 'foo', sk: 'bar'});
+    })
 
-    // TODO: How do I make this work? ;)
-    // Environment Variable isn't being recognized by addPoints function
-    process.env.DATA_TABLE_NAME = "loyalty-table";
-
-    const clientStub = {
-      put: () => {
-          return {
-            promise: () => Promise.resolve(true)
-          }
-      }
-    }
+    const doc = new AWS.DynamoDB.DocumentClient();
 
     // Assume if there's no Exception it worked.
-    const ret = await addPoints("hooman", 1235, clientStub)
+    const ret = await addPoints('hooman', 1235, doc, 'loyalty-table');
   });
 });
