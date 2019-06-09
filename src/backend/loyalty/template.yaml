@@ -61,25 +61,6 @@ Resources:
           Properties:
             Topic: !Ref BookingSNSTopic
 
-  CreateMemberFunc:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: build/create
-      Handler: index.handler
-      Runtime: nodejs8.10
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref LoyaltyMemberTable
-      Environment:
-        Variables:
-          MEMBER_TABLE_NAME: !Ref LoyaltyMemberTable
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Method: PUT
-            Path: /loyalty
-
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
