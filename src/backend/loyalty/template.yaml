@@ -80,12 +80,12 @@ Resources:
             Method: GET
             Path: /loyalty/{CustomerId}
   
-  BaseUrl:
+  LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Join ["/", [ "/service/loyalty/api-endpoint", !Ref Stage ]]
+      Name: !Sub "/service/loyalty/api-endpoint/${Stage}"
       Type: String
-      Value: !Join [ "", [ "https://", !Ref ServerlessRestApi, ".execute-api.", !Ref "AWS::Region", ".amazonaws.com/", !Ref ServerlessRestApiProdStage ]]
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
 Outputs:
   LoyaltyDataTable:
@@ -93,5 +93,9 @@ Outputs:
     Description: Loyalty Data Table ARN
 
   BaseUrl:
-    Value: !GetAtt BaseUrl.Value
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Description: Base URL for the API Gateway
+
+  LoyaltyGetUrl:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/loyalty"
+    Description: Loyalty Endpoint for retrieving loyalty points for a given customerId
