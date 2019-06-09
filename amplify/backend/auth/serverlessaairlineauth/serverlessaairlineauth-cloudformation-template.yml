@@ -279,7 +279,7 @@ Resources:
             - ' }'
             - '};'
       Handler: index.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs8.10
       Timeout: '300'
       Role: !GetAtt 
         - UserPoolClientRole
@@ -402,7 +402,7 @@ Resources:
             - ' }'
             - '};'
       Handler: index.handler
-      Runtime: nodejs6.10
+      Runtime: nodejs8.10
       Timeout: '300'
       Role: !GetAtt 
         - MFALambdaRole
