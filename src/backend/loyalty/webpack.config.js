@@ -15,7 +15,7 @@ const entryObject = entryArray.reduce((acc, item) => {
 
 module.exports = {
     entry: entryObject,
-    mode: "production",
+    devtool: 'source-map',
     target: "node",
     module: {
         rules: [
@@ -32,6 +32,9 @@ module.exports = {
     // Output directive will generate build/<function-name>/index.js
     output: {
         filename: '[name]/index.js',
-        path: path.resolve(__dirname, 'build')
+        path: path.resolve(__dirname, 'build'),
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+        // Credit to Richard Buggy!!
+        libraryTarget: 'commonjs2'
     }
 };

@@ -23,8 +23,8 @@
   },
   "scripts": {
     "test": "jest",
-    "watch": "webpack --watch --mode=development",
-    "build": "webpack",
+    "watch": "NODE_ENV=dev webpack --watch --mode=development",
+    "build": "NODE_ENV=prod webpack --mode=production",
     "lint": "tslint --project tsconfig.json"
   },
   "repository": {

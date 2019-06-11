@@ -103,7 +103,8 @@ export const addPoints = async (customerId: string, points: number, client: Docu
  * @param {Context} context
  * @returns {Promise<Result>}
  */
-export const handler = async (event: SNSEvent, context: Context): Promise<Result> => {
+export async function handler(event: SNSEvent, context: Context): Promise<Result> {
+
   if (!table) {
     throw new Error(`Table name not defined`);
   }
