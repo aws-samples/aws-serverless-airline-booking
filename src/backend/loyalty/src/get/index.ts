@@ -12,12 +12,12 @@ interface Result {
   /**
    * Points
    */
-  Points: number;
+  points: number;
 
   /**
    * Level
    */
-  Level: string;
+  level: string;
 }
 
 /**
@@ -102,8 +102,8 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   }
 
   const result: Result = {
-    Points: p,
-    Level: level(p)
+    points: p,
+    level: level(p)
   }
 
   return {
