@@ -27,7 +27,7 @@ interface Result {
  * @returns string
  */
 const level = (points: number): string => {
-  switch (true) { 
+  switch (true) {
     case (points > 100000):
       return "gold";
     case (points > 50000 && points < 100000):
@@ -96,7 +96,8 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
   let p: number;
   try {
     p = await points(customerId, client, tableName)
-  } catch(err) {
+  } catch (err) {
+    console.log(err);
     throw err;
   }
 
