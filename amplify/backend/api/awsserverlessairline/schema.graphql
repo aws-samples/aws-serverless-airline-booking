@@ -14,4 +14,40 @@ type Flight @model {
     ticketPrice: Int!
     ticketCurrency: String!
     flightNumber: Int!
+    seatAllocation: Int!
+}
+
+type Booking @model @auth(rules: [
+      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
+      {allow: groups, groups: ["Admin"]}
+    ]) {
+    id: ID!
+    status: BookingStatus!
+    inboundFlight: Flight @connection 
+    outboundFlight: Flight! @connection
+    paymentToken: String!
+    checkedIn: Boolean
+    customer: String
+    createdAt: String
+    bookingReference: String
+}
+
+enum BookingStatus {
+    UNCONFIRMED
+    CONFIRMED
+    CANCELLED
+}
+
+input CreateBookingInput {
+  id: ID
+  status: BookingStatus
+  paymentToken: String!
+  checkedIn: Boolean
+  customer: String
+  bookingInboundFlightId: ID
+  bookingOutboundFlightId: ID!
+}
+
+type Mutation {
+    processBooking(input: CreateBookingInput!): Booking
 }

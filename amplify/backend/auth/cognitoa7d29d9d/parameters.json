@@ -1,0 +1,81 @@
+{
+    "userPoolName": "awsserverlessairlinea7d29d9d_userpool_a7d29d9d",
+    "autoVerifiedAttributes": [
+        "email"
+    ],
+    "mfaConfiguration": "OPTIONAL",
+    "mfaTypes": [
+        "SMS Text Message",
+        "TOTP"
+    ],
+    "roleName": "cognitoa7d29d9d_sns-role",
+    "roleExternalId": "cognitoa7d29d9d_role_external_id",
+    "policyName": "cognitoa7d29d9d-sns-policy",
+    "smsAuthenticationMessage": "Your authentication code is {####}",
+    "smsVerificationMessage": "Your verification code is {####}",
+    "emailVerificationSubject": "Your verification code",
+    "emailVerificationMessage": "Your verification code is {####}",
+    "defaultPasswordPolicy": false,
+    "passwordPolicyMinLength": 8,
+    "passwordPolicyCharacters": [
+        "Requires Lowercase",
+        "Requires Uppercase",
+        "Requires Numbers",
+        "Requires Symbols"
+    ],
+    "requiredAttributes": [
+        "family_name",
+        "given_name",
+        "email"
+    ],
+    "userpoolClientName": "cognitoa7d29d9d_app_client",
+    "userpoolClientGenerateSecret": true,
+    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientReadAttributes": [
+        "email",
+        "family_name",
+        "given_name",
+        "phone_number",
+        "email_verified",
+        "phone_number_verified",
+        "custom:luggage_preference",
+        "custom:meal_preference"
+    ],
+    "mfaLambdaRole": "cognitoa7d29d9d_totp_lambda_role",
+    "mfaLambdaLogPolicy": "cognitoa7d29d9d_totp_lambda_log_policy",
+    "mfaPassRolePolicy": "cognitoa7d29d9d_totp_pass_role_policy",
+    "mfaLambdaIAMPolicy": "cognitoa7d29d9d_totp_lambda_iam_policy",
+    "userpoolClientLambdaRole": "cognitoa7d29d9d_userpoolclient_lambda_role",
+    "userpoolClientLogPolicy": "cognitoa7d29d9d_userpoolclient_lambda_log_policy",
+    "userpoolClientLambdaPolicy": "cognitoa7d29d9d_userpoolclient_lambda_iam_policy",
+    "userpoolClientSetAttributes": true,
+    "useDefault": "manual",
+    "authSelections": "userPoolOnly",
+    "resourceName": "cognitoa7d29d9d",
+    "userpoolClientWriteAttributes": [
+        "email",
+        "family_name",
+        "given_name",
+        "phone_number",
+        "custom:luggage_preference",
+        "custom:meal_preference"
+    ],
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    },
+    "unauthRoleArn": {
+        "Fn::GetAtt": [
+            "UnauthRole",
+            "Arn"
+        ]
+    }
+}
