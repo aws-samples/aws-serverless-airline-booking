@@ -22,7 +22,7 @@ interface LoyaltyPoints {
   /**
    * Identifier
    */
-  Id: string;
+  id: string;
 
   /**
    * Customer ID
@@ -74,7 +74,7 @@ enum LoyaltyStatus {
  */
 export const addPoints = async (customerId: string, points: number, client: DocumentClientInterface, tableName: string) => {
   const item: LoyaltyPoints = {
-    Id: uuidv4(),
+    id: uuidv4(),
     CustomerId: customerId,
     Points: points,
     Flag: LoyaltyStatus.Active,
