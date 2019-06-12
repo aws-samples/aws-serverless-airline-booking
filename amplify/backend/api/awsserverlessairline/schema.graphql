@@ -48,6 +48,15 @@ input CreateBookingInput {
   bookingOutboundFlightId: ID!
 }
 
+type Loyalty {
+    points: Int
+    level: String
+}
+
 type Mutation {
     processBooking(input: CreateBookingInput!): Booking
+}
+
+type Query {
+    getLoyaltyPoints(customer: String): Loyalty
 }
