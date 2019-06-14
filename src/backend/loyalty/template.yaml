@@ -80,13 +80,60 @@ Resources:
           Properties:
             Method: GET
             Path: /loyalty/{customerId}
+            RestApiId: !Ref LoyaltyApi
   
   LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: !Sub "/service/loyalty/api-endpoint/${Stage}"
       Type: String
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+      Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+
+  LoyaltyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub 'LoyaltyApi-${Stage}'
+      StageName: Prod
+      # Cors:
+      #   AllowOrigin: "'*'"
+      #   AllowHeaders:
+      #     "'Content-Type,Authorization,X-Amz-Date'"
+      #   MaxAge: "'600'"
+      #TracingEnabled: True
+      # AccessLogSetting:
+      #   - DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group/custom_log_group_name"
+      #     Format: "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId"
+      MethodSettings:
+        - MetricsEnabled: True
+          ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingRateLimit: 100
+          ThrottlingBurstLimit: 50
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+      DefinitionBody:
+        swagger: "2.0"
+        x-amazon-apigateway-request-validator: all
+        x-amazon-apigateway-request-validators:
+          all:
+            validateRequestBody: true
+            validateRequestParameters: true
+        produces:
+          - application/json
+        paths:
+          "/loyalty/{customerId}":
+            get:
+              summary: 'Fetch customer loyalty points'
+              parameters:
+              - name: "customerId"
+                in: "path"
+                required: true
+                type: "string"
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFunc.Arn}/invocations
 
 Outputs:
   LoyaltyDataTable:
@@ -94,9 +141,9 @@ Outputs:
     Description: Loyalty Data Table ARN
 
   BaseUrl:
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Description: Base URL for the API Gateway
 
   LoyaltyGetUrl:
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/loyalty"
+    Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/loyalty"
     Description: Loyalty Endpoint for retrieving loyalty points for a given customerId
