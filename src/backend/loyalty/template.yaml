@@ -55,7 +55,7 @@ Resources:
             TableName: !Ref LoyaltyDataTable
       Environment:
         Variables:
-          DATA_TABLE_NAME: !Ref LoyaltyDataTable
+          TABLE_NAME: !Ref LoyaltyDataTable
       Events:
         Listener:
           Type: SNS
@@ -73,7 +73,7 @@ Resources:
             TableName: !Ref LoyaltyDataTable
       Environment:
         Variables:
-          DATA_TABLE_NAME: !Ref LoyaltyDataTable
+          TABLE_NAME: !Ref LoyaltyDataTable
       Events:
         Api:
           Type: Api

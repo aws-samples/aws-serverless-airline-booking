@@ -2,7 +2,7 @@ import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DefaultDocumentClient, DocumentClientInterface } from './lib/document_client';
 import { ItemList } from 'aws-sdk/clients/dynamodb';
 
-const tableName = process.env.DATA_TABLE_NAME;
+const tableName = process.env.TABLE_NAME;
 const client = DefaultDocumentClient;
 
 /**
