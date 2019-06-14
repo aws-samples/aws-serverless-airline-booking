@@ -58,5 +58,5 @@ type Mutation {
 }
 
 type Query {
-    getLoyaltyPoints(customer: String): Loyalty
+    getLoyalty(customer: String!): Loyalty
 }

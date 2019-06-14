@@ -16,6 +16,11 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Description: Booking SVC SNS Topic
 
+  AppsyncApiId:
+      Type: String
+      Description: AWS AppSync API ID
+
+
 Resources:
   LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
@@ -134,6 +139,75 @@ Resources:
                 type: aws_proxy
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFunc.Arn}/invocations
+
+ # Resources for API Gateway integration with AppSync
+
+  AppsyncLoyaltyRestApiIamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+                - Effect: Allow
+                  Principal:
+                      Service: appsync.amazonaws.com
+                  Action: sts:AssumeRole
+        Path: /
+        Policies:
+            - PolicyName: LoyaltyApiInvoke
+              PolicyDocument:
+                  Version: 2012-10-17
+                  Statement:
+                  - Effect: Allow
+                    Action:
+                      - execute-api:Invoke
+                    # arn:aws:execute-api:region:account-id:api-id/stage/METHOD_HTTP_VERB/Resource-path
+                    Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${LoyaltyApi}/*/*/*
+
+  AppsyncLoyaltyApiDataSource:
+      Type: AWS::AppSync::DataSource
+      Properties:
+        ApiId: !Ref AppsyncApiId
+        Name: LoyaltyRestApi
+        Description: Loyalty REST API Gateway
+        Type: HTTP
+        ServiceRoleArn: !GetAtt AppsyncLoyaltyRestApiIamRole.Arn
+        HttpConfig:
+            Endpoint: !Sub https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com
+            AuthorizationConfig:
+                AuthorizationType: AWS_IAM
+                AwsIamConfig:
+                    SigningRegion: !Ref AWS::Region
+                    SigningServiceName: execute-api
+
+  GetLoyaltyQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppsyncApiId
+      TypeName: Query
+      FieldName: getLoyalty
+      DataSourceName: !Sub ${AppsyncLoyaltyApiDataSource.Name}
+      RequestMappingTemplate: !Sub |
+        {
+          "version": "2018-05-29",
+          "method": "GET",
+          "resourcePath": "/Prod/loyalty/$ctx.args.customer",
+          "params":{
+            "headers": {
+              "Content-Type" : "application/json"
+            }
+          }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.error)
+          $util.error($ctx.error.message, $ctx.error.type)
+        #end
+        ## If the response is not 200 then return an error. Else return the body
+        #if($ctx.result.statusCode == 200)
+            $ctx.result.body
+        #else
+            $util.error($ctx.result.body)
+        #end
 
 Outputs:
   LoyaltyDataTable:

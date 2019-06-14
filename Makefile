@@ -91,6 +91,7 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 			--parameter-overrides \
 				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
 				Stage=$${AWS_BRANCH} \
+				AppsyncApiId=$${GRAPHQL_API_ID} \
 			--region $${AWS_REGION}
 
 #############
