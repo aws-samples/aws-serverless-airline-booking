@@ -83,15 +83,15 @@ export const points = async (customerId: string, client: DocumentClientInterface
  * @returns {Promise<APIGatewayProxyResult>}
  */
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
-  if (!event.pathParameters || !event.pathParameters.CustomerId) {
-    throw new Error('CustomerId not defined');
+  if (!event.pathParameters || !event.pathParameters.customerId) {
+    throw new Error('customerId not defined');
   }
 
   if (!tableName) {
     throw new Error('Table name is undefined');
   }
 
-  const customerId = event.pathParameters.CustomerId;
+  const customerId = event.pathParameters.customerId;
 
   let p: number;
   try {

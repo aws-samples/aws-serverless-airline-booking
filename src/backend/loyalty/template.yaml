@@ -79,7 +79,7 @@ Resources:
           Type: Api
           Properties:
             Method: GET
-            Path: /loyalty/{CustomerId}
+            Path: /loyalty/{customerId}
   
   LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
