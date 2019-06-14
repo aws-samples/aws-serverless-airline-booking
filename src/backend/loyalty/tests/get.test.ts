@@ -1,6 +1,7 @@
 import * as AWSMock from 'aws-sdk-mock';
-import * as AWS from 'aws-sdk'; 
-import { points } from '../src/get/get';
+import * as AWS from 'aws-sdk';
+import { points } from '../src/get';
+import { QueryInput } from "../src/get/lib/document_client"
 
 describe('Loyalty Ingest Function tests', () => {
   beforeEach(() => {
@@ -9,10 +10,12 @@ describe('Loyalty Ingest Function tests', () => {
 
   test('Successful read from Loyalty Table', async () => {
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB.DocumentClient', 'query', (params: AWS.DynamoDB.DocumentClient.QueryInput, callback: Function) => {
-      callback(null, {Items: [
-        {CustomerId: 'hooman', Points: 500}
-      ]});
+    AWSMock.mock('DynamoDB.DocumentClient', 'query', (params: QueryInput, callback: Function) => {
+      callback(null, {
+        Items: [
+          { customerId: 'hooman', points: 500 }
+        ]
+      });
     })
 
     const doc = new AWS.DynamoDB.DocumentClient();
@@ -23,7 +26,7 @@ describe('Loyalty Ingest Function tests', () => {
 
   test('No data read from Loyalty Table', async () => {
     AWSMock.setSDKInstance(AWS);
-    AWSMock.mock('DynamoDB.DocumentClient', 'query', (params: AWS.DynamoDB.DocumentClient.QueryInput, callback: Function) => {
+    AWSMock.mock('DynamoDB.DocumentClient', 'query', (params: QueryInput, callback: Function) => {
       callback(null, {});
     })
 
@@ -31,7 +34,7 @@ describe('Loyalty Ingest Function tests', () => {
 
     try {
       await points('hooman', doc, 'loyalty-table');
-    } catch(err) {
+    } catch (err) {
       expect(err).toContain('No data')
     }
   });

@@ -1,6 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { DefaultDocumentClient, DocumentClientInterface } from './lib/document_client';
-import { ItemList } from 'aws-sdk/clients/dynamodb';
+import { DefaultDocumentClient, DocumentClientInterface, QueryInput, ItemList } from './lib/document_client';
 
 const tableName = process.env.TABLE_NAME;
 const client = DefaultDocumentClient;
@@ -47,33 +46,33 @@ const level = (points: number): string => {
  */
 export const points = async (customerId: string, client: DocumentClientInterface, tableName: string): Promise<number> => {
   let items: ItemList = [];
-
-  await client.query({
+  let params: QueryInput = {
     TableName: tableName,
     IndexName: "customer-flag",
-    KeyConditionExpression: 'CustomerId = :hkey and Flag = :rkey',
+    KeyConditionExpression: 'customerId = :hkey and flag = :rkey',
     ExpressionAttributeValues: {
       ':hkey': customerId,
       ':rkey': 'active'
     }
-  }, function (err, data) {
-    if (err) {
-      throw new Error(`Unable to query data`);
-    }
-    if (data.Items) {
-      items = data.Items;
-    } else {
-      throw new Error(`No data returned`);
-    }
-  }).promise();
-
-  let p = 0;
-
-  for (let v of items) {
-    p = p + (v.Points as number);
   }
 
-  return p;
+  try {
+    let data = await client.query(params).promise()
+    if (data.Items) {
+      items = data.Items
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error(`Unable to query data`);
+  }
+
+  let points = 0;
+
+  for (let v of items) {
+    points = points + (v.points as number);
+  }
+
+  return points;
 };
 
 /**

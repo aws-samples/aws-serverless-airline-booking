@@ -17,3 +17,5 @@ export interface DocumentClientInterface {
  * @type DocumentClientInterface
  */
 export let DefaultDocumentClient: DocumentClientInterface = new DocumentClient();
+export type QueryInput = DocumentClient.QueryInput
+export type ItemList = DocumentClient.ItemList

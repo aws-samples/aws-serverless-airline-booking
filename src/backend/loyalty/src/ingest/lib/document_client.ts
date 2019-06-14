@@ -17,3 +17,4 @@ export interface DocumentClientInterface {
  * @type DocumentClientInterface
  */
 export let DefaultDocumentClient: DocumentClientInterface = new DocumentClient();
+export type PutInput = DocumentClient.PutItemInput

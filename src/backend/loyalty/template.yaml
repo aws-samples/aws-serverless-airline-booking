@@ -23,21 +23,21 @@ Resources:
       TableName: !Sub LoyaltyData-${AWS::StackName}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: CustomerId
+        - AttributeName: customerId
           AttributeType: S
-        - AttributeName: Flag
+        - AttributeName: flag
           AttributeType: S
-        - AttributeName: Id
+        - AttributeName: id
           AttributeType: S
       KeySchema:
-        - AttributeName: Id
+        - AttributeName: id
           KeyType: HASH
       GlobalSecondaryIndexes:
         - IndexName: customer-flag
           KeySchema:
-            - AttributeName: CustomerId
+            - AttributeName: customerId
               KeyType: HASH
-            - AttributeName: Flag
+            - AttributeName: flag
               KeyType: RANGE
           Projection:
               ProjectionType: ALL

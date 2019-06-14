@@ -1,5 +1,5 @@
 import { Context, SNSEvent } from 'aws-lambda';
-import { DefaultDocumentClient, DocumentClientInterface } from './lib/document_client';
+import { DefaultDocumentClient, DocumentClientInterface, PutInput } from './lib/document_client';
 import uuidv4 from 'uuid/v4';
 
 const client = DefaultDocumentClient;
@@ -81,15 +81,16 @@ export const addPoints = async (customerId: string, points: number, client: Docu
     date: new Date().toISOString()
   };
 
-  let params = {
+  let params: PutInput = {
     TableName: tableName,
     Item: item as Object
   }
 
   try {
     await client.put(params).promise();
-  } catch (e) {
-    throw new Error(`Unable to write to DynamoDB: ${e}`);
+  } catch (error) {
+    console.log(error);
+    throw new Error(`Unable to write to DynamoDB`);
   }
 }
 
@@ -116,6 +117,11 @@ export async function handler(event: SNSEvent, context: Context): Promise<Result
 
     await addPoints(customerId, points, client, table)
   } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.log(event);
+      throw new Error("Invalid input");
+    }
+
     throw error
   }
 
