@@ -27,22 +27,22 @@ interface LoyaltyPoints {
   /**
    * Customer ID
    */
-  CustomerId: string;
+  customerId: string;
 
   /**
    * Points
    */
-  Points: number;
+  points: number;
 
   /**
    * DAte
    */
-  Date: string;
+  date: string;
 
   /**
    * Flag
    */
-  Flag: LoyaltyStatus;
+  flag: LoyaltyStatus;
 }
 
 /**
@@ -52,17 +52,17 @@ enum LoyaltyStatus {
   /**
    * Active
    */
-  Active = "active",
+  active = "active",
 
   /**
    * Revoked
    */
-  Revoked = "revoked",
+  revoked = "revoked",
 
   /**
    * Expired
    */
-  Expired = "expired"
+  expired = "expired"
 }
 
 /**
@@ -75,10 +75,10 @@ enum LoyaltyStatus {
 export const addPoints = async (customerId: string, points: number, client: DocumentClientInterface, tableName: string) => {
   const item: LoyaltyPoints = {
     id: uuidv4(),
-    CustomerId: customerId,
-    Points: points,
-    Flag: LoyaltyStatus.Active,
-    Date: new Date().toISOString()
+    customerId: customerId,
+    points: points,
+    flag: LoyaltyStatus.active,
+    date: new Date().toISOString()
   };
 
   let params = {
