@@ -48,7 +48,6 @@ artifacts/
 src/frontend/.env
 datasources.json
 
-
 ## Exceptions
 !*.vscode/tasks.json
 !*.vscode/launch.json
