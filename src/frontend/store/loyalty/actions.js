@@ -1,7 +1,9 @@
 import Loyalty from "../../shared/models/LoyaltyClass";
-import axios from "axios";
 // @ts-ignore
 import { Loading } from "quasar";
+
+import { API, graphqlOperation } from "aws-amplify";
+import { getLoyalty } from "./graphql";
 
 /**
  * Loyalty [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchLoyalty retrieves current authenticated user loyalty info from Loyalty service.
@@ -28,7 +30,10 @@ export function fetchLoyalty({ commit }) {
     });
 
     try {
-      const { data: loyaltyData } = await axios.get("/mocks/loyalty.json");
+      const {
+        // @ts-ignore
+        data: { getLoyalty: loyaltyData }
+      } = await API.graphql(graphqlOperation(getLoyalty));
       const loyalty = new Loyalty(loyaltyData);
 
       commit("SET_LOYALTY", loyalty);
