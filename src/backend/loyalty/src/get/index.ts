@@ -9,57 +9,67 @@ const client = DefaultDocumentClient;
  */
 interface Result {
   /**
-   * Points
+   * points
    */
   points: number;
 
   /**
-   * Level
+   * level
    */
   level: string;
 
   /**
    * remainingPoints needed to reach the next Tier
-   *
-   * @type {number}
-   * @memberof Result
    */
   remainingPoints: number;
 }
 
-enum LoyaltyTier {
+export enum LoyaltyTierPoints {
   gold = 100000,
   silver = 50000,
   bronze = 1
+}
+
+export enum LoyaltyTier {
+  bronze = "bronze",
+  silver = "silver",
+  gold = "gold"
 }
 
 /**
  * Calculate the level based on number of points
  * 
  * @param points number
- * @returns string
+ * @returns LoyaltytierPoints
  */
-const level = (points: number): string => {
+export const level = (points: number): LoyaltyTier => {
   switch (true) {
-    case (points >= LoyaltyTier.gold):
-      return "gold";
-    case (points >= LoyaltyTier.silver && points < LoyaltyTier.gold):
-      return "silver"
+    case (points >= LoyaltyTierPoints.gold):
+      return LoyaltyTier.gold;
+    case (points >= LoyaltyTierPoints.silver && points < LoyaltyTierPoints.gold):
+      return LoyaltyTier.silver
     default:
-      return "bronze";
+      return LoyaltyTier.bronze;
   }
 }
 
-const nextTier = (points: number, level: string): number => {
-  switch (level) {
-    case "bronze":
-      return LoyaltyTier.silver - points
-    case "silver":
-      return LoyaltyTier.gold - points
-    default:
-      return 0;
+export /**
+ * Calculates how many points needed to progress to the next loyalty tier
+ *
+ * @param {number} points
+ * @param {LoyaltyTier} level
+ * @returns {number}
+ */
+  const nextTier = (points: number, level: LoyaltyTier): number => {
+    switch (level) {
+      case LoyaltyTier.bronze:
+        return LoyaltyTierPoints.silver - points
+      case LoyaltyTier.silver:
+        return LoyaltyTierPoints.gold - points
+      default:
+        return 0;
+    }
   }
-}
 
 /**
  * Returns the number of points for a customer
