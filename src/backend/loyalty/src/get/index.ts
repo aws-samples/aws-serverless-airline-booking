@@ -17,6 +17,20 @@ interface Result {
    * Level
    */
   level: string;
+
+  /**
+   * remainingPoints needed to reach the next Tier
+   *
+   * @type {number}
+   * @memberof Result
+   */
+  remainingPoints: number;
+}
+
+enum LoyaltyTier {
+  gold = 100000,
+  silver = 50000,
+  bronze = 1
 }
 
 /**
@@ -27,12 +41,23 @@ interface Result {
  */
 const level = (points: number): string => {
   switch (true) {
-    case (points > 100000):
+    case (points >= LoyaltyTier.gold):
       return "gold";
-    case (points > 50000 && points < 100000):
+    case (points >= LoyaltyTier.silver && points < LoyaltyTier.gold):
       return "silver"
     default:
       return "bronze";
+  }
+}
+
+const nextTier = (points: number, level: string): number => {
+  switch (level) {
+    case "bronze":
+      return LoyaltyTier.silver - points
+    case "silver":
+      return LoyaltyTier.gold - points
+    default:
+      return 0;
   }
 }
 
@@ -100,9 +125,12 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
     throw err;
   }
 
+  let currentTier = level(p)
+
   const result: Result = {
     points: p,
-    level: level(p)
+    level: currentTier,
+    remainingPoints: nextTier(p, currentTier)
   }
 
   return {
