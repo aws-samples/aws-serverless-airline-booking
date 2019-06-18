@@ -3,7 +3,7 @@
     <div class="col-12 wrapper">
       <div class="heading">
         <div class="text-primary q-display-1 loyalty__heading--name">
-          Heitor F. Lessa
+          {{ fullName }}
         </div>
         <div class="loyalty__heading--tier">
           <div class="q-title loyalty__heading-tier-name">
@@ -81,7 +81,12 @@ export default {
       user: state => state.profile.user,
       loyalty: state => state.loyalty.loyalty
     }),
-    ...mapGetters("profile", ["isAuthenticated"])
+    ...mapGetters("profile", ["isAuthenticated"]),
+    fullName() {
+      return `${this.user.attributes.given_name} ${
+        this.user.attributes.family_name
+      }`;
+    }
   },
   methods: {
     choosePreference(option) {
