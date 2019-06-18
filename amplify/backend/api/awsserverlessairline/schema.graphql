@@ -51,6 +51,7 @@ input CreateBookingInput {
 type Loyalty {
     points: Int
     level: String
+    remainingPoints: Int
 }
 
 type Mutation {
