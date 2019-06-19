@@ -6,10 +6,10 @@
  * @param {string} loyalty.level - Current loyalty level
  * @param {number} loyalty.points - Current amount of loyalty points
  * @param {number} loyalty.remainingPoints - Loyalty points necessary to reach next loyalty tier
- * @param {number} loyalty.membershipNumber - Loyalty membership number
- * @param {object} loyalty.customer - Loyalty customer ID
  * @see {@link fetchLoyalty} for more info on action that calls SET_LOYALTY
  */
 export const SET_LOYALTY = async (state, loyalty) => {
+  loyalty.points = loyalty.points || 0;
+  loyalty.remainingPoints = loyalty.remainingPoints || 0;
   state.loyalty = loyalty;
 };

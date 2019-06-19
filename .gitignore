@@ -2,6 +2,8 @@
 node_modules
 /dist
 
+src/backend/loyalty/src/**/*.js
+
 # local env files
 .env.local
 .env.*.local
@@ -13,7 +15,7 @@ yarn-error.log*
 
 # Editor directories and files
 .idea
-.vscode
+.vscode/*
 *.suo
 *.ntvs*
 *.njsproj
@@ -45,3 +47,7 @@ packaged.yaml
 artifacts/
 src/frontend/.env
 datasources.json
+
+## Exceptions
+!*.vscode/tasks.json
+!*.vscode/launch.json

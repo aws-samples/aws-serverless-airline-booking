@@ -3,17 +3,27 @@
   "version": "1.0.0",
   "description": "Loyalty service to collection airmiles",
   "dependencies": {
-    "@types/aws-lambda": "^8.10.26",
-    "@types/node": "^12.0.2",
-    "aws-sdk": "^2.463.0",
-    "tslint": "^5.16.0",
-    "typescript": "^3.4.5"
+    "aws-sdk": "^2.464.0",
+    "uuid": "^3.3.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.27",
+    "@types/jest": "^24.0.13",
+    "@types/node": "^12.0.8",
+    "@types/uuid": "^3.4.4",
+    "aws-sdk-mock": "^4.4.0",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-loader": "^6.0.2",
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.2",
+    "webpack": "^4.33.0",
+    "webpack-cli": "^3.3.3"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "tsc --watch",
-    "build": "tsc --build tsconfig.json",
+    "test": "jest",
+    "watch": "NODE_ENV=dev webpack --watch --mode=development",
+    "build": "NODE_ENV=prod webpack --mode=production",
     "lint": "tslint --project tsconfig.json"
   },
   "repository": {
