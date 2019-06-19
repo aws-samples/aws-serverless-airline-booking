@@ -81,8 +81,5 @@ def lambda_handler(event, context):
 
     ret = collect_payment(event["chargeId"])
 
-    # Step Functions use the return to append `receiptUrl` key into the overall output
-    return {
-        'receiptUrl': ret['receiptUrl'],
-        'price': ret['price']
-    }
+    # Step Functions can append multiple values if you return a single dict
+    return ret

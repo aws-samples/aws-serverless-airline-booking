@@ -96,7 +96,9 @@ def lambda_handler(event, context):
         Booking Notification Exception including error message upon failure
     """
 
-    customer_id, price = event.get("customerId", False), event.get("price", False)
+    customer_id = event.get("customerId", False)
+    price = event.get("payment", False).get("price", False)  # ['payment']['price'] w/ defaults if either is empty/undefined
+
     booking_reference = event.get("bookingReference", False)
 
     if not customer_id and not price:
