@@ -1,6 +1,5 @@
 import json
 import os
-import secrets
 
 import boto3
 from botocore.exceptions import ClientError
@@ -52,7 +51,7 @@ def notify_booking(payload, booking_reference):
     try:
         ret = sns.publish(
             TopicArn=booking_sns_topic,
-            Message=payload,
+            Message=json.dumps(payload),
             Subject=subject,
             MessageAttributes={
                 "Booking.Status": {"DataType": "String", "StringValue": booking_status}
