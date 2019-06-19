@@ -1,5 +1,12 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
+Description: >
+  Booking service
+
+Globals:
+  Function:
+    Timeout: 5
+
 
 Parameters:
     BookingTable:
@@ -33,7 +40,6 @@ Resources:
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
       Runtime: python3.6
-      Timeout: 5
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -47,7 +53,6 @@ Resources:
       Handler: cancel.lambda_handler
       CodeUri: src/cancel-booking
       Runtime: python3.6
-      Timeout: 10
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -61,7 +66,6 @@ Resources:
       Handler: reserve.lambda_handler
       CodeUri: src/reserve-booking
       Runtime: python3.6
-      Timeout: 10
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -78,7 +82,6 @@ Resources:
       Handler: notify.lambda_handler
       CodeUri: src/notify-booking
       Runtime: python3.6
-      Timeout: 10
       Environment:
         Variables:
           BOOKING_TOPIC: !Ref BookingTopic

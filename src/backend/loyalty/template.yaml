@@ -5,7 +5,7 @@ Description: >
   
 Globals:
   Function:
-    Timeout: 100
+    Timeout: 5
 
 Parameters:
   Stage:
