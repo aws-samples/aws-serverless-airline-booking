@@ -12,23 +12,23 @@ Parameters:
     BookingTable:
         Type: String
         Description: Booking Table
-    
+
     FlightTable:
         Type: String
         Description: Flight Table
-    
+
     Stage:
         Type: String
         Description: Environment stage or git branch
 
     CollectPaymentFunction:
         Type: AWS::SSM::Parameter::Value<String>
-        Description: Parameter Name for Collect Payment Function ARN 
-    
+        Description: Parameter Name for Collect Payment Function ARN
+
     RefundPaymentFunction:
         Type: AWS::SSM::Parameter::Value<String>
-        Description: Parameter Name for Refund Payment Function ARN 
-    
+        Description: Parameter Name for Refund Payment Function ARN
+
     AppsyncApiId:
         Type: String
         Description: AWS AppSync API ID
@@ -46,7 +46,7 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
-  
+
   CancelBooking:
     Type: AWS::Serverless::Function
     Properties:
@@ -59,7 +59,7 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
-  
+
   ReserveBooking:
     Type: AWS::Serverless::Function
     Properties:
@@ -128,7 +128,7 @@ Resources:
 
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
-    Properties: 
+    Properties:
       DefinitionString: !Sub |
         {
             "StartAt": "Reserve Flight",
@@ -305,7 +305,7 @@ Resources:
                             "BackoffRate": 2,
                             "MaxAttempts": 2
                         }
-                    ],            
+                    ],
                     "Catch": [
                         {
                             "ErrorEquals": [
@@ -336,14 +336,6 @@ Resources:
                             "BackoffRate": 2,
                             "MaxAttempts": 2
                         }
-                    ],            
-                    "Catch": [
-                        {
-                            "ErrorEquals": [
-                                "States.ALL"
-                            ],
-                            "ResultPath": "$.notificationError"
-                        }
                     ],
                     "ResultPath": "$.notificationId",
                     "Next": "Booking Failed"
@@ -363,14 +355,6 @@ Resources:
                             "BackoffRate": 2,
                             "MaxAttempts": 2
                         }
-                    ],            
-                    "Catch": [
-                        {
-                            "ErrorEquals": [
-                                "States.ALL"
-                            ],
-                            "ResultPath": "$.notificationError"
-                        }
                     ],
                     "ResultPath": "$.notificationId",
                     "Next": "Booking Confirmed"
@@ -385,7 +369,7 @@ Resources:
 
   ProcessBookingParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/booking/process-booking-state-machine/${Stage}
         Description: Step Functions State Machine ARN
         Type: String
@@ -393,7 +377,7 @@ Resources:
 
   BookingTopicParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/booking/booking-topic/${Stage}
         Description: Booking SNS Topic ARN
         Type: String
@@ -485,10 +469,10 @@ Resources:
         }
 
 Outputs:
-  ProcessBookingStateMachine: 
+  ProcessBookingStateMachine:
     Value: !Ref ProcessBooking
     Description: The ARN of the Process Booking StateMachine
 
-  BookingTopic: 
+  BookingTopic:
     Value: !Ref BookingTopic
     Description: Booking SNS Topic ARN
