@@ -33,7 +33,7 @@ Resources:
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
       Runtime: python3.6
-      Timeout: 10
+      Timeout: 5
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -72,6 +72,20 @@ Resources:
   BookingTopic:
     Type: AWS::SNS::Topic
 
+  NotifyBooking:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: notify.lambda_handler
+      CodeUri: src/notify-booking
+      Runtime: python3.6
+      Timeout: 10
+      Environment:
+        Variables:
+          BOOKING_TOPIC: !Ref BookingTopic
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !Sub ${BookingTopic.TopicName}
+
   StatesExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -91,7 +105,13 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
-                Resource: "*"
+                Resource:
+                    - !Sub ${ReserveBooking.Arn}
+                    - !Sub ${CancelBooking.Arn}
+                    - !Sub ${ConfirmBooking.Arn}
+                    - !Sub ${NotifyBooking.Arn}
+                    - !Ref CollectPaymentFunction
+                    - !Ref RefundPaymentFunction
         - PolicyName: DynamoDBCRUD
           PolicyDocument:
             Version: 2012-10-17
@@ -102,14 +122,6 @@ Resources:
                 Resource:
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
-        - PolicyName: PublishBookingTopic
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sns:Publish
-                Resource: !Ref BookingTopic
 
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
@@ -311,12 +323,26 @@ Resources:
                 },
                 "Notify Booking Failed": {
                     "Type": "Task",
-                    "Resource": "arn:aws:states:::sns:publish",
-                    "Parameters": {
-                        "TopicArn": "${BookingTopic}",
-                        "Message.$": "$.bookingId",
-                        "Subject": "Unable to process your booking :(" 
-                    },
+                    "Resource": "${NotifyBooking.Arn}",
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "BookingNotificationException"
+                            ],
+                            "IntervalSeconds": 1,
+                            "BackoffRate": 2,
+                            "MaxAttempts": 2
+                        }
+                    ],            
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.notificationError"
+                        }
+                    ],
+                    "ResultPath": "$.notificationId",
                     "Next": "Booking Failed"
                 },
                 "Booking Failed": {
@@ -324,12 +350,26 @@ Resources:
                 },
                 "Notify Booking Confirmed": {
                     "Type": "Task",
-                    "Resource": "arn:aws:states:::sns:publish",
-                    "Parameters": {
-                        "TopicArn": "${BookingTopic}",
-                        "Message.$": "$.bookingReference",
-                        "Subject": "Your booking is now confirmed"
-                    },
+                    "Resource": "${NotifyBooking.Arn}",
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "BookingNotificationException"
+                            ],
+                            "IntervalSeconds": 1,
+                            "BackoffRate": 2,
+                            "MaxAttempts": 2
+                        }
+                    ],            
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.notificationError"
+                        }
+                    ],
+                    "ResultPath": "$.notificationId",
                     "Next": "Booking Confirmed"
                 },
                 "Booking Confirmed": {
