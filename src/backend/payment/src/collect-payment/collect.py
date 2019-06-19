@@ -29,6 +29,9 @@ def collect_payment(charge_id):
     dict
         receiptUrl: string
             receipt URL containing more details about the successful charge
+
+        price: int
+            amount collected
     """
     payment_payload = {"chargeId": charge_id}
     ret = requests.post(payment_endpoint, json=payment_payload)
@@ -40,6 +43,7 @@ def collect_payment(charge_id):
 
     return {
         "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
+        "price": payment_response["capturedCharge"]["amount"]
     }
 
 
@@ -60,8 +64,12 @@ def lambda_handler(event, context):
 
     Returns
     -------
-    string
-        receipt URL of charge collected
+    dict
+        receiptUrl: string
+            receipt URL of charge collected
+
+        price: int
+            amount collected
 
     Raises
     ------
@@ -74,4 +82,7 @@ def lambda_handler(event, context):
     ret = collect_payment(event["chargeId"])
 
     # Step Functions use the return to append `receiptUrl` key into the overall output
-    return ret['receiptUrl']
+    return {
+        'receiptUrl': ret['receiptUrl'],
+        'price': ret['price']
+    }
