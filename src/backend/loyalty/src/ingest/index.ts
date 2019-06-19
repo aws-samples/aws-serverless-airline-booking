@@ -115,6 +115,10 @@ export async function handler(event: SNSEvent, context: Context): Promise<Result
     const customerId = record['customerId'];
     const points = record['price'];
 
+    if (isNaN(points)) {
+      throw new Error("Points cannot be undefined or falsy")
+    }
+
     await addPoints(customerId, points, client, table)
   } catch (error) {
     if (error instanceof SyntaxError) {
