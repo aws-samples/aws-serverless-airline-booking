@@ -1,21 +1,21 @@
 {
-    "include": [
-        "./src/ingest/*",
-        "./src/get/*"
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "strict": true,
+    "baseUrl": "./",
+    "typeRoots": [
+      "node_modules/@types"
     ],
-    "compilerOptions": {
-      "target": "es2017",
-      "module": "commonjs",
-      "outDir": "./build",
-      "strict": true,
-      "baseUrl": "./",
-      "typeRoots": [
-        "node_modules/@types"
-      ],
-      "types": [
-        "node"
-      ],
-      "esModuleInterop": true,
-      "inlineSourceMap": true
-    }
+    "types": [
+      "node",
+      "jest"
+    ],
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "resolveJsonModule": true
   }
+}

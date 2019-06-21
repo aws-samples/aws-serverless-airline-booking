@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Ingest Fn",
+            "type": "node",
+            "request": "attach",
+            "address": "localhost",
+            "port": 5858,
+            // Location to where the transpiled JS file is: follows CodeUri
+            "localRoot": "${workspaceRoot}/build/ingest",
+            "remoteRoot": "/var/task",
+            "protocol": "inspector",
+            "stopOnEntry": false,
+            // Same as LocalRoot given we run on a docker container
+            // outFiles allows VSCode debugger to know where the source code is after finding its sourceMap
+            "outFiles": [
+                "${workspaceRoot}/build/ingest/index.js"
+            ],
+            // instructs debugger to use sourceMap to identify correct breakpoint line
+            // and more importantly expand line/column numbers correctly as code is minified
+            "sourceMaps": true
+        },
+        {
+            "name": "Get Fn",
+            "type": "node",
+            "request": "attach",
+            "address": "localhost",
+            "port": 5858,
+            // Location to where the transpiled JS file is: follows CodeUri
+            "localRoot": "${workspaceRoot}/build/get",
+            "remoteRoot": "/var/task",
+            "protocol": "inspector",
+            "stopOnEntry": false,
+            // Same as LocalRoot given we run on a docker container
+            // outFiles allows VSCode debugger to know where the source code is after finding its sourceMap
+            "outFiles": [
+                "${workspaceRoot}/build/get/index.js"
+            ],
+            // instructs debugger to use sourceMap to identify correct breakpoint line
+            // and more importantly expand line/column numbers correctly as code is minified
+            "sourceMaps": true
+        },
+    ]
+}

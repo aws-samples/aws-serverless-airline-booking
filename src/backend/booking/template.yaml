@@ -1,27 +1,34 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
+Description: >
+  Booking service
+
+Globals:
+  Function:
+    Timeout: 5
+
 
 Parameters:
     BookingTable:
         Type: String
         Description: Booking Table
-    
+
     FlightTable:
         Type: String
         Description: Flight Table
-    
+
     Stage:
         Type: String
         Description: Environment stage or git branch
 
     CollectPaymentFunction:
         Type: AWS::SSM::Parameter::Value<String>
-        Description: Parameter Name for Collect Payment Function ARN 
-    
+        Description: Parameter Name for Collect Payment Function ARN
+
     RefundPaymentFunction:
         Type: AWS::SSM::Parameter::Value<String>
-        Description: Parameter Name for Refund Payment Function ARN 
-    
+        Description: Parameter Name for Refund Payment Function ARN
+
     AppsyncApiId:
         Type: String
         Description: AWS AppSync API ID
@@ -33,35 +40,32 @@ Resources:
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
       Runtime: python3.6
-      Timeout: 10
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
-  
+
   CancelBooking:
     Type: AWS::Serverless::Function
     Properties:
       Handler: cancel.lambda_handler
       CodeUri: src/cancel-booking
       Runtime: python3.6
-      Timeout: 10
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
-  
+
   ReserveBooking:
     Type: AWS::Serverless::Function
     Properties:
       Handler: reserve.lambda_handler
       CodeUri: src/reserve-booking
       Runtime: python3.6
-      Timeout: 10
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -71,6 +75,19 @@ Resources:
 
   BookingTopic:
     Type: AWS::SNS::Topic
+
+  NotifyBooking:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: notify.lambda_handler
+      CodeUri: src/notify-booking
+      Runtime: python3.6
+      Environment:
+        Variables:
+          BOOKING_TOPIC: !Ref BookingTopic
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !Sub ${BookingTopic.TopicName}
 
   StatesExecutionRole:
     Type: AWS::IAM::Role
@@ -91,7 +108,13 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
-                Resource: "*"
+                Resource:
+                    - !Sub ${ReserveBooking.Arn}
+                    - !Sub ${CancelBooking.Arn}
+                    - !Sub ${ConfirmBooking.Arn}
+                    - !Sub ${NotifyBooking.Arn}
+                    - !Ref CollectPaymentFunction
+                    - !Ref RefundPaymentFunction
         - PolicyName: DynamoDBCRUD
           PolicyDocument:
             Version: 2012-10-17
@@ -102,18 +125,10 @@ Resources:
                 Resource:
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
-        - PolicyName: PublishBookingTopic
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sns:Publish
-                Resource: !Ref BookingTopic
 
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
-    Properties: 
+    Properties:
       DefinitionString: !Sub |
         {
             "StartAt": "Reserve Flight",
@@ -259,7 +274,7 @@ Resources:
                             "Next": "Cancel Booking"
                         }
                     ],
-                    "ResultPath": "$.receiptUrl",
+                    "ResultPath": "$.payment",
                     "Next": "Confirm Booking"
                 },
                 "Cancel Booking": {
@@ -290,7 +305,7 @@ Resources:
                             "BackoffRate": 2,
                             "MaxAttempts": 2
                         }
-                    ],            
+                    ],
                     "Catch": [
                         {
                             "ErrorEquals": [
@@ -311,12 +326,18 @@ Resources:
                 },
                 "Notify Booking Failed": {
                     "Type": "Task",
-                    "Resource": "arn:aws:states:::sns:publish",
-                    "Parameters": {
-                        "TopicArn": "${BookingTopic}",
-                        "Message.$": "$.bookingId",
-                        "Subject": "Unable to process your booking :(" 
-                    },
+                    "Resource": "${NotifyBooking.Arn}",
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "BookingNotificationException"
+                            ],
+                            "IntervalSeconds": 1,
+                            "BackoffRate": 2,
+                            "MaxAttempts": 2
+                        }
+                    ],
+                    "ResultPath": "$.notificationId",
                     "Next": "Booking Failed"
                 },
                 "Booking Failed": {
@@ -324,12 +345,18 @@ Resources:
                 },
                 "Notify Booking Confirmed": {
                     "Type": "Task",
-                    "Resource": "arn:aws:states:::sns:publish",
-                    "Parameters": {
-                        "TopicArn": "${BookingTopic}",
-                        "Message.$": "$.bookingReference",
-                        "Subject": "Your booking is now confirmed"
-                    },
+                    "Resource": "${NotifyBooking.Arn}",
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "BookingNotificationException"
+                            ],
+                            "IntervalSeconds": 1,
+                            "BackoffRate": 2,
+                            "MaxAttempts": 2
+                        }
+                    ],
+                    "ResultPath": "$.notificationId",
                     "Next": "Booking Confirmed"
                 },
                 "Booking Confirmed": {
@@ -342,7 +369,7 @@ Resources:
 
   ProcessBookingParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/booking/process-booking-state-machine/${Stage}
         Description: Step Functions State Machine ARN
         Type: String
@@ -350,7 +377,7 @@ Resources:
 
   BookingTopicParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/booking/booking-topic/${Stage}
         Description: Booking SNS Topic ARN
         Type: String
@@ -442,10 +469,10 @@ Resources:
         }
 
 Outputs:
-  ProcessBookingStateMachine: 
+  ProcessBookingStateMachine:
     Value: !Ref ProcessBooking
     Description: The ARN of the Process Booking StateMachine
 
-  BookingTopic: 
+  BookingTopic:
     Value: !Ref BookingTopic
     Description: Booking SNS Topic ARN

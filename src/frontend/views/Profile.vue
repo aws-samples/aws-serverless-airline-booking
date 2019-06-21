@@ -3,14 +3,11 @@
     <div class="col-12 wrapper">
       <div class="heading">
         <div class="text-primary q-display-1 loyalty__heading--name">
-          Heitor F. Lessa
+          {{ fullName }}
         </div>
         <div class="loyalty__heading--tier">
           <div class="q-title loyalty__heading-tier-name">
-            {{ loyalty.level }}
-          </div>
-          <div class="q-subtitle text-bold loyalty__heading-tier-number">
-            {{ Number(loyalty.membershipNumber).toLocaleString("en") }}
+            {{ loyalty.level || "bronze" }}
           </div>
         </div>
       </div>
@@ -18,7 +15,7 @@
         <div class="row loyalty__progress">
           <div class="col-7 loyalty__progress--points">
             <div class="q-display-1">
-              {{ Number(loyalty.points).toLocaleString("en") }}
+              {{ loyalty.points }}
             </div>
             <div class="q-title text-primary text-bold">Points</div>
           </div>
@@ -84,7 +81,12 @@ export default {
       user: state => state.profile.user,
       loyalty: state => state.loyalty.loyalty
     }),
-    ...mapGetters("profile", ["isAuthenticated"])
+    ...mapGetters("profile", ["isAuthenticated"]),
+    fullName() {
+      return `${this.user.attributes.given_name} ${
+        this.user.attributes.family_name
+      }`;
+    }
   },
   methods: {
     choosePreference(option) {

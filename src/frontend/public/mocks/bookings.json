@@ -1,8 +1,9 @@
 [
     {
         "id": "A1",
+        "bookingReference": "Flkuc1",
         "departureCity": "London",
-        "transactionDate": "2019-01-01T08:00+0000",
+        "createdAt": "2019-01-01T08:00+0000",
         "inboundFlight": {
             "id": "f976e763-5e43-45d0-83b2-8190698b2cdc",
             "departureDate": "2019-01-17T08:00+0000",
