@@ -48,6 +48,11 @@ artifacts/
 src/frontend/.env
 datasources.json
 
+# Cypress videos and screenshots
+
+src/e2e-tests/ui/**/cypress/videos
+src/e2e-tests/ui/**/cypress/screenshots
+
 ## Exceptions
 !*.vscode/tasks.json
 !*.vscode/launch.json
