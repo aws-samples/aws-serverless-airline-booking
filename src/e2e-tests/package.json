@@ -4,7 +4,9 @@
   "description": "End-to-end tests for Serverless Airline services",
   "main": "index.js",
   "scripts": {
-    "test:ui": "cypress open --project ./ui/"
+    "test:ui": "cypress open --project ./ui/",
+    "db:seed": "",
+    "db:reset": ""
   },
   "repository": {
     "type": "git",
