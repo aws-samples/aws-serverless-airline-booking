@@ -13,7 +13,8 @@ context('Search for flights', function () {
         cy.get(".flight__departure").contains(flight.departureCode)
         cy.get(".flight__arrival").contains(flight.arrivalCode)
 
-        // Select
+        // Select and confirm whether flight has been successfully selected for booking
         cy.get('.flight__card').trigger('mouseover').click()
+        cy.get('.flight__headline').contains("Review your selection")
     })
 })
