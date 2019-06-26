@@ -17,6 +17,8 @@ context('Search for flights', function () {
         })
         cy.get('.cta__button > .q-btn-inner > div').contains("Search flights")
 
+        // cy.login()
+
         // Search for a flight from London Gatwich to Madrid on June 26th 2019
         cy.visit('/#/search/results?date=2019-06-26&departure=LGW&arrival=MAD')
         cy.get(".flight__departure").contains(flight.departureCode)

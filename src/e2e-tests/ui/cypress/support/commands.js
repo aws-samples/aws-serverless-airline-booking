@@ -23,3 +23,24 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('login', (options = {}) => {
+    // this is an example of skipping your UI and logging in programmatically
+
+    // TODO: fetch it from Secrets Manager/SSM Param
+    // and user properties
+    const creds = {
+        username: 'demo',
+        password: "Demo123!",
+    }
+
+    cy.visit('/')
+    cy.get('.authenticator__form').within(() => {
+        cy.get('input:first').type(creds.username)
+        cy.get('input:last').type(creds.password)
+
+        cy.get('button').click()
+    })
+    cy.get('.cta__button > .q-btn-inner > div').contains("Search flights")
+
+})
