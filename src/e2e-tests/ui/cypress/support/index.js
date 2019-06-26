@@ -18,3 +18,14 @@ import './commands'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+// Hotfix for random observable errors in latest chrome versions: https://github.com/quasarframework/quasar/issues/2233
+const resizeObserverLoopErrRe = /^ResizeObserver loop limit exceeded/
+
+Cypress.on('uncaught:exception', (err) => {
+    if (resizeObserverLoopErrRe.test(err.message)) {
+        // returning false here prevents Cypress from
+        // failing the test
+        return false
+    }
+})
