@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test:ui": "cypress open --project ./ui/",
-    "db:seed": "",
-    "db:reset": ""
+    "test:ui:dev": "CYPRESS_baseUrl=http://localhost:8080 cypress open --project ./ui/"
   },
   "repository": {
     "type": "git",
