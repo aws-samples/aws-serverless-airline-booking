@@ -270,7 +270,7 @@ export default {
         setTimeout(() => {
           this.$q.loading.hide();
           this.$router.push({ name: "bookings" });
-        }, 6000);
+        }, 3000);
       } catch (err) {
         this.$q.loading.hide();
         console.error(err);
