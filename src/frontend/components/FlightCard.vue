@@ -23,7 +23,7 @@
                 <q-icon class="flight__icon" name="local_airport" />
               </div>
               <div class="col flight__right-details text-right">
-                <div class="q-headline flight__arival uppercase">
+                <div class="q-headline flight__arrival uppercase">
                   {{ details.arrivalAirportCode }}
                 </div>
                 <div class="q-caption capitalize text-secondary text-bold">

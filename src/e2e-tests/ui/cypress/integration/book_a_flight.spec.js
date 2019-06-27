@@ -48,7 +48,8 @@ context('Search for flights', function () {
         cy.get('.cta__button').click()
 
         // If pre-authorization worked, and booking process has been kicked off successfully we should be redirected to Bookings page
-        // Due to networking calls variying, 10s is the worst case scenario even for 2G network
+        // Due to networking calls variying, 10s is the worst case scenario even for 2G network 
+        // Therefore it's safe to fail the test if nothing happens after that amount
         cy.location('hash', { timeout: 10000 }).should('eq', '#/profile/bookings')
     })
 })
