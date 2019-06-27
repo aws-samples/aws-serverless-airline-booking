@@ -4,9 +4,17 @@
       <q-toolbar class="flight__filter--toolbar" color="grey-1">
         <q-toolbar-title class="text-dark text-weight-bold row">
           <div class="flight__orientation col-11 text-left">
-            <span class="flight__departure">{{ departure }}</span>
+            <span
+              class="flight__departure--toolbar"
+              data-test="toolbar-departure"
+              >{{ departure }}</span
+            >
             <q-btn flat round dense icon="swap_horiz" />
-            <span class="flight__arrival">{{ arrival }}</span>
+            <span
+              class="flight__arrival--toolbar"
+              data-test="toolbar-arrival"
+              >{{ arrival }}</span
+            >
           </div>
         </q-toolbar-title>
       </q-toolbar>
