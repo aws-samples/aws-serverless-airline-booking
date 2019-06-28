@@ -15,7 +15,8 @@ mutation flight1 {
         arrivalLocale: "Europe/Madrid",
         ticketPrice: 100,
         ticketCurrency: "EUR",
-        flightNumber: 1830
+        flightNumber: 1830,
+	seatAllocation: 10
     }) {
         id
     }
