@@ -48,6 +48,14 @@ artifacts/
 src/frontend/.env
 datasources.json
 
+# CDK outputs
+src/backend/cdk/**/*.js
+src/backend/cdk/**/*.d.ts
+
+# CDK asset staging directory
+src/backend/cdk/.cdk.staging
+src/backend/cdk/cdk.out
+
 ## Exceptions
 !*.vscode/tasks.json
 !*.vscode/launch.json
