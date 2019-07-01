@@ -33,37 +33,34 @@
     <div class="row">
       <q-timeline responsive color="secondary" style="padding: 0 24px;">
         <q-timeline-entry
-          v-bind:subtitle="departureDisplayDate"
+          :subtitle="departureDisplayDate"
           icon="flight_takeoff"
         >
           <q-list highlight no-border class="q-pa-none">
             <q-item class="q-pa-none">
               <q-item-main
                 class="text-bold"
-                v-bind:label="departureTime"
+                :label="departureTime"
                 data-test="booking-departure-time"
               />
               <q-item-main
-                v-bind:label="departureAirportName"
+                :label="departureAirportName"
                 data-test="booking-departure-code"
               />
             </q-item>
           </q-list>
         </q-timeline-entry>
 
-        <q-timeline-entry
-          v-bind:subtitle="arrivalDisplayDate"
-          icon="flight_land"
-        >
+        <q-timeline-entry :subtitle="arrivalDisplayDate" icon="flight_land">
           <q-list highlight no-border class="q-pa-none">
             <q-item class="q-pa-none">
               <q-item-main
                 class="text-bold"
-                v-bind:label="arrivalTime"
+                :label="arrivalTime"
                 data-test="booking-arrival-time"
               />
               <q-item-main
-                v-bind:label="arrivalAirportName"
+                :label="arrivalAirportName"
                 data-test="booking-arrival-code"
               />
             </q-item>
