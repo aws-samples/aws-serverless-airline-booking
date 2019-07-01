@@ -54,6 +54,7 @@
                     placeholder="Country"
                     :options="form.countryOptions"
                     hide-underline
+                    data-test="form-country"
                   />
                 </div>
               </label>
@@ -108,6 +109,7 @@
           color="secondary"
           label="Agree and pay now"
           :disable="$v.form.$invalid || form.isCardInvalid"
+          data-test="payment-button"
         >
           <q-icon
             class="cta__button--direction"

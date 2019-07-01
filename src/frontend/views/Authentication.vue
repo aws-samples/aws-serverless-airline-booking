@@ -3,6 +3,7 @@
     <amplify-authenticator
       class="authenticator__form"
       :authConfig="authConfig"
+      data-test="authenticator"
     ></amplify-authenticator>
   </div>
 </template>

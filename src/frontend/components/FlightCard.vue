@@ -1,6 +1,10 @@
 <template>
   <div class="row flight">
-    <q-card class="flight__card" :id="details.flightNumber">
+    <q-card
+      class="flight__card"
+      :id="details.flightNumber"
+      data-test="flight-card"
+    >
       <div class="col-10">
         <q-list highlight>
           <q-list-header>

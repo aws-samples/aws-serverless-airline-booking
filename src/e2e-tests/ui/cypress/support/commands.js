@@ -35,7 +35,7 @@ Cypress.Commands.add('login', (options = {}) => {
     }
 
     cy.visit('/')
-    cy.get('.authenticator__form').within(() => {
+    cy.get('[data-test=authenticator]').within(() => {
         cy.get('input:first').type(creds.username)
         cy.get('input:last').type(creds.password)
 

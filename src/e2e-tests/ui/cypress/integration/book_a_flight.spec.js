@@ -10,17 +10,16 @@ context('Search for flights', function () {
 
         // Search for a flight from London Gatwich to Madrid on June 26th 2019
         cy.visit('/#/search/results?date=2019-06-26&departure=LGW&arrival=MAD')
-        cy.get(".flight__departure").contains(flight.departureCode)
-        cy.get(".flight__arrival").contains(flight.arrivalCode)
+        cy.get('[data-test=flight-departure-code]').contains(flight.departureCode)
+        cy.get('[data-test=flight-arrival-code]').contains(flight.arrivalCode)
 
         // Select 
-        cy.get('.flight__card').trigger('mouseover').click()
+        cy.get('[data-test=flight-card]').trigger('mouseover').click()
 
         // Input Payment data
-        cy.get('.form__name').type("E2E Test")
-        cy.get('.form__postcode').type('234563')
-        // cy.get('.form__payment--country').click()
-        cy.get('.form__country').click()
+        cy.get('[data-test=form-name]').type("E2E Test")
+        cy.get('[data-test=form-postcode]').type('234563')
+        cy.get('[data-test=form-country]').click()
             // select first country that appears
             .get('.q-popover > .q-list > :nth-child(1) > .q-item-main > .q-item-label').click()
 
@@ -45,7 +44,7 @@ context('Search for flights', function () {
         });
 
         // Once clicked, it should pre-authorize Payment and kick off the booking process
-        cy.get('.cta__button').click()
+        cy.get('[data-test=payment-button]').click()
 
         // If pre-authorization worked, and booking process has been kicked off successfully we should be redirected to Bookings page
         // Due to networking calls variying, 10s is the worst case scenario even for 2G network 
