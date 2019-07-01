@@ -7,7 +7,10 @@
     />
     <div class="flights">
       <div class="heading">
-        <div class="q-headline text-primary text-center flight__headline">
+        <div
+          class="q-headline text-primary text-center flight__headline"
+          data-test="flight-headline"
+        >
           Review your selection
         </div>
         <div class="loader" v-if="loading">
@@ -18,7 +21,10 @@
     </div>
     <div class="form__payment">
       <div class="text-center">
-        <div class="form__header q-pt-md q-headline text-primary text-center">
+        <div
+          class="form__header q-pt-md q-headline text-primary text-center"
+          data-test="form-header"
+        >
           Payment details
         </div>
         <div class="form">
@@ -33,6 +39,7 @@
                   name="name"
                   placeholder="Name on card"
                   class="form__input field form__name"
+                  data-test="form-name"
                   required
                 />
               </label>
@@ -58,6 +65,7 @@
                   name="postcode"
                   placeholder="Postcode"
                   class="form__input field form__postcode"
+                  data-test="form-postcode"
                   required
                 />
               </label>
@@ -86,6 +94,7 @@
             <div class="outcome">
               <div
                 class="error text-bold text-secondary form__error"
+                data-test="form-error"
                 v-if="token.error"
               >
                 {{ token.error.message }}
