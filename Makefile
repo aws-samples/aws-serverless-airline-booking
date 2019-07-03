@@ -7,7 +7,7 @@ target:
 	$(info ${HELP_MESSAGE})
 	@exit 0
 
-init: ##=> Install OS deps, python3.6 and dev tools
+init: ##=> Install OS deps and dev tools
 	$(info [*] Bootstrapping CI system...)
 	@$(MAKE) _install_os_packages
 
@@ -99,10 +99,10 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 #############
 
 _install_os_packages:
-	$(info [*] Installing Python and OS deps...)
-	yum install jq python36 python36-devel python36-pip -y
-	$(info [*] Upgrading Python PIP, and installing SAM CLI and CloudFormation linter...)
-	python36 -m pip install --upgrade pip cfn-lint aws-sam-cli
+	$(info [*] Installing jq…)
+	yum install jq -y
+	$(info [*] Upgrading Python PIP, and installing SAM CLI and CloudFormation linter…)
+	python3 -m pip install --upgrade pip cfn-lint aws-sam-cli
 
 define HELP_MESSAGE
 	Common usage:
