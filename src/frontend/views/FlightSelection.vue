@@ -7,7 +7,10 @@
     />
     <div class="flights">
       <div class="heading">
-        <div class="q-headline text-primary text-center">
+        <div
+          class="q-headline text-primary text-center flight__headline"
+          data-test="flight-headline"
+        >
           Review your selection
         </div>
         <div class="loader" v-if="loading">
@@ -18,7 +21,10 @@
     </div>
     <div class="form__payment">
       <div class="text-center">
-        <div class="form__header q-pt-md q-headline text-primary text-center">
+        <div
+          class="form__header q-pt-md q-headline text-primary text-center"
+          data-test="form-header"
+        >
           Payment details
         </div>
         <div class="form">
@@ -32,7 +38,8 @@
                   id="name"
                   name="name"
                   placeholder="Name on card"
-                  class="form__input field"
+                  class="form__input field form__name"
+                  data-test="form-name"
                   required
                 />
               </label>
@@ -41,12 +48,13 @@
                 <div class="form__payment--country field">
                   <q-select
                     v-model="form.country"
-                    class="q-pt-sm form__select"
+                    class="q-pt-sm form__select form__country"
                     filter
                     filter-placeholder="Country"
                     placeholder="Country"
                     :options="form.countryOptions"
                     hide-underline
+                    data-test="form-country"
                   />
                 </div>
               </label>
@@ -57,25 +65,39 @@
                   id="postcode"
                   name="postcode"
                   placeholder="Postcode"
-                  class="form__input field"
+                  class="form__input field form__postcode"
+                  data-test="form-postcode"
                   required
                 />
               </label>
               <label>
                 <span class="text-secondary">Card number</span>
-                <div id="card-number-element" class="form__stripe field"></div>
+                <div
+                  id="card-number-element"
+                  class="form__stripe field form__card"
+                ></div>
               </label>
               <label>
                 <span class="text-secondary">Expiry date</span>
-                <div id="card-expiry-element" class="form__stripe field"></div>
+                <div
+                  id="card-expiry-element"
+                  class="form__stripe field form__expiry"
+                ></div>
               </label>
               <label>
                 <span class="text-secondary">CVC</span>
-                <div id="card-cvc-element" class="form__stripe field"></div>
+                <div
+                  id="card-cvc-element"
+                  class="form__stripe field form__cvc"
+                ></div>
               </label>
             </div>
             <div class="outcome">
-              <div class="error text-bold text-secondary" v-if="token.error">
+              <div
+                class="error text-bold text-secondary form__error"
+                data-test="form-error"
+                v-if="token.error"
+              >
                 {{ token.error.message }}
               </div>
             </div>
@@ -87,6 +109,7 @@
           color="secondary"
           label="Agree and pay now"
           :disable="$v.form.$invalid || form.isCardInvalid"
+          data-test="payment-button"
         >
           <q-icon
             class="cta__button--direction"
@@ -258,7 +281,7 @@ export default {
         setTimeout(() => {
           this.$q.loading.hide();
           this.$router.push({ name: "bookings" });
-        }, 6000);
+        }, 3000);
       } catch (err) {
         this.$q.loading.hide();
         console.error(err);

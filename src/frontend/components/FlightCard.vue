@@ -1,21 +1,31 @@
 <template>
   <div class="row flight">
-    <q-card class="flight__card" :id="details.flightNumber">
+    <q-card
+      class="flight__card"
+      :id="details.flightNumber"
+      data-test="flight-card"
+    >
       <div class="col-10">
         <q-list highlight>
           <q-list-header>
             <div class="row uppercase text-bold">
               <div class="col">Departure</div>
-              <div class="col text-right">
+              <div class="col text-right" data-test="flight-long-date">
                 {{ details.departureDayMonthYear }}
               </div>
             </div>
             <div class="row text-primary flight__direction">
               <div class="col flight__left-details">
-                <div class="q-headline flight__departure uppercase">
+                <div
+                  class="q-headline flight__departure uppercase"
+                  data-test="flight-departure-code"
+                >
                   {{ details.departureAirportCode }}
                 </div>
-                <div class="q-caption capitalize text-secondary text-bold">
+                <div
+                  class="q-caption capitalize text-secondary text-bold"
+                  data-test="flight-departure-name"
+                >
                   {{ details.departureAirportName }}
                 </div>
               </div>
@@ -23,10 +33,16 @@
                 <q-icon class="flight__icon" name="local_airport" />
               </div>
               <div class="col flight__right-details text-right">
-                <div class="q-headline flight__arival uppercase">
+                <div
+                  class="q-headline flight__arrival uppercase"
+                  data-test="flight-arrival-code"
+                >
                   {{ details.arrivalAirportCode }}
                 </div>
-                <div class="q-caption capitalize text-secondary text-bold">
+                <div
+                  class="q-caption capitalize text-secondary text-bold"
+                  data-test="flight-arrival-name"
+                >
                   {{ details.arrivalAirportName }}
                 </div>
               </div>
@@ -44,7 +60,10 @@
               <div class="col flight__left-details">
                 <div class="row inline">
                   <q-icon class="flight__icon-caption" name="flight_takeoff" />
-                  <div class="q-ml-sm q-body-1 text-bold q-pt-xs">
+                  <div
+                    class="q-ml-sm q-body-1 text-bold q-pt-xs"
+                    data-test="flight-departure-time"
+                  >
                     {{ details.departureTime }}
                   </div>
                 </div>
@@ -52,7 +71,10 @@
               <div class="col flight__center-details text-center">
                 <div class="row inline">
                   <q-icon class="flight__icon-caption" name="access_time" />
-                  <div class="q-ml-sm q-caption text-bold q-pt-xs">
+                  <div
+                    class="q-ml-sm q-caption text-bold q-pt-xs"
+                    data-test="flight-duration"
+                  >
                     {{ details.flightDuration }}
                   </div>
                 </div>
@@ -60,7 +82,10 @@
               <div class="col flight__right-details text-right">
                 <div class="row inline">
                   <q-icon class="flight__icon-caption" name="flight_land" />
-                  <div class="q-ml-sm q-caption text-bold q-pt-xs">
+                  <div
+                    class="q-ml-sm q-caption text-bold q-pt-xs"
+                    data-test="flight-arrival-time"
+                  >
                     {{ details.arrivalTime }}
                   </div>
                 </div>
@@ -72,7 +97,10 @@
             >
               <q-card-separator class="flight__separator" />
               <div class="col flight__left-details" v-if="details.ticketPrice">
-                <div class="uppercase text-secondary flight__price">
+                <div
+                  class="uppercase text-secondary flight__price"
+                  data-test="flight-price"
+                >
                   {{ details.ticketPrice }} eur
                 </div>
               </div>
@@ -85,7 +113,10 @@
                   <div class="q-caption text-primary capitalize text-bold">
                     Flight no
                   </div>
-                  <div class="q-ml-xs q-caption text-bold">
+                  <div
+                    class="q-ml-xs q-caption text-bold"
+                    data-test="flight-number"
+                  >
                     #{{ details.flightNumber }}
                   </div>
                 </div>

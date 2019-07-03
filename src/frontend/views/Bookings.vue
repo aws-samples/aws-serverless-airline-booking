@@ -1,7 +1,12 @@
 <template>
   <q-page>
     <div class="wrapper">
-      <div class="q-display-1 text-primary booking__heading">Bookings</div>
+      <div
+        class="q-display-1 text-primary booking__heading"
+        data-test="booking-headline"
+      >
+        Bookings
+      </div>
     </div>
     <div class="bookings">
       <q-timeline color="secondary" class="q-pl-md">
@@ -12,7 +17,7 @@
             side="left"
           >
             <h5 slot="subtitle" class="q-timeline-subtitle">
-              <span>
+              <span data-test="booking-city-date">
                 {{ booking.outboundFlight.departureCity }} &mdash;
                 {{ booking.bookingDate }}
               </span>
