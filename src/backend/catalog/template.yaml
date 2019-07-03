@@ -5,7 +5,7 @@ Parameters:
     Stage:
         Type: String
         Description: Environment stage or git branch
-      
+
     FlightTable:
       Type: String
       Description: Flight Table
@@ -16,18 +16,18 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: reserve.lambda_handler
-      Runtime: python3.6
+      Runtime: python3.7
       CodeUri: src/reserve-flight
       Timeout: 10
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
-  
+
   ReleaseFlight:
     Type: AWS::Serverless::Function
     Properties:
       Handler: release.lambda_handler
-      Runtime: python3.6
+      Runtime: python3.7
       CodeUri: src/release-flight
       Timeout: 10
       Environment:
@@ -36,15 +36,15 @@ Resources:
 
   ReserveFlightParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/catalog/reserve-function/${Stage}
         Description: Reserve Flight Lambda ARN
         Type: String
         Value: !Sub ${ReserveFlight.Arn}
-  
+
   ReleaseFlightParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/catalog/release-function/${Stage}
         Description: Release Flight Lambda ARN
         Type: String
@@ -55,8 +55,8 @@ Outputs:
   ReserveFlightFunction:
     Value: !Sub ${ReserveFlight.Arn}
     Description: Collect Payment Lambda Function
-  
+
   ReleaseFlightFunction:
     Value: !Sub ${ReserveFlight.Arn}
     Description: Collect Payment Lambda Function
-  
+
