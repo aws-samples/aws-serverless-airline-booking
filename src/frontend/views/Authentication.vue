@@ -2,7 +2,8 @@
   <div class="row">
     <amplify-authenticator
       class="authenticator__form"
-      v-bind:authConfig="authConfig"
+      :authConfig="authConfig"
+      data-test="authenticator"
     ></amplify-authenticator>
   </div>
 </template>

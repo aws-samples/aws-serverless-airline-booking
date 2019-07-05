@@ -1,6 +1,14 @@
 // eslint-disable
 // this is an auto generated file. This will be overwritten
 
+export const getLoyalty = `query GetLoyalty($customer: String) {
+  getLoyalty(customer: $customer) {
+    points
+    level
+    remainingPoints
+  }
+}
+`;
 export const getFlight = `query GetFlight($id: ID!) {
   getFlight(id: $id) {
     id
@@ -89,6 +97,8 @@ export const getBooking = `query GetBooking($id: ID!) {
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
@@ -138,6 +148,8 @@ export const listBookings = `query ListBookings(
       paymentToken
       checkedIn
       customer
+      createdAt
+      bookingReference
     }
     nextToken
   }

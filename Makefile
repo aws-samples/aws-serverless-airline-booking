@@ -99,9 +99,9 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 #############
 
 _install_os_packages:
-	$(info [*] Installing jq…)
+	$(info [*] Installing jq...)
 	yum install jq -y
-	$(info [*] Upgrading Python PIP, and installing SAM CLI and CloudFormation linter…)
+	$(info [*] Upgrading Python PIP, SAM CLI and CloudFormation linter...)
 	python3 -m pip install --upgrade pip cfn-lint aws-sam-cli
 
 define HELP_MESSAGE

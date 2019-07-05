@@ -41,12 +41,12 @@ awsconfiguration.json
 TEMPORARY/
 codebuild_build.sh
 Dockerfile
-docker-compose.yaml
 packaged.yaml
 *.aws-sam/
 artifacts/
 src/frontend/.env
 datasources.json
+
 
 # CDK outputs
 src/backend/cdk/**/*.js
@@ -55,6 +55,10 @@ src/backend/cdk/**/*.d.ts
 # CDK asset staging directory
 src/backend/cdk/.cdk.staging
 src/backend/cdk/cdk.out
+
+# Cypress videos and screenshots
+src/e2e-tests/ui/**/cypress/videos
+src/e2e-tests/ui/**/cypress/screenshots
 
 ## Exceptions
 !*.vscode/tasks.json
