@@ -4,7 +4,11 @@ import os
 import uuid
 
 import boto3
+from aws_xray_sdk.core import patch, xray_recorder
 from botocore.exceptions import ClientError
+
+patched_libs = ('boto3')
+patch(patched_libs)
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
@@ -35,13 +39,13 @@ def reserve_booking(booking):
             Step Functions Process Booking Execution ID
 
         chargeId: string
-            Pre-authorization payment token 
+            Pre-authorization payment token
 
         customer: string
             Customer unique identifier
 
         bookingOutboundFlightId: string
-            Outbound flight unique identifier     
+            Outbound flight unique identifier
 
     Returns
     -------
@@ -49,26 +53,36 @@ def reserve_booking(booking):
         bookingId: string
     """
     try:
-        id = str(uuid.uuid4())
-        booking_item = {
-            "id": id,
-            "stateExecutionId": booking["name"],
-            "__typename": "Booking",
-            "bookingOutboundFlightId": booking["outboundFlightId"],
-            "checkedIn": False,
-            "customer": booking["customerId"],
-            "paymentToken": booking["chargeId"],
-            "status": "UNCONFIRMED",
-            "createdAt": str(datetime.datetime.now()),
-        }
+        with xray_recorder.capture('reserve_booking') as subsegment:
+            id = str(uuid.uuid4())
 
-        table.put_item(Item=booking_item)
+            subsegment.put_annotation("Booking", id)
+            subsegment.put_annotation("Customer", booking["customerId"])
+            subsegment.put_annotation("Payment", booking["chargeId"])
+            subsegment.put_annotation("Flight", booking["outboundFlightId"])
+
+            booking_item = {
+                "id": id,
+                "stateExecutionId": booking["name"],
+                "__typename": "Booking",
+                "bookingOutboundFlightId": booking["outboundFlightId"],
+                "checkedIn": False,
+                "customer": booking["customerId"],
+                "paymentToken": booking["chargeId"],
+                "status": "UNCONFIRMED",
+                "createdAt": str(datetime.datetime.now()),
+            }
+
+            table.put_item(Item=booking_item)
+
+            subsegment.put_metadata(id, booking_item, "booking")
 
         return {"bookingId": id}
     except ClientError as e:
         raise BookingReservationException(e.response["Error"]["Message"])
 
 
+@xray_recorder.capture('handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to reserve a booking
 
@@ -84,7 +98,7 @@ def lambda_handler(event, context):
             Step Functions Process Booking Execution ID
 
         chargeId: string
-            Pre-authorization payment token 
+            Pre-authorization payment token
 
         customer: string
             Customer unique identifier

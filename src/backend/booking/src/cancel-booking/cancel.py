@@ -1,7 +1,11 @@
 import os
 
 import boto3
+from aws_xray_sdk.core import patch, xray_recorder
 from botocore.exceptions import ClientError
+
+patched_libs = ('boto3')
+patch(patched_libs)
 
 session = boto3.Session()
 dynamodb = session.resource('dynamodb')
@@ -14,22 +18,29 @@ class BookingCancellationException(Exception):
 
 def cancel_booking(booking_id):
     try:
-        table.update_item(
-            Key={'id': booking_id},
-            ConditionExpression='id = :idVal',
-            UpdateExpression='SET #STATUS = :cancelled',
-            ExpressionAttributeNames={'#STATUS': 'status'},
-            ExpressionAttributeValues={
-                ':idVal': booking_id,
-                ':cancelled': 'CANCELLED',
-            },
-        )
+        with xray_recorder.capture('cancel_booking') as subsegment:
+            subsegment.put_annotation("Booking", booking_id)
+
+            ret = table.update_item(
+                Key={'id': booking_id},
+                ConditionExpression='id = :idVal',
+                UpdateExpression='SET #STATUS = :cancelled',
+                ExpressionAttributeNames={'#STATUS': 'status'},
+                ExpressionAttributeValues={
+                    ':idVal': booking_id,
+                    ':cancelled': 'CANCELLED',
+                },
+                ReturnValues="UPDATED_NEW",
+            )
+
+            subsegment.put_metadata(booking_id, ret, "booking")
 
         return True
     except ClientError as e:
         raise BookingCancellationException(e.response['Error']['Message'])
 
 
+@xray_recorder.capture('handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to cancel booking
 

@@ -2,6 +2,10 @@ import json
 import os
 
 from botocore.vendored import requests
+from aws_xray_sdk.core import patch, xray_recorder
+
+patched_libs = ('boto3', 'requests')
+patch(patched_libs)
 
 # Payment API Capture URL to collect payment(i.e. https://endpoint/capture)
 payment_endpoint = os.environ["PAYMENT_API_URL"]
@@ -33,9 +37,14 @@ def collect_payment(charge_id):
         price: int
             amount collected
     """
-    payment_payload = {"chargeId": charge_id}
-    ret = requests.post(payment_endpoint, json=payment_payload)
-    payment_response = ret.json()
+    with xray_recorder.capture('collect_payment') as subsegment:
+        subsegment.put_annotation("Payment", charge_id)
+
+        payment_payload = {"chargeId": charge_id}
+        ret = requests.post(payment_endpoint, json=payment_payload)
+        payment_response = ret.json()
+
+        subsegment.put_metadata(charge_id, ret, "payment")
 
     if ret.status_code != 200:
         print(payment_response)
@@ -47,6 +56,7 @@ def collect_payment(charge_id):
     }
 
 
+@xray_recorder.capture('handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to collect payment
 

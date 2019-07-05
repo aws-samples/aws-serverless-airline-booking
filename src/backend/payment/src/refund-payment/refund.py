@@ -2,6 +2,10 @@ import json
 import os
 
 from botocore.vendored import requests
+from aws_xray_sdk.core import patch, xray_recorder
+
+patched_libs = ('boto3', 'requests')
+patch(patched_libs)
 
 # Payment API Refund URL to collect payment(i.e. https://endpoint/refund)
 payment_endpoint = os.environ["PAYMENT_API_URL"]
@@ -32,9 +36,15 @@ def refund_payment(charge_id):
     dict
         refundId: string
     """
-    refund_payload = {"chargeId": charge_id}
-    ret = requests.post(payment_endpoint, json=refund_payload)
-    refund_response = ret.json()
+    with xray_recorder.capture('collect_payment') as subsegment:
+        subsegment.put_annotation("Payment", charge_id)
+
+        refund_payload = {"chargeId": charge_id}
+        ret = requests.post(payment_endpoint, json=refund_payload)
+        refund_response = ret.json()
+
+        subsegment.put_metadata(charge_id, ret, "payment")
+        subsegment.put_annotation("Refund", refund_response["createdRefund"]["id"])
 
     if ret.status_code != 200:
         print(refund_response)
@@ -43,6 +53,7 @@ def refund_payment(charge_id):
     return {"refundId": refund_response["createdRefund"]["id"]}
 
 
+@xray_recorder.capture('handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to refund payment
 

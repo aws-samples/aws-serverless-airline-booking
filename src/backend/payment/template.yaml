@@ -10,6 +10,10 @@ Parameters:
         Type: String
         Description: Stripe Secret Key for SAR App
 
+Globals:
+  Function:
+    Tracing: Active
+
 Resources:
   StripePaymentApplication:
     DependsOn: StripePaymentApplicationKeyParameter

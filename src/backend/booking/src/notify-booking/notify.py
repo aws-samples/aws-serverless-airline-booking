@@ -2,7 +2,12 @@ import json
 import os
 
 import boto3
+from aws_xray_sdk.core import patch, xray_recorder
 from botocore.exceptions import ClientError
+
+patched_libs = ('boto3')
+patch(patched_libs)
+
 
 session = boto3.Session()
 sns = session.client("sns")
@@ -49,20 +54,28 @@ def notify_booking(payload, booking_reference):
     booking_status = "confirmed" if booking_reference else "cancelled"
 
     try:
-        ret = sns.publish(
-            TopicArn=booking_sns_topic,
-            Message=json.dumps(payload),
-            Subject=subject,
-            MessageAttributes={
-                "Booking.Status": {"DataType": "String", "StringValue": booking_status}
-            },
-        )
+        with xray_recorder.capture('notify_booking') as subsegment:
+            subsegment.put_annotation("BookingReference", booking_reference)
 
-        return {"notificationId": ret["MessageId"]}
+            ret = sns.publish(
+                TopicArn=booking_sns_topic,
+                Message=json.dumps(payload),
+                Subject=subject,
+                MessageAttributes={
+                    "Booking.Status": {"DataType": "String", "StringValue": booking_status}
+                },
+            )
+
+            message_id = ret["MessageId"]
+            subsegment.put_annotation("BookingNotification", message_id)
+            subsegment.put_metadata(booking_reference, ret, "notification")
+
+        return {"notificationId": message_id}
     except ClientError as e:
         raise BookingNotificationException(e.response["Error"]["Message"])
 
 
+@xray_recorder.capture('handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to notify booking
 

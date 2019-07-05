@@ -1,6 +1,10 @@
+const AWSXRay = require('aws-xray-sdk-core')
+
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { AWSError } from 'aws-sdk/lib/error';
 import { Request } from 'aws-sdk/lib/request';
+
+AWSXRay.captureAWSClient((DocumentClient as any).service);
 
 /**
  * Document Client Interface

@@ -6,6 +6,7 @@ Description: >
 Globals:
   Function:
     Timeout: 5
+    Tracing: Active
 
 Parameters:
   Stage:
