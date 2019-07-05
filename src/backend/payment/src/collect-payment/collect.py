@@ -1,7 +1,7 @@
 import json
 import os
 
-from botocore.vendored import requests
+import requests
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 patch_all()
