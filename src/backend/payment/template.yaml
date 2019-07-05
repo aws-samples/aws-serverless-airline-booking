@@ -12,13 +12,15 @@ Parameters:
 
 Resources:
   StripePaymentApplication:
+    DependsOn: StripePaymentApplicationKeyParameter
     Type: AWS::Serverless::Application
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge
-        SemanticVersion: 4.0.0
+        SemanticVersion: 4.1.0
       Parameters:
         EnableInstantCapture: "false"
+        SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
 
   CollectPayment:
     Type: AWS::Serverless::Function
@@ -61,7 +63,7 @@ Resources:
   StripePaymentApplicationKeyParameter:
     Type: "AWS::SSM::Parameter"
     Properties: 
-        Name: /lambda-stripe-charge/stripe-secret-key
+        Name: !Sub /service/payment/stripe-secret-key/${Stage}
         Description: Stripe Key for SAR App 
         Type: String
         Value: !Ref StripeKey
