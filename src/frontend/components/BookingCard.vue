@@ -4,43 +4,65 @@
       <q-btn flat round dense v-close-overlay icon="close" />
       <q-toolbar-title class="booking__modal--title self-center">
         <div class="row q-pt-md">
-          <p class="no-margin">{{ departureIata }}</p>
+          <p
+            class="no-margin booking__departure--code"
+            data-test="booking-departure-code"
+          >
+            {{ departureIata }}
+          </p>
           <q-icon name="keyboard_arrow_right" size="1.3rem" />
-          <p>{{ arrivalIata }}</p>
+          <p class="booking__arrival--code" data-test="booking-arrival-code">
+            {{ arrivalIata }}
+          </p>
         </div>
       </q-toolbar-title>
     </q-toolbar>
     <div
       class="booking__modal--passenger booking__modal--highlighted text-center q-pa-md"
     >
-      <div class="q-headline text-primary q-mb-sm">{{ name }}</div>
+      <div class="q-headline text-primary q-mb-sm" data-test="booking-customer">
+        {{ name }}
+      </div>
       <div class="q-body-2">
         Booking reference:
-        <span class="text-primary">{{ reference }}</span>
+        <span class="text-primary" data-test="booking-reference">{{
+          reference
+        }}</span>
       </div>
     </div>
     <div class="row">
       <q-timeline responsive color="secondary" style="padding: 0 24px;">
         <q-timeline-entry
-          v-bind:subtitle="departureDisplayDate"
+          :subtitle="departureDisplayDate"
           icon="flight_takeoff"
         >
           <q-list highlight no-border class="q-pa-none">
             <q-item class="q-pa-none">
-              <q-item-main class="text-bold" v-bind:label="departureTime" />
-              <q-item-main v-bind:label="departureAirportName" />
+              <q-item-main
+                class="text-bold"
+                :label="departureTime"
+                data-test="booking-departure-time"
+              />
+              <q-item-main
+                :label="departureAirportName"
+                data-test="booking-departure-code"
+              />
             </q-item>
           </q-list>
         </q-timeline-entry>
 
-        <q-timeline-entry
-          v-bind:subtitle="arrivalDisplayDate"
-          icon="flight_land"
-        >
+        <q-timeline-entry :subtitle="arrivalDisplayDate" icon="flight_land">
           <q-list highlight no-border class="q-pa-none">
             <q-item class="q-pa-none">
-              <q-item-main class="text-bold" v-bind:label="arrivalTime" />
-              <q-item-main v-bind:label="arrivalAirportName" />
+              <q-item-main
+                class="text-bold"
+                :label="arrivalTime"
+                data-test="booking-arrival-time"
+              />
+              <q-item-main
+                :label="arrivalAirportName"
+                data-test="booking-arrival-code"
+              />
             </q-item>
           </q-list>
         </q-timeline-entry>
@@ -50,14 +72,21 @@
         class="booking__modal--ctas booking__modal--highlighted row inline full-width q-pl-lg"
       >
         <div class="col-6">
-          <q-btn class="full-width" flat color="primary" label="Check-in" />
+          <q-btn
+            class="full-width cta__button-check-in"
+            flat
+            color="primary"
+            label="Check-in"
+            data-test="booking-check-in"
+          />
         </div>
         <div class="col-6">
           <q-btn
-            class="full-width"
+            class="full-width cta__button-cancel"
             flat
             color="secondary"
             label="Cancel booking"
+            data-test="booking-cancel"
           />
         </div>
       </div>

@@ -102,6 +102,8 @@ export const onCreateBooking = `subscription OnCreateBooking {
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
@@ -146,6 +148,8 @@ export const onUpdateBooking = `subscription OnUpdateBooking {
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
@@ -190,6 +194,8 @@ export const onDeleteBooking = `subscription OnDeleteBooking {
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;

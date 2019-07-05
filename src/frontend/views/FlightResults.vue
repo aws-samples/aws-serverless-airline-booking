@@ -25,6 +25,7 @@
               label
               label-always
               v-model="maxPriceFilter"
+              class="filter__price"
             />
           </q-popup-edit>
         </q-fab-action>
@@ -39,6 +40,7 @@
               clearable
               @input="setDeparture"
               v-model="departureTimeFilter"
+              class="filter__departure"
             />
             <q-datetime
               type="time"
@@ -49,6 +51,7 @@
               clearable
               @input="setArrival"
               v-model="arrivalTimeFilter"
+              class="filter__arrival"
             />
           </q-popup-edit>
         </q-fab-action>
@@ -57,6 +60,7 @@
           icon="cancel"
           @click="filteredFlights = flights"
           glossy
+          class="filter__cta"
         />
       </q-fab>
     </q-page-sticky>
@@ -66,13 +70,19 @@
           <flight-loader></flight-loader>
         </div>
         <div v-if="filteredFlights.length && !loading">
-          <span>Select your flight</span>
+          <span class="results__headline" data-test="results-headline"
+            >Select your flight</span
+          >
         </div>
         <div
           v-if="!filteredFlights.length && !loading"
           class="heading__error row"
         >
-          <span class="justify-center full-width">No results found</span>
+          <span
+            class="justify-center full-width results__error"
+            data-test="results-error"
+            >No results found</span
+          >
           <transition enter-active-class="animated bounce" appear>
             <q-btn
               class="cta__button heading__error--cta"
@@ -86,7 +96,7 @@
         </div>
       </div>
     </div>
-    <div class="flight__results" v-if="filteredFlights.length && !loading">
+    <div class="results__flights" v-if="filteredFlights.length && !loading">
       <router-link
         :to="{
           name: 'selectedFlight',

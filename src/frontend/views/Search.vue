@@ -2,7 +2,9 @@
   <q-page class="container">
     <div class="wrapper">
       <div class="heading">
-        <div class="q-display-1">Where next?</div>
+        <div class="q-display-1 search__headline" data-test="search-headline">
+          Where next?
+        </div>
       </div>
     </div>
     <div class="search__options q-pa-sm">
@@ -16,6 +18,7 @@
           class="search__departure"
           v-model="departureCity"
           stack-label="Departure airport"
+          data-test="search-departure"
         >
           <q-autocomplete
             class="search__departure--suggestion text-bold"

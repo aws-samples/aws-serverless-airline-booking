@@ -42,6 +42,8 @@ export const processBooking = `mutation ProcessBooking($input: CreateBookingInpu
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
@@ -146,6 +148,8 @@ export const createBooking = `mutation CreateBooking($input: CreateBookingInput!
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
@@ -190,6 +194,8 @@ export const updateBooking = `mutation UpdateBooking($input: UpdateBookingInput!
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
@@ -234,6 +240,8 @@ export const deleteBooking = `mutation DeleteBooking($input: DeleteBookingInput!
     paymentToken
     checkedIn
     customer
+    createdAt
+    bookingReference
   }
 }
 `;
