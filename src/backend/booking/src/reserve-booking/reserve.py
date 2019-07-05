@@ -7,7 +7,7 @@ import boto3
 from aws_xray_sdk.core import patch, xray_recorder
 from botocore.exceptions import ClientError
 
-patched_libs = ('boto3')
+patched_libs = ('boto3',)
 patch(patched_libs)
 
 session = boto3.Session()
