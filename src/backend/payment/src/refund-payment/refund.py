@@ -2,10 +2,9 @@ import json
 import os
 
 from botocore.vendored import requests
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch_all, xray_recorder
 
-patched_libs = ('boto3', 'requests')
-patch(patched_libs)
+patch_all()
 
 # Payment API Refund URL to collect payment(i.e. https://endpoint/refund)
 payment_endpoint = os.environ["PAYMENT_API_URL"]
