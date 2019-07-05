@@ -39,7 +39,7 @@ Resources:
     Properties:
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
-      Runtime: python3.6
+      Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -52,7 +52,7 @@ Resources:
     Properties:
       Handler: cancel.lambda_handler
       CodeUri: src/cancel-booking
-      Runtime: python3.6
+      Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -65,7 +65,7 @@ Resources:
     Properties:
       Handler: reserve.lambda_handler
       CodeUri: src/reserve-booking
-      Runtime: python3.6
+      Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
@@ -81,7 +81,7 @@ Resources:
     Properties:
       Handler: notify.lambda_handler
       CodeUri: src/notify-booking
-      Runtime: python3.6
+      Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TOPIC: !Ref BookingTopic

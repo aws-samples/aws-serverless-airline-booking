@@ -16,7 +16,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: reserve.lambda_handler
-      Runtime: python3.6
+      Runtime: python3.7
       CodeUri: src/reserve-flight
       Timeout: 10
       Environment:
@@ -27,7 +27,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: release.lambda_handler
-      Runtime: python3.6
+      Runtime: python3.7
       CodeUri: src/release-flight
       Timeout: 10
       Environment:
