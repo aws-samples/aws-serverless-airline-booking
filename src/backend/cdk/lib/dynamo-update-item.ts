@@ -1,5 +1,5 @@
-import cdk = require('@aws-cdk/core');
-import sfn = require('@aws-cdk/aws-stepfunctions');
+import cdk = require("@aws-cdk/core");
+import sfn = require("@aws-cdk/aws-stepfunctions");
 
 /**
  * TODO(leepac): We don't cover all the options here, just the ones we
@@ -13,19 +13,18 @@ import sfn = require('@aws-cdk/aws-stepfunctions');
  */
 export class DynamoValue {
   public static fromString(s: string) {
-      return new DynamoValue({ S: s });
+    return new DynamoValue({ S: s });
   }
 
   public static fromNumber(n: number) {
     if (!cdk.Token.isUnresolved(n)) {
-        return new DynamoValue({ N: `${n}` });
+      return new DynamoValue({ N: `${n}` });
     } else {
-        return new DynamoValue({ N: n });
+      return new DynamoValue({ N: n });
     }
   }
 
-  protected constructor(public readonly value: any) {
-  }
+  protected constructor(public readonly value: any) {}
 }
 
 /**
@@ -56,7 +55,7 @@ export interface UpdateItemProps {
   /**
    * Any variable replacements for the expressions above.
    */
-  readonly expressionAttributeValues: { [key: string]: DynamoValue }
+  readonly expressionAttributeValues: { [key: string]: DynamoValue };
 }
 
 /**
@@ -67,7 +66,7 @@ export class UpdateItem implements sfn.IStepFunctionsTask {
   private readonly updateExpression: string;
   private readonly conditionExpression?: string;
   private readonly key: string;
-  private readonly expressionAttributeValues: { [key: string]: DynamoValue }
+  private readonly expressionAttributeValues: { [key: string]: DynamoValue };
 
   constructor(props: UpdateItemProps) {
     this.tableName = props.tableName;
@@ -79,18 +78,18 @@ export class UpdateItem implements sfn.IStepFunctionsTask {
 
   public bind(task: sfn.Task): sfn.StepFunctionsTaskConfig {
     return {
-      resourceArn: 'arn:aws:states:::dynamodb:updateItem',
+      resourceArn: "arn:aws:states:::dynamodb:updateItem",
       parameters: {
-        'TableName.$': this.tableName,
-        'ConditionExpression': this.conditionExpression,
+        "TableName.$": this.tableName,
+        ConditionExpression: this.conditionExpression,
         UpdateExpression: this.updateExpression,
         Key: {
           id: {
-            'S.$': this.key,
+            "S.$": this.key
           }
         },
-        ExpressionAttributeValues: this.expressionAttributeValues,
-      },
-    }
+        ExpressionAttributeValues: this.expressionAttributeValues
+      }
+    };
   }
 }
