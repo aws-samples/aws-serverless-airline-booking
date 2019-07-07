@@ -13,7 +13,7 @@
     "@types/node": "8.10.45",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
-    "aws-cdk": "^0.36.1",
+    "aws-cdk": "^0.37.0",
     "babel-eslint": "^10.0.2",
     "eslint": "^6.0.1",
     "eslint-plugin-eslint-plugin": "^2.1.0",
@@ -21,12 +21,14 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "@aws-cdk/aws-iam": "^0.36.1",
-    "@aws-cdk/aws-lambda": "^0.36.1",
-    "@aws-cdk/aws-ssm": "^0.36.1",
-    "@aws-cdk/aws-stepfunctions": "^0.36.1",
-    "@aws-cdk/aws-stepfunctions-tasks": "^0.36.1",
-    "@aws-cdk/core": "^0.36.1",
+    "@aws-cdk/aws-dynamodb": "^0.37.0",
+    "@aws-cdk/aws-iam": "^0.37.0",
+    "@aws-cdk/aws-lambda": "^0.37.0",
+    "@aws-cdk/aws-sns": "^0.37.0",
+    "@aws-cdk/aws-ssm": "^0.37.0",
+    "@aws-cdk/aws-stepfunctions": "^0.37.0",
+    "@aws-cdk/aws-stepfunctions-tasks": "^0.37.0",
+    "@aws-cdk/core": "^0.37.0",
     "source-map-support": "^0.5.9"
   }
 }
