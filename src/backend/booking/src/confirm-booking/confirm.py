@@ -3,11 +3,10 @@ import os
 import secrets
 
 import boto3
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
 
-patched_libs = ('boto3',)
-patch(patched_libs)
+patch_all()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
@@ -38,25 +37,25 @@ def confirm_booking(booking_id):
     """
     try:
         reference = secrets.token_urlsafe(4)
+        subsegment = xray_recorder.current_subsegment()
+        subsegment.put_annotation("Booking", booking_id)
+        subsegment.put_annotation("BookingReference", reference)
 
-        with xray_recorder.capture('confirm_booking') as subsegment:
-            subsegment.put_annotation("Booking", booking_id)
-            subsegment.put_annotation("BookingReference", booking_id)
+        ret = table.update_item(
+            Key={"id": booking_id},
+            ConditionExpression="id = :idVal",
+            UpdateExpression="SET bookingReference = :br, #STATUS = :confirmed",
+            ExpressionAttributeNames={"#STATUS": "status"},
+            ExpressionAttributeValues={
+                ":br": reference,
+                ":idVal": booking_id,
+                ":confirmed": "CONFIRMED",
+            },
+            ReturnValues="UPDATED_NEW",
+        )
 
-            ret = table.update_item(
-                Key={"id": booking_id},
-                ConditionExpression="id = :idVal",
-                UpdateExpression="SET bookingReference = :br, #STATUS = :confirmed",
-                ExpressionAttributeNames={"#STATUS": "status"},
-                ExpressionAttributeValues={
-                    ":br": reference,
-                    ":idVal": booking_id,
-                    ":confirmed": "CONFIRMED",
-                },
-                ReturnValues="UPDATED_NEW",
-            )
-
-            subsegment.put_metadata(booking_id, ret, "booking")
+        subsegment.put_metadata(booking_id, ret, "booking")
+        subsegment.end_subsegment()
 
         return {
             "bookingReference": reference

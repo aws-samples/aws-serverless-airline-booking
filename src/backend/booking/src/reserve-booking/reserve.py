@@ -4,11 +4,10 @@ import os
 import uuid
 
 import boto3
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
 
-patched_libs = ('boto3',)
-patch(patched_libs)
+patch_all()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
@@ -53,29 +52,29 @@ def reserve_booking(booking):
         bookingId: string
     """
     try:
-        with xray_recorder.capture('reserve_booking') as subsegment:
-            id = str(uuid.uuid4())
+        id = str(uuid.uuid4())
+        subsegment = xray_recorder.current_subsegment()
+        subsegment.put_annotation("Booking", id)
+        subsegment.put_annotation("Customer", booking["customerId"])
+        subsegment.put_annotation("Payment", booking["chargeId"])
+        subsegment.put_annotation("Flight", booking["outboundFlightId"])
 
-            subsegment.put_annotation("Booking", id)
-            subsegment.put_annotation("Customer", booking["customerId"])
-            subsegment.put_annotation("Payment", booking["chargeId"])
-            subsegment.put_annotation("Flight", booking["outboundFlightId"])
+        booking_item = {
+            "id": id,
+            "stateExecutionId": booking["name"],
+            "__typename": "Booking",
+            "bookingOutboundFlightId": booking["outboundFlightId"],
+            "checkedIn": False,
+            "customer": booking["customerId"],
+            "paymentToken": booking["chargeId"],
+            "status": "UNCONFIRMED",
+            "createdAt": str(datetime.datetime.now()),
+        }
 
-            booking_item = {
-                "id": id,
-                "stateExecutionId": booking["name"],
-                "__typename": "Booking",
-                "bookingOutboundFlightId": booking["outboundFlightId"],
-                "checkedIn": False,
-                "customer": booking["customerId"],
-                "paymentToken": booking["chargeId"],
-                "status": "UNCONFIRMED",
-                "createdAt": str(datetime.datetime.now()),
-            }
+        table.put_item(Item=booking_item)
 
-            table.put_item(Item=booking_item)
-
-            subsegment.put_metadata(id, booking_item, "booking")
+        subsegment.put_metadata(id, booking_item, "booking")
+        subsegment.end_subsegment()
 
         return {"bookingId": id}
     except ClientError as e:

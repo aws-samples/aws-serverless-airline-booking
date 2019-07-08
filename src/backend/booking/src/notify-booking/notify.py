@@ -2,12 +2,10 @@ import json
 import os
 
 import boto3
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
 
-patched_libs = ('boto3',)
-patch(patched_libs)
-
+patch_all()
 
 session = boto3.Session()
 sns = session.client("sns")
@@ -54,21 +52,22 @@ def notify_booking(payload, booking_reference):
     booking_status = "confirmed" if booking_reference else "cancelled"
 
     try:
-        with xray_recorder.capture('notify_booking') as subsegment:
-            subsegment.put_annotation("BookingReference", booking_reference)
+        subsegment = xray_recorder.current_subsegment()
+        subsegment.put_annotation("BookingReference", booking_reference)
 
-            ret = sns.publish(
-                TopicArn=booking_sns_topic,
-                Message=json.dumps(payload),
-                Subject=subject,
-                MessageAttributes={
-                    "Booking.Status": {"DataType": "String", "StringValue": booking_status}
-                },
-            )
+        ret = sns.publish(
+            TopicArn=booking_sns_topic,
+            Message=json.dumps(payload),
+            Subject=subject,
+            MessageAttributes={
+                "Booking.Status": {"DataType": "String", "StringValue": booking_status}
+            },
+        )
 
-            message_id = ret["MessageId"]
-            subsegment.put_annotation("BookingNotification", message_id)
-            subsegment.put_metadata(booking_reference, ret, "notification")
+        message_id = ret["MessageId"]
+        subsegment.put_annotation("BookingNotification", message_id)
+        subsegment.put_metadata(booking_reference, ret, "notification")
+        subsegment.end_subsegment()
 
         return {"notificationId": message_id}
     except ClientError as e:
