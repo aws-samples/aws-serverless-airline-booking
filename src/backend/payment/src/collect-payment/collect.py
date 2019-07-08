@@ -36,14 +36,15 @@ def collect_payment(charge_id):
         price: int
             amount collected
     """
-    with xray_recorder.capture('collect_payment') as subsegment:
-        subsegment.put_annotation("Payment", charge_id)
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("Payment", charge_id)
 
-        payment_payload = {"chargeId": charge_id}
-        ret = requests.post(payment_endpoint, json=payment_payload)
-        payment_response = ret.json()
+    payment_payload = {"chargeId": charge_id}
+    ret = requests.post(payment_endpoint, json=payment_payload)
+    payment_response = ret.json()
 
-        subsegment.put_metadata(charge_id, ret, "payment")
+    subsegment.put_metadata(charge_id, ret, "payment")
+    xray_recorder.end_subsegment()
 
     if ret.status_code != 200:
         print(payment_response)

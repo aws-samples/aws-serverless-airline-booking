@@ -35,15 +35,16 @@ def refund_payment(charge_id):
     dict
         refundId: string
     """
-    with xray_recorder.capture('collect_payment') as subsegment:
-        subsegment.put_annotation("Payment", charge_id)
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("Payment", charge_id)
 
-        refund_payload = {"chargeId": charge_id}
-        ret = requests.post(payment_endpoint, json=refund_payload)
-        refund_response = ret.json()
+    refund_payload = {"chargeId": charge_id}
+    ret = requests.post(payment_endpoint, json=refund_payload)
+    refund_response = ret.json()
 
-        subsegment.put_metadata(charge_id, ret, "payment")
-        subsegment.put_annotation("Refund", refund_response["createdRefund"]["id"])
+    subsegment.put_metadata(charge_id, ret, "payment")
+    subsegment.put_annotation("Refund", refund_response["createdRefund"]["id"])
+    xray_recorder.end_subsegment()
 
     if ret.status_code != 200:
         print(refund_response)

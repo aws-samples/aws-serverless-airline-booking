@@ -55,7 +55,7 @@ def confirm_booking(booking_id):
         )
 
         subsegment.put_metadata(booking_id, ret, "booking")
-        subsegment.end_subsegment()
+        xray_recorder.end_subsegment()
 
         return {
             "bookingReference": reference

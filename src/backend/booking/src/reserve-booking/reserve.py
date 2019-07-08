@@ -74,7 +74,7 @@ def reserve_booking(booking):
         table.put_item(Item=booking_item)
 
         subsegment.put_metadata(id, booking_item, "booking")
-        subsegment.end_subsegment()
+        xray_recorder.end_subsegment()
 
         return {"bookingId": id}
     except ClientError as e:

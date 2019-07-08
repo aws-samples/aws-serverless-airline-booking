@@ -67,7 +67,7 @@ def notify_booking(payload, booking_reference):
         message_id = ret["MessageId"]
         subsegment.put_annotation("BookingNotification", message_id)
         subsegment.put_metadata(booking_reference, ret, "notification")
-        subsegment.end_subsegment()
+        xray_recorder.end_subsegment()
 
         return {"notificationId": message_id}
     except ClientError as e:

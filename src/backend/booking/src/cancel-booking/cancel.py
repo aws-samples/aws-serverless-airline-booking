@@ -34,7 +34,7 @@ def cancel_booking(booking_id):
 
         subsegment.put_annotation("BookingStatus", "CANCELLED")
         subsegment.put_metadata(booking_id, ret, "booking")
-        subsegment.end_subsegment()
+        xray_recorder.end_subsegment()
 
         return True
     except ClientError as e:
