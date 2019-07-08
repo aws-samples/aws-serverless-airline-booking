@@ -1,0 +1,31 @@
+$util.qr($ctx.stash.put("outboundFlightId", $ctx.args.input.bookingOutboundFlightId))
+$util.qr($ctx.stash.put("paymentToken", $ctx.args.input.paymentToken))
+$util.qr($ctx.stash.put("customer", $ctx.identity.sub))
+$util.qr($ctx.stash.put("executionId", $util.autoId()))
+$util.qr($ctx.stash.put("createdAt", $util.time.nowISO8601()))
+
+#set( $payload = {
+  "outboundFlightId": $ctx.stash.outboundFlightId,
+  "customerId": $context.identity.sub,
+  "chargeId": $ctx.stash.paymentToken,
+  "bookingTable": "{{BookingTable}}",
+  "flightTable": "{{FlightTable}}",
+  "name": $ctx.stash.executionId,
+  "createdAt": $ctx.stash.createdAt
+})
+
+{
+  "version": "2018-05-29",
+  "method": "POST",
+  "resourcePath": "/",
+  "params": {
+    "headers": {
+    "content-type": "application/x-amz-json-1.0",
+    "x-amz-target":"AWSStepFunctions.StartExecution"
+    },
+    "body": {
+    "stateMachineArn": "{{ProcessBooking}}",
+    "input": "$util.escapeJavaScript($util.toJson($payload))"
+    }
+  }
+}

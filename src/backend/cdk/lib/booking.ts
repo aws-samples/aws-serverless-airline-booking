@@ -1,11 +1,15 @@
 import cdk = require("@aws-cdk/core");
+import appsync = require("@aws-cdk/aws-appsync");
+import iam = require("@aws-cdk/aws-iam");
 import lambda = require("@aws-cdk/aws-lambda");
 import sfn = require("@aws-cdk/aws-stepfunctions");
 import tasks = require("@aws-cdk/aws-stepfunctions-tasks");
 import sns = require("@aws-cdk/aws-sns");
 import { RetryProps } from "@aws-cdk/aws-stepfunctions";
+import handlebars = require("handlebars");
 
 import path = require("path");
+import { readFileSync } from "fs";
 
 import dynamoTask = require("./dynamo-update-item");
 import { DynamoDBCrudPolicy } from "./dynamodbcrud-policy";
@@ -16,6 +20,7 @@ interface BookingProps {
   readonly BookingTable: ImportedDynamoTable;
   readonly CollectPaymentFunction: lambda.IFunction;
   readonly RefundPaymentFunction: lambda.IFunction;
+  readonly AppSyncApiId: string;
 }
 
 export class Booking extends cdk.Construct {
@@ -207,6 +212,20 @@ export class Booking extends cdk.Construct {
     });
   }
 
+  private RenderVelocityTemplate(statemachine: sfn.StateMachine): string {
+    const f = path.resolve(__dirname, 'process-booking.vm')
+    const vm = readFileSync(f).toString();
+    const template = handlebars.compile(vm)
+
+    const ctx = {
+      'BookingTable': this.props.BookingTable.Name,
+      'FlightTable': this.props.FlightTable.Name,
+      'ProcessBooking': statemachine.stateMachineArn,
+    };
+
+    return template(ctx);
+  }
+
   constructor(
     scope: cdk.Construct,
     id: string,
@@ -298,12 +317,30 @@ export class Booking extends cdk.Construct {
       .next(this.BookingFailedState);
 
     // Now define the actual state machine
-    new sfn.StateMachine(this, "Booking", {
+    const processBooking = new sfn.StateMachine(this, "Booking", {
       definition: this.ReserveFlightSeatTask.next(this.ReserveBookingTask)
         .next(this.CollectPaymentTask)
         .next(this.ConfirmBookingTask)
         .next(this.NotifyBookingSucceededTask)
         .next(this.BookingConfirmedState)
+    });
+
+    // Render the Apache Velocity Template for our Resolver
+    const appsyncResolver = this.RenderVelocityTemplate(processBooking);
+
+    // Create the role needed for
+    const appsyncRole = new iam.Role(this, 'AppSync', {
+      assumedBy: new iam.ServicePrincipal('appsync.amazonaws.com'),
+      inlinePolicies: {
+        'ProcessBookingSFN': new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions: ['states:StartExecution'],
+              resources: [processBooking.stateMachineArn],
+            })
+          ]
+        })
+      }
     });
   }
 }

@@ -59,9 +59,14 @@ export class AirlineBackendStack extends cdk.Stack {
     }
 
     if (process.env.FLIGHT_TABLE == null) {
-      throw new Error("FLIGHT_TABLE not define");
+      throw new Error("FLIGHT_TABLE not defined");
     }
 
+    if (process.env.APPSYNC_APIID == null) {
+      throw new Error("APPSYNC_APIID not defined");
+    }
+
+    const apiId = process.env.APPSYNC_APIID;
     const bookingTopic = new sns.Topic(this, "BookingNotification");
 
     this.BookingTable = new importedTable.ImportedDynamoTable(
@@ -84,7 +89,8 @@ export class AirlineBackendStack extends cdk.Stack {
       BookingTable: this.BookingTable,
       FlightTable: this.FlightTable,
       CollectPaymentFunction: collectPaymentFunction,
-      RefundPaymentFunction: refundPaymentFunction
+      RefundPaymentFunction: refundPaymentFunction,
+      AppSyncApiId: apiId,
     });
   }
 }

@@ -21,6 +21,7 @@
     "typescript": "^3.3.3333"
   },
   "dependencies": {
+    "@aws-cdk/aws-appsync": "^0.37.0",
     "@aws-cdk/aws-dynamodb": "^0.37.0",
     "@aws-cdk/aws-iam": "^0.37.0",
     "@aws-cdk/aws-lambda": "^0.37.0",
@@ -29,6 +30,7 @@
     "@aws-cdk/aws-stepfunctions": "^0.37.0",
     "@aws-cdk/aws-stepfunctions-tasks": "^0.37.0",
     "@aws-cdk/core": "^0.37.0",
+    "handlebars": "^4.1.2",
     "source-map-support": "^0.5.9"
   }
 }
