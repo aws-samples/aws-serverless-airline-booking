@@ -11,12 +11,20 @@ import store from "./store";
 import "./styles/quasar.styl";
 import "quasar-extras/animate";
 import "quasar-extras/material-icons";
-import Quasar, { Loading, QSpinnerPuff } from "quasar";
+import Quasar, { Loading, QSpinnerPuff, uid } from "quasar";
 
 import Amplify, * as AmplifyModules from "aws-amplify";
 import { AmplifyPlugin } from "aws-amplify-vue";
 import aws_exports from "./aws-exports";
 Amplify.configure(aws_exports);
+
+Amplify.configure({
+  API: {
+    graphql_headers: async () => ({
+      "X-airline-request-id": uid()
+    })
+  }
+});
 
 Vue.use(AmplifyPlugin, AmplifyModules);
 
