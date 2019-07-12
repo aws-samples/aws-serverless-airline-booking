@@ -25,6 +25,7 @@ backend:
         ##
         # Deploy SAM based back-end
         ##
+        - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
         - make deploy
     postBuild:
       commands:
