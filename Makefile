@@ -3,6 +3,13 @@
 # Bootstrapping variables
 ##########################
 
+AWS_BRANCH ?= "dev"
+FLIGHT_TABLE_NAME ?= "UNDEFINED"
+STACK_NAME ?= "UNDEFINED"
+DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
+GRAPHQL_API_ID ?= "UNDEFINED"
+BOOKING_TABLE_NAME ?= "UNDEFINED"
+
 target:
 	$(info ${HELP_MESSAGE})
 	@exit 0
