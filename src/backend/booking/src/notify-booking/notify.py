@@ -113,8 +113,8 @@ def lambda_handler(event, context):
     """
 
     customer_id = event.get("customerId", False)
-    price = event.get("payment", False).get("price", False)  # ['payment']['price'] w/ defaults if either is empty/undefined
-
+    payment = event.get("payment", {})
+    price = payment.get("price", False)
     booking_reference = event.get("bookingReference", False)
 
     if not customer_id and not price:
