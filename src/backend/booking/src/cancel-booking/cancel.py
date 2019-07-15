@@ -12,14 +12,18 @@ table = dynamodb.Table(os.environ['BOOKING_TABLE_NAME'])
 
 
 class BookingCancellationException(Exception):
-    pass
+    def __init__(self, message="Booking cancellation failed", status_code=500, details={}):
+
+        super(BookingCancellationException, self).__init__()
+
+        self.message = message
+        self.status_code = status_code
+        self.details = details
 
 
+@xray_recorder.capture("## cancel_booking")
 def cancel_booking(booking_id):
     try:
-        subsegment = xray_recorder.current_subsegment()
-        subsegment.put_annotation("Booking", booking_id)
-
         ret = table.update_item(
             Key={'id': booking_id},
             ConditionExpression='id = :idVal',
@@ -32,16 +36,15 @@ def cancel_booking(booking_id):
             ReturnValues="UPDATED_NEW",
         )
 
-        subsegment.put_annotation("BookingStatus", "CANCELLED")
+        subsegment = xray_recorder.current_segment()
         subsegment.put_metadata(booking_id, ret, "booking")
-        xray_recorder.end_subsegment()
 
         return True
-    except ClientError as e:
-        raise BookingCancellationException(e.response['Error']['Message'])
+    except ClientError as err:
+        raise BookingCancellationException(details=err)
 
 
-@xray_recorder.capture('handler')
+@xray_recorder.capture('## handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to cancel booking
 
@@ -69,9 +72,17 @@ def lambda_handler(event, context):
     if 'bookingId' not in event:
         raise ValueError('Invalid booking ID')
 
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
+    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
+    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
+    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
+
     try:
         ret = cancel_booking(event['bookingId'])
+        subsegment.put_annotation("BookingStatus", "CANCELLED")
 
         return ret
-    except BookingCancellationException as e:
-        raise BookingCancellationException(e)
+    except BookingCancellationException as err:
+        subsegment.put_metadata("cancel_booking_error", err, "booking")
+        raise BookingCancellationException(details=err)

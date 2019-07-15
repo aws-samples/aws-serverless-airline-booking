@@ -11,12 +11,16 @@ payment_endpoint = os.environ["PAYMENT_API_URL"]
 
 
 class PaymentException(Exception):
-    def __init__(self, message, status_code):
+    def __init__(self, message="Payment failed", status_code=500, details={}):
 
-        super(PaymentException, self).__init__(message)
+        super(PaymentException, self).__init__()
+
+        self.message = message
         self.status_code = status_code
+        self.details = details
 
 
+@xray_recorder.capture("## collect_payment")
 def collect_payment(charge_id):
     """Collects payment from a pre-authorized charge through Payment API
 
@@ -36,19 +40,17 @@ def collect_payment(charge_id):
         price: int
             amount collected
     """
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("Payment", charge_id)
-
     payment_payload = {"chargeId": charge_id}
     ret = requests.post(payment_endpoint, json=payment_payload)
     payment_response = ret.json()
 
+    # TODO: Create decorator for tracing
+    subsegment = xray_recorder.current_subsegment()
     subsegment.put_metadata(charge_id, ret, "payment")
-    xray_recorder.end_subsegment()
 
     if ret.status_code != 200:
         print(payment_response)
-        raise PaymentException("Payment failed", ret.status_code)
+        raise PaymentException(status_code=ret.status_code, details=ret.json())
 
     return {
         "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
@@ -56,7 +58,7 @@ def collect_payment(charge_id):
     }
 
 
-@xray_recorder.capture('handler')
+@xray_recorder.capture("## handler")
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to collect payment
 
@@ -89,7 +91,16 @@ def lambda_handler(event, context):
     if "chargeId" not in event:
         raise ValueError(message="Invalid Charge ID", status_code=400)
 
-    ret = collect_payment(event["chargeId"])
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
+    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
+    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
+    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
 
-    # Step Functions can append multiple values if you return a single dict
-    return ret
+    try:
+        ret = collect_payment(event["chargeId"])
+        # Step Functions can append multiple values if you return a single dict
+        return ret
+    except PaymentException as err:
+        subsegment.put_metadata("payment_error", err, "payment")
+        raise PaymentException(details=err)

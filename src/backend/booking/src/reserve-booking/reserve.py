@@ -11,11 +11,17 @@ patch_all()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
-table = dynamodb.Table(os.environ["BOOKING_TABLE_NAME"])
+table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
 
 
 class BookingReservationException(Exception):
-    pass
+    def __init__(self, message="Booking reservation failed", status_code=500, details={}):
+
+        super(BookingReservationException, self).__init__()
+
+        self.message = message
+        self.status_code = status_code
+        self.details = details
 
 
 def is_booking_request_valid(booking):
@@ -25,6 +31,7 @@ def is_booking_request_valid(booking):
     )
 
 
+@xray_recorder.capture("## reserve_booking")
 def reserve_booking(booking):
     """Creates a new booking as UNCONFIRMED
 
@@ -53,11 +60,6 @@ def reserve_booking(booking):
     """
     try:
         id = str(uuid.uuid4())
-        subsegment = xray_recorder.current_subsegment()
-        subsegment.put_annotation("Booking", id)
-        subsegment.put_annotation("Customer", booking["customerId"])
-        subsegment.put_annotation("Payment", booking["chargeId"])
-        subsegment.put_annotation("Flight", booking["outboundFlightId"])
 
         booking_item = {
             "id": id,
@@ -73,15 +75,15 @@ def reserve_booking(booking):
 
         table.put_item(Item=booking_item)
 
+        subsegment = xray_recorder.current_subsegment()
         subsegment.put_metadata(id, booking_item, "booking")
-        xray_recorder.end_subsegment()
 
         return {"bookingId": id}
-    except ClientError as e:
-        raise BookingReservationException(e.response["Error"]["Message"])
+    except ClientError as err:
+        raise BookingReservationException(details=err)
 
 
-@xray_recorder.capture('handler')
+@xray_recorder.capture('## handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to reserve a booking
 
@@ -122,10 +124,17 @@ def lambda_handler(event, context):
     if not is_booking_request_valid(event):
         raise ValueError("Invalid booking request")
 
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
+    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
+    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
+
     try:
         ret = reserve_booking(event)
-    except BookingReservationException as e:
-        raise BookingReservationException(e)
+        subsegment.put_annotation("Booking", ret['bookingId'])
 
-    # Step Functions use the return to append `bookingId` key into the overall output
-    return ret['bookingId']
+        # Step Functions use the return to append `bookingId` key into the overall output
+        return ret['bookingId']
+    except BookingReservationException as err:
+        subsegment.put_metadata("reserve_booking_error", err, "booking")
+        raise BookingReservationException(details=err)
