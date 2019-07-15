@@ -253,6 +253,7 @@ Resources:
                             "Next": "Notify Booking Failed"
                         }
                     ],
+                    "ResultPath": null,
                     "Next": "Notify Booking Failed"
                 },
                 "Collect Payment": {
