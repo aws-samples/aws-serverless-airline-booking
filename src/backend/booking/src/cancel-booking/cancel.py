@@ -36,7 +36,7 @@ def cancel_booking(booking_id):
             ReturnValues="UPDATED_NEW",
         )
 
-        subsegment = xray_recorder.current_segment()
+        subsegment = xray_recorder.current_subsegment()
         subsegment.put_metadata(booking_id, ret, "booking")
 
         return True
