@@ -291,6 +291,15 @@ Resources:
                             "MaxAttempts": 2
                         }
                     ],
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.paymentError",
+                            "Next": "Release Flight Seat"
+                        }
+                    ],
                     "ResultPath": null,
                     "Next": "Release Flight Seat"
                 },
@@ -336,6 +345,15 @@ Resources:
                             "IntervalSeconds": 1,
                             "BackoffRate": 2,
                             "MaxAttempts": 2
+                        }
+                    ],
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.notificationgError",
+                            "Next": "Booking Failed"
                         }
                     ],
                     "ResultPath": "$.notificationId",
