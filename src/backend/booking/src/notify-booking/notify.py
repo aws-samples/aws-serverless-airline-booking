@@ -125,6 +125,7 @@ def lambda_handler(event, context):
     subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
     subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
     subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
     subsegment.put_annotation("BookingReference", booking_reference)
 
     try:

@@ -8,7 +8,7 @@ patch_all()
 
 session = boto3.Session()
 dynamodb = session.resource('dynamodb')
-table = dynamodb.Table(os.environ['BOOKING_TABLE_NAME'])
+table = dynamodb.Table(os.getenv('BOOKING_TABLE_NAME', "undefined"))
 
 
 class BookingCancellationException(Exception):
@@ -21,7 +21,7 @@ class BookingCancellationException(Exception):
         self.details = details
 
 
-@xray_recorder.capture("## cancel_booking")
+@xray_recorder.capture('## cancel_booking')
 def cancel_booking(booking_id):
     try:
         ret = table.update_item(
@@ -77,6 +77,7 @@ def lambda_handler(event, context):
     subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
     subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
     subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
 
     try:
         ret = cancel_booking(event['bookingId'])
