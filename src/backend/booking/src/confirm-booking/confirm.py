@@ -3,17 +3,27 @@ import os
 import secrets
 
 import boto3
+from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
+
+patch_all()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
-table = dynamodb.Table(os.environ["BOOKING_TABLE_NAME"])
+table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
 
 
 class BookingConfirmationException(Exception):
-    pass
+    def __init__(self, message="Booking confirmation failed", status_code=500, details={}):
+
+        super(BookingConfirmationException, self).__init__()
+
+        self.message = message
+        self.status_code = status_code
+        self.details = details
 
 
+@xray_recorder.capture("## confirm_booking")
 def confirm_booking(booking_id):
     """Update existing booking to CONFIRMED and generates a Booking reference
 
@@ -34,7 +44,7 @@ def confirm_booking(booking_id):
     """
     try:
         reference = secrets.token_urlsafe(4)
-        table.update_item(
+        ret = table.update_item(
             Key={"id": booking_id},
             ConditionExpression="id = :idVal",
             UpdateExpression="SET bookingReference = :br, #STATUS = :confirmed",
@@ -44,15 +54,20 @@ def confirm_booking(booking_id):
                 ":idVal": booking_id,
                 ":confirmed": "CONFIRMED",
             },
+            ReturnValues="UPDATED_NEW",
         )
+
+        subsegment = xray_recorder.current_subsegment()
+        subsegment.put_metadata(booking_id, ret, "booking")
 
         return {
             "bookingReference": reference
         }
-    except ClientError as e:
-        raise BookingConfirmationException(e.response["Error"]["Message"])
+    except ClientError as err:
+        raise BookingConfirmationException(details=err)
 
 
+@xray_recorder.capture('## handler')
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to confirm booking
 
@@ -82,10 +97,21 @@ def lambda_handler(event, context):
     if "bookingId" not in event:
         raise ValueError("Invalid booking ID")
 
+    subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
+    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
+    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
+    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
+
     try:
         ret = confirm_booking(event["bookingId"])
-    except BookingConfirmationException as e:
-        raise BookingConfirmationException(e)
+        subsegment.put_annotation("BookingReference", ret['bookingReference'])
+        subsegment.put_annotation("BookingStatus", "CONFIRMED")
 
-    # Step Functions use the return to append `bookingReference` key into the overall output
-    return ret['bookingReference']
+        # Step Functions use the return to append `bookingReference` key into the overall output
+        return ret['bookingReference']
+    except BookingConfirmationException as err:
+        subsegment.put_annotation("BookingStatus", "ERROR")
+        subsegment.put_metadata("confirm_booking_error", err, "booking")
+        raise BookingConfirmationException(details=err)

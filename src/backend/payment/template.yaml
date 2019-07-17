@@ -10,8 +10,13 @@ Parameters:
         Type: String
         Description: Stripe Secret Key for SAR App
 
+Globals:
+  Function:
+    Tracing: Active
+
 Resources:
   StripePaymentApplication:
+    DependsOn: StripePaymentApplicationKeyParameter
     Type: AWS::Serverless::Application
     Properties:
       Location:
@@ -19,8 +24,7 @@ Resources:
         SemanticVersion: 4.1.0
       Parameters:
         EnableInstantCapture: "false"
-        SSMParameterPath: !Sub service/payment/stripe/${Stage}
-
+        SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
 
   CollectPayment:
     Type: AWS::Serverless::Function
@@ -63,7 +67,7 @@ Resources:
   StripePaymentApplicationKeyParameter:
     Type: "AWS::SSM::Parameter"
     Properties: 
-        Name: !Sub /service/payment/stripe/${Stage}
+        Name: !Sub /service/payment/stripe-secret-key/${Stage}
         Description: Stripe Key for SAR App 
         Type: String
         Value: !Ref StripeKey

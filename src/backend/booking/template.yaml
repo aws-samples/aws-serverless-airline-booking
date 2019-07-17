@@ -6,7 +6,7 @@ Description: >
 Globals:
   Function:
     Timeout: 5
-
+    Tracing: Active
 
 Parameters:
     BookingTable:
@@ -253,6 +253,7 @@ Resources:
                             "Next": "Notify Booking Failed"
                         }
                     ],
+                    "ResultPath": null,
                     "Next": "Notify Booking Failed"
                 },
                 "Collect Payment": {
@@ -288,6 +289,15 @@ Resources:
                             "IntervalSeconds": 1,
                             "BackoffRate": 2,
                             "MaxAttempts": 2
+                        }
+                    ],
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.paymentError",
+                            "Next": "Release Flight Seat"
                         }
                     ],
                     "ResultPath": null,
@@ -335,6 +345,15 @@ Resources:
                             "IntervalSeconds": 1,
                             "BackoffRate": 2,
                             "MaxAttempts": 2
+                        }
+                    ],
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.notificationgError",
+                            "Next": "Booking Failed"
                         }
                     ],
                     "ResultPath": "$.notificationId",
@@ -453,12 +472,13 @@ Resources:
             "resourcePath": "/",
             "params": {
                 "headers": {
-                "content-type": "application/x-amz-json-1.0",
-                "x-amz-target":"AWSStepFunctions.StartExecution"
+                    "content-type": "application/x-amz-json-1.0",
+                    "x-amz-target":"AWSStepFunctions.StartExecution"
                 },
                 "body": {
-                "stateMachineArn": "${ProcessBooking}",
-                "input": "$util.escapeJavaScript($util.toJson($payload))"
+                    "stateMachineArn": "${ProcessBooking}",
+                    "input": "$util.escapeJavaScript($util.toJson($payload))",
+                    "name": $util.toJson($ctx.stash.executionId)
                 }
             }
         }

@@ -34,15 +34,18 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.loyalty
 
 delete: ##=> Delete services
-	$(MAKE) deploy.booking
-	$(MAKE) deploy.payment
-	$(MAKE) deploy.loyalty
+	$(MAKE) delete.booking
+	$(MAKE) delete.payment
+	$(MAKE) delete.loyalty
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
 
 delete.payment: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
+
+delete.loyalty: ##=> Delete booking service
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -106,11 +109,35 @@ _install_os_packages:
 	python3 -m pip install --upgrade pip cfn-lint aws-sam-cli
 
 define HELP_MESSAGE
+
+	Environment variables:
+
+	These variables are automatically filled at CI time except STRIPE_SECRET_KEY
+	If doing a dirty/individual/non-ci deployment locally you'd need them to be set
+
+	AWS_BRANCH: "dev"
+		Description: Feature branch name used as part of stacks name; added by Amplify Console by default
+	FLIGHT_TABLE_NAME: "Flight-hnxochcn4vfdbgp6zaopgcxk2a-xray"
+		Description: Flight Table name created by Amplify for Catalog service
+	STACK_NAME: "awsserverlessairline-twitch-20190705130553"
+		Description: Stack Name already deployed; used for dirty/individual deployment
+	DEPLOYMENT_BUCKET_NAME: "a_valid_bucket_name"
+		Description: S3 Bucket name used for deployment artifacts
+	GRAPHQL_API_ID: "hnxochcn4vfdbgp6zaopgcxk2a"
+		Description: AppSync GraphQL ID already deployed
+	BOOKING_TABLE_NAME: "Booking-hnxochcn4vfdbgp6zaopgcxk2a-xray"
+		Description: Flight Table name created by Amplify for Booking service
+	STRIPE_SECRET_KEY: "sk-test-asdf..."
+		Description: Stripe Private Secret Key generated in Stripe; manually added in Amplify Console Env Variables per App
+
 	Common usage:
 
-	...::: Bootstraps environment with necessary tools like SAM and Pipenv :::...
+	...::: Bootstraps environment with necessary tools like SAM CLI, cfn-lint, etc. :::...
 	$ make init
 
 	...::: Deploy all SAM based services :::...
 	$ make deploy
+
+	...::: Delete all SAM based services :::...
+	$ make delete
 endef

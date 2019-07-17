@@ -1,0 +1,4 @@
+{
+    "python.formatting.provider": "black",
+    "python.pythonPath": "/Users/lessa/.pyenv/versions/work/bin/python"
+}
