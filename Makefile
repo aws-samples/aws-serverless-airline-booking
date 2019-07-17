@@ -34,15 +34,18 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.loyalty
 
 delete: ##=> Delete services
-	$(MAKE) deploy.booking
-	$(MAKE) deploy.payment
-	$(MAKE) deploy.loyalty
+	$(MAKE) delete.booking
+	$(MAKE) delete.payment
+	$(MAKE) delete.loyalty
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
 
 delete.payment: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
+
+delete.loyalty: ##=> Delete booking service
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -113,4 +116,7 @@ define HELP_MESSAGE
 
 	...::: Deploy all SAM based services :::...
 	$ make deploy
+
+	...::: Delete all SAM based services :::...
+	$ make delete
 endef
