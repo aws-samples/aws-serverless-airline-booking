@@ -90,8 +90,10 @@ def lambda_handler(event, context):
     try:
         ret = refund_payment(event["chargeId"])
         subsegment.put_annotation("Refund", ret['refundId'])
+        subsegment.put_annotation("PaymentStatus", "REFUNDED")
     except RefundException as err:
         subsegment.put_metadata("refund_error", err, "refund")
+        subsegment.put_annotation("RefundStatus", "FAILED")
         raise RefundException(details=err)
 
     return json.dumps(ret)

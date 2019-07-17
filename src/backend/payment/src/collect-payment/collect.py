@@ -100,8 +100,10 @@ def lambda_handler(event, context):
 
     try:
         ret = collect_payment(event["chargeId"])
+        subsegment.put_annotation("PaymentStatus", "SUCCESS")
         # Step Functions can append multiple values if you return a single dict
         return ret
     except PaymentException as err:
+        subsegment.put_annotation("PaymentStatus", "FAILED")
         subsegment.put_metadata("payment_error", err, "payment")
         raise PaymentException(details=err)

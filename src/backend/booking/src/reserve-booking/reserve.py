@@ -132,9 +132,11 @@ def lambda_handler(event, context):
     try:
         ret = reserve_booking(event)
         subsegment.put_annotation("Booking", ret['bookingId'])
+        subsegment.put_annotation("BookingStatus", "RESERVED")
 
         # Step Functions use the return to append `bookingId` key into the overall output
         return ret['bookingId']
     except BookingReservationException as err:
+        subsegment.put_annotation("BookingStatus", "ERROR")
         subsegment.put_metadata("reserve_booking_error", err, "booking")
         raise BookingReservationException(details=err)

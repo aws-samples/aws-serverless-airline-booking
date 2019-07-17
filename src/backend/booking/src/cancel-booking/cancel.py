@@ -85,5 +85,6 @@ def lambda_handler(event, context):
 
         return ret
     except BookingCancellationException as err:
+        subsegment.put_annotation("BookingStatus", "ERROR")
         subsegment.put_metadata("cancel_booking_error", err, "booking")
         raise BookingCancellationException(details=err)

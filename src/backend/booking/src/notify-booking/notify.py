@@ -132,9 +132,11 @@ def lambda_handler(event, context):
         payload = {"customerId": customer_id, "price": price}
         ret = notify_booking(payload, booking_reference)
         subsegment.put_annotation("BookingNotification", ret['notificationId'])
+        subsegment.put_annotation("BookingNotificationStatus", "SUCCESS")
 
         # Step Functions use the return to append `notificationId` key into the overall output
         return ret["notificationId"]
     except BookingNotificationException as err:
+        subsegment.put_annotation("BookingNotificationStatus", "FAILED")
         subsegment.put_metadata("notify_booking_error", err, "booking")
         raise BookingNotificationException(details=err)
