@@ -472,12 +472,13 @@ Resources:
             "resourcePath": "/",
             "params": {
                 "headers": {
-                "content-type": "application/x-amz-json-1.0",
-                "x-amz-target":"AWSStepFunctions.StartExecution"
+                    "content-type": "application/x-amz-json-1.0",
+                    "x-amz-target":"AWSStepFunctions.StartExecution"
                 },
                 "body": {
-                "stateMachineArn": "${ProcessBooking}",
-                "input": "$util.escapeJavaScript($util.toJson($payload))"
+                    "stateMachineArn": "${ProcessBooking}",
+                    "input": "$util.escapeJavaScript($util.toJson($payload))",
+                    "name": $util.toJson($ctx.stash.executionId)
                 }
             }
         }
