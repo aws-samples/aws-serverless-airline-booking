@@ -14,17 +14,18 @@ backend:
         ##
         - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/#current-cloud-backend/amplify-meta.json)
-        - export AWS_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
+        - export AWS_DEFAULT_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
         - export GRAPHQL_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
         ##
         # List all data sources and capture DynamoDB table created from @model
         ##
-        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --region ${AWS_REGION} > datasources.json
+        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
         - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
         - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
         ##
         # Deploy SAM based back-end
         ##
+        - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
         - make deploy
     postBuild:
       commands:

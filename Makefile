@@ -3,6 +3,13 @@
 # Bootstrapping variables
 ##########################
 
+AWS_BRANCH ?= "dev"
+FLIGHT_TABLE_NAME ?= "UNDEFINED"
+STACK_NAME ?= "UNDEFINED"
+DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
+GRAPHQL_API_ID ?= "UNDEFINED"
+BOOKING_TABLE_NAME ?= "UNDEFINED"
+
 target:
 	$(info ${HELP_MESSAGE})
 	@exit 0
@@ -15,7 +22,7 @@ outputs: ##=> Fetch SAM stack outputs and save under /tmp
 	$(MAKE) outputs.payment
 
 outputs.payment: ##=> Fetch SAM stack outputs
-	 aws cloudformation describe-stacks --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --query 'Stacks[0].Outputs' --region $${AWS_REGION} > /tmp/payment-stack.json
+	 aws cloudformation describe-stacks --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --query 'Stacks[0].Outputs' > /tmp/payment-stack.json
 
 outputs.vue: ##=> Converts Payments output stack to Vue env variables
 	cat /tmp/payment-stack.json | jq -r '.[] | "VUE_APP_" + .OutputKey + "=\"" + (.OutputValue|tostring) + "\""'  > src/frontend/.env
@@ -32,10 +39,10 @@ delete: ##=> Delete services
 	$(MAKE) deploy.loyalty
 
 delete.booking: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} --region $${AWS_REGION}
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
 
 delete.payment: ##=> Delete payment service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --region $${AWS_REGION}
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -43,7 +50,6 @@ deploy.booking: ##=> Deploy booking service using SAM
 		sam build && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--region $${AWS_REGION} \
 			--output-template-file packaged.yaml && \
 		sam deploy \
 			--template-file packaged.yaml \
@@ -55,8 +61,7 @@ deploy.booking: ##=> Deploy booking service using SAM
 				CollectPaymentFunction=/service/payment/collect-function/$${AWS_BRANCH} \
 				RefundPaymentFunction=/service/payment/refund-function/$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID} \
-				Stage=$${AWS_BRANCH} \
-			--region $${AWS_REGION}
+				Stage=$${AWS_BRANCH}
 
 deploy.payment: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
@@ -64,7 +69,6 @@ deploy.payment: ##=> Deploy payment service using SAM
 		sam build && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--region $${AWS_REGION} \
 			--output-template-file packaged.yaml && \
 		sam deploy \
 			--template-file packaged.yaml \
@@ -72,8 +76,7 @@ deploy.payment: ##=> Deploy payment service using SAM
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
 			--parameter-overrides \
 				Stage=$${AWS_BRANCH} \
-				StripeKey=$${STRIPE_SECRET_KEY} \
-			--region $${AWS_REGION}
+				StripeKey=$${STRIPE_SECRET_KEY}
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)
@@ -82,7 +85,6 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 		npm run build && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--region $${AWS_REGION} \
 			--output-template-file packaged.yaml && \
 		sam deploy \
 			--template-file packaged.yaml \
@@ -91,8 +93,7 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 			--parameter-overrides \
 				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
 				Stage=$${AWS_BRANCH} \
-				AppsyncApiId=$${GRAPHQL_API_ID} \
-			--region $${AWS_REGION}
+				AppsyncApiId=$${GRAPHQL_API_ID}
 
 #############
 #  Helpers  #
