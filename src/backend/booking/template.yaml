@@ -373,14 +373,6 @@ Resources:
                     "ResultPath": "$.notificationId",
                     "Next": "Booking Failed"
                 },
-                "Booking Failed": {
-                    "Type": "Task",
-                    "Resource": "arn:aws:states:::sqs:sendMessage",
-                    "Parameters": {
-                        "QueueUrl": "${FailedBookingsQueue}",
-                        "MessageBody.$": "$"
-                    }
-                },
                 "Notify Booking Confirmed": {
                     "Type": "Task",
                     "Resource": "${NotifyBooking.Arn}",
@@ -396,6 +388,15 @@ Resources:
                     ],
                     "ResultPath": "$.notificationId",
                     "Next": "Booking Confirmed"
+                },
+                "Booking Failed": {
+                    "Type": "Task",
+                    "Resource": "arn:aws:states:::sqs:sendMessage",
+                    "Parameters": {
+                        "QueueUrl": "${FailedBookingsQueue}",
+                        "MessageBody.$": "$"
+                    },
+                    "End": true
                 },
                 "Booking Confirmed": {
                     "Type": "Pass",
