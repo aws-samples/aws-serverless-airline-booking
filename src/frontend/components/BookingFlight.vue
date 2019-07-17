@@ -6,7 +6,7 @@
     <BookingCard
       ref="card"
       :reference="bookingID"
-      name="Simon Thulbourn"
+      :name="fullName"
       :departureDate="flight.departureDate"
       :departureAirportName="flight.departureAirportName"
       :departureIata="flight.departureAirportCode"
@@ -22,6 +22,8 @@
 import FlightCard from "./FlightCard";
 // @ts-ignore
 import BookingCard from "./BookingCard";
+
+import { mapState } from "vuex";
 
 export default {
   /**
@@ -46,7 +48,16 @@ export default {
     BookingCard,
     FlightCard
   },
-
+  computed: {
+    ...mapState({
+      user: state => state.profile.user
+    }),
+    fullName() {
+      return `${this.user.attributes.given_name} ${
+        this.user.attributes.family_name
+      }`;
+    }
+  },
   props: {
     /**
      * @param {string} bookingID - Sets Booking ID
