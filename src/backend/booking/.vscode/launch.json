@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CancelBooking Fn",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/.aws-sam/build/CancelBooking",
+                    "remoteRoot": "/var/task"
+                }
+            ]
+        },
+        {
+            "name": "ConfirmBooking Fn",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/.aws-sam/build/ConfirmBooking",
+                    "remoteRoot": "/var/task"
+                }
+            ]
+        },
+        {
+            "name": "NotifyBooking Fn",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/.aws-sam/build/NotifyBooking",
+                    "remoteRoot": "/var/task"
+                }
+            ]
+        },
+        {
+            "name": "ReserveBooking Fn",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/.aws-sam/build/ReserveBooking",
+                    "remoteRoot": "/var/task"
+                }
+            ]
+        },
+    ]
+}
