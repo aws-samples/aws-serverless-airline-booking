@@ -125,7 +125,7 @@ Resources:
                 Resource:
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}
                     - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
-        - PolicyName: QueueFailedBookings
+        - PolicyName: Send2DLQ
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -133,9 +133,9 @@ Resources:
                 Action:
                   - sqs:SendMessage
                 Resource:
-                    - !Sub ${FailedBookingsQueue.Arn}
+                    - !Sub ${BookingsDLQ.Arn}
 
-  FailedBookingsQueue:
+  BookingsDLQ:
     Type: AWS::SQS::Queue
     Properties:
       MessageRetentionPeriod: 1209600
@@ -393,9 +393,10 @@ Resources:
                     "Type": "Task",
                     "Resource": "arn:aws:states:::sqs:sendMessage",
                     "Parameters": {
-                        "QueueUrl": "${FailedBookingsQueue}",
+                        "QueueUrl": "${BookingsDLQ}",
                         "MessageBody.$": "$"
                     },
+                    "ResultPath": "$.deadLetterQueue",
                     "End": true
                 },
                 "Booking Confirmed": {
