@@ -276,13 +276,6 @@ Resources:
                     "Catch": [
                         {
                             "ErrorEquals": [
-                                "PaymentException"
-                            ],
-                            "ResultPath": "$.paymentError",
-                            "Next": "Cancel Booking"
-                        },
-                        {
-                            "ErrorEquals": [
                                 "States.ALL"
                             ],
                             "ResultPath": "$.paymentError",
@@ -310,7 +303,7 @@ Resources:
                             "ErrorEquals": [
                                 "States.ALL"
                             ],
-                            "ResultPath": "$.paymentError",
+                            "ResultPath": "$.bookingError",
                             "Next": "Release Flight Seat"
                         }
                     ],
@@ -345,6 +338,15 @@ Resources:
                 "Refund Payment": {
                     "Type": "Task",
                     "Resource": "${RefundPaymentFunction}",
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.paymentError",
+                            "Next": "Cancel Booking"
+                        }
+                    ],
                     "ResultPath": null,
                     "Next": "Cancel Booking"
                 },
