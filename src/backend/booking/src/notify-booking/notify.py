@@ -13,7 +13,9 @@ booking_sns_topic = os.getenv("BOOKING_TOPIC", "undefined")
 
 
 class BookingNotificationException(Exception):
-    def __init__(self, message="Booking notification failed", status_code=500, details={}):
+    def __init__(
+        self, message="Booking notification failed", status_code=500, details={}
+    ):
 
         super(BookingNotificationException, self).__init__()
 
@@ -78,7 +80,7 @@ def notify_booking(payload, booking_reference):
         raise BookingNotificationException(details=err)
 
 
-@xray_recorder.capture('## handler')
+@xray_recorder.capture("## handler")
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to notify booking
 
@@ -122,16 +124,16 @@ def lambda_handler(event, context):
 
     subsegment = xray_recorder.current_subsegment()
     subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
-    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
-    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
+    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
+    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
+    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
     subsegment.put_annotation("BookingReference", booking_reference)
 
     try:
         payload = {"customerId": customer_id, "price": price}
         ret = notify_booking(payload, booking_reference)
-        subsegment.put_annotation("BookingNotification", ret['notificationId'])
+        subsegment.put_annotation("BookingNotification", ret["notificationId"])
         subsegment.put_annotation("BookingNotificationStatus", "SUCCESS")
 
         # Step Functions use the return to append `notificationId` key into the overall output

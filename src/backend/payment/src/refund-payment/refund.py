@@ -51,7 +51,7 @@ def refund_payment(charge_id):
     return {"refundId": refund_response["createdRefund"]["id"]}
 
 
-@xray_recorder.capture('## handler')
+@xray_recorder.capture("## handler")
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to refund payment
 
@@ -82,14 +82,14 @@ def lambda_handler(event, context):
 
     subsegment = xray_recorder.current_subsegment()
     subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
-    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
-    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
+    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
+    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
+    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
 
     try:
         ret = refund_payment(event["chargeId"])
-        subsegment.put_annotation("Refund", ret['refundId'])
+        subsegment.put_annotation("Refund", ret["refundId"])
         subsegment.put_annotation("PaymentStatus", "REFUNDED")
     except RefundException as err:
         subsegment.put_metadata("refund_error", err, "refund")

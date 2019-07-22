@@ -14,7 +14,9 @@ table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
 
 
 class BookingConfirmationException(Exception):
-    def __init__(self, message="Booking confirmation failed", status_code=500, details={}):
+    def __init__(
+        self, message="Booking confirmation failed", status_code=500, details={}
+    ):
 
         super(BookingConfirmationException, self).__init__()
 
@@ -60,14 +62,12 @@ def confirm_booking(booking_id):
         subsegment = xray_recorder.current_subsegment()
         subsegment.put_metadata(booking_id, ret, "booking")
 
-        return {
-            "bookingReference": reference
-        }
+        return {"bookingReference": reference}
     except ClientError as err:
         raise BookingConfirmationException(details=err)
 
 
-@xray_recorder.capture('## handler')
+@xray_recorder.capture("## handler")
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to confirm booking
 
@@ -99,18 +99,18 @@ def lambda_handler(event, context):
 
     subsegment = xray_recorder.current_subsegment()
     subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
-    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
-    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
+    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
+    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
+    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
 
     try:
         ret = confirm_booking(event["bookingId"])
-        subsegment.put_annotation("BookingReference", ret['bookingReference'])
+        subsegment.put_annotation("BookingReference", ret["bookingReference"])
         subsegment.put_annotation("BookingStatus", "CONFIRMED")
 
         # Step Functions use the return to append `bookingReference` key into the overall output
-        return ret['bookingReference']
+        return ret["bookingReference"]
     except BookingConfirmationException as err:
         subsegment.put_annotation("BookingStatus", "ERROR")
         subsegment.put_metadata("confirm_booking_error", err, "booking")

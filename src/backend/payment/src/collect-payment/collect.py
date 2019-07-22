@@ -54,7 +54,7 @@ def collect_payment(charge_id):
 
     return {
         "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
-        "price": payment_response["capturedCharge"]["amount"]
+        "price": payment_response["capturedCharge"]["amount"],
     }
 
 
@@ -93,10 +93,10 @@ def lambda_handler(event, context):
 
     subsegment = xray_recorder.current_subsegment()
     subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
-    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
-    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
+    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
+    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
+    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
 
     try:
         ret = collect_payment(event["chargeId"])

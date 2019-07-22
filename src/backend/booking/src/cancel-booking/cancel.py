@@ -7,12 +7,14 @@ from botocore.exceptions import ClientError
 patch_all()
 
 session = boto3.Session()
-dynamodb = session.resource('dynamodb')
-table = dynamodb.Table(os.getenv('BOOKING_TABLE_NAME', "undefined"))
+dynamodb = session.resource("dynamodb")
+table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
 
 
 class BookingCancellationException(Exception):
-    def __init__(self, message="Booking cancellation failed", status_code=500, details={}):
+    def __init__(
+        self, message="Booking cancellation failed", status_code=500, details={}
+    ):
 
         super(BookingCancellationException, self).__init__()
 
@@ -21,18 +23,15 @@ class BookingCancellationException(Exception):
         self.details = details
 
 
-@xray_recorder.capture('## cancel_booking')
+@xray_recorder.capture("## cancel_booking")
 def cancel_booking(booking_id):
     try:
         ret = table.update_item(
-            Key={'id': booking_id},
-            ConditionExpression='id = :idVal',
-            UpdateExpression='SET #STATUS = :cancelled',
-            ExpressionAttributeNames={'#STATUS': 'status'},
-            ExpressionAttributeValues={
-                ':idVal': booking_id,
-                ':cancelled': 'CANCELLED',
-            },
+            Key={"id": booking_id},
+            ConditionExpression="id = :idVal",
+            UpdateExpression="SET #STATUS = :cancelled",
+            ExpressionAttributeNames={"#STATUS": "status"},
+            ExpressionAttributeValues={":idVal": booking_id, ":cancelled": "CANCELLED"},
             ReturnValues="UPDATED_NEW",
         )
 
@@ -44,7 +43,7 @@ def cancel_booking(booking_id):
         raise BookingCancellationException(details=err)
 
 
-@xray_recorder.capture('## handler')
+@xray_recorder.capture("## handler")
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to cancel booking
 
@@ -69,18 +68,18 @@ def lambda_handler(event, context):
     BookingCancellationException
         Booking Cancellation Exception including error message upon failure
     """
-    if 'bookingId' not in event:
-        raise ValueError('Invalid booking ID')
+    if "bookingId" not in event:
+        raise ValueError("Invalid booking ID")
 
     subsegment = xray_recorder.current_subsegment()
     subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get('bookingId', "undefined"))
-    subsegment.put_annotation("Customer", event.get('customerId', "undefined"))
-    subsegment.put_annotation("Flight", event.get('outboundFlightId', "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get('name', "undefined"))
+    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
+    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
+    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
+    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
 
     try:
-        ret = cancel_booking(event['bookingId'])
+        ret = cancel_booking(event["bookingId"])
         subsegment.put_annotation("BookingStatus", "CANCELLED")
 
         return ret
