@@ -369,11 +369,11 @@ Resources:
                                 "States.ALL"
                             ],
                             "ResultPath": "$.notificationgError",
-                            "Next": "Booking Failed"
+                            "Next": "Booking DLQ"
                         }
                     ],
                     "ResultPath": "$.notificationId",
-                    "Next": "Booking Failed"
+                    "Next": "Booking DLQ"
                 },
                 "Notify Booking Confirmed": {
                     "Type": "Task",
@@ -391,7 +391,7 @@ Resources:
                     "ResultPath": "$.notificationId",
                     "Next": "Booking Confirmed"
                 },
-                "Booking Failed": {
+                "Booking DLQ": {
                     "Type": "Task",
                     "Resource": "arn:aws:states:::sqs:sendMessage",
                     "Parameters": {
@@ -399,7 +399,10 @@ Resources:
                         "MessageBody.$": "$"
                     },
                     "ResultPath": "$.deadLetterQueue",
-                    "End": true
+                    "Next": "Booking Failed"
+                },
+                "Booking Failed": {
+                    "Type": "Fail"
                 },
                 "Booking Confirmed": {
                     "Type": "Pass",
