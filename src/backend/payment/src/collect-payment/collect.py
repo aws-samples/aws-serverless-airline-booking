@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 
+import aws_lambda_logging
 import requests
 from aws_xray_sdk.core import patch_all, xray_recorder
 
@@ -41,6 +43,7 @@ def collect_payment(charge_id):
             amount collected
     """
     payment_payload = {"chargeId": charge_id}
+    logging.info("Collecting payment...")
     ret = requests.post(payment_endpoint, json=payment_payload)
     payment_response = ret.json()
 
@@ -50,6 +53,7 @@ def collect_payment(charge_id):
 
     if ret.status_code != 200:
         print(payment_response)
+        logging.error("Failed to collect payment")
         raise PaymentException(status_code=ret.status_code, details=ret.json())
 
     return {
@@ -88,18 +92,37 @@ def lambda_handler(event, context):
     BookingConfirmationException
         Booking Confirmation Exception including error message upon failure
     """
+
+    customer_id = event.get("customerId", "undefined")
+    booking_id = event.get("bookingId", "undefined")
+    charge_id = event.get("chargeId", "undefined")
+    state_machine_execution_id = event.get("name", "undefined")
+
+    aws_lambda_logging.setup(
+        level=os.getenv("LOG_LEVEL", "INFO"),
+        lambda_request_id=context.aws_request_id,
+        lambda_arn=context.invoked_function_arn,
+        service="payment",
+        customer_id=customer_id,
+        booking_id=booking_id,
+        charge_id=charge_id,
+    )
+
     if "chargeId" not in event:
+        logging.error("Invalid event")
+        logging.info(event)
         raise ValueError(message="Invalid Charge ID", status_code=400)
 
     subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
-    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
+    subsegment.put_annotation("Payment", charge_id)
+    subsegment.put_annotation("Booking", booking_id)
+    subsegment.put_annotation("Customer", customer_id)
     subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
+    subsegment.put_annotation("StateMachineExecution", state_machine_execution_id)
 
     try:
-        ret = collect_payment(event["chargeId"])
+        ret = collect_payment(charge_id)
+        logging.info("Payment has been successful")
         subsegment.put_annotation("PaymentStatus", "SUCCESS")
         # Step Functions can append multiple values if you return a single dict
         return ret
