@@ -32,11 +32,13 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
+	$(MAKE) deploy.log-processing
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
+	$(MAKE) delete.log-processing
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
@@ -46,6 +48,9 @@ delete.payment: ##=> Delete payment service
 
 delete.loyalty: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
+
+delete.log-processing:
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -97,6 +102,14 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
 				Stage=$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID}
+
+deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
+	$(info [*] Packaging and deploying Loyalty service...)
+	cd src/backend/log-processing && \
+		sam deploy \
+			--template-file template.yaml \
+			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
+			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
 #############
 #  Helpers  #
