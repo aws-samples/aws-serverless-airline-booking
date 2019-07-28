@@ -6,7 +6,8 @@
     ],
     "python.linting.pylintEnabled": false,
     "[python]": {
-        "editor.formatOnPaste": false
+        "editor.formatOnPaste": true
     },
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "autoDocstring.docstringFormat": "numpy"
 }
