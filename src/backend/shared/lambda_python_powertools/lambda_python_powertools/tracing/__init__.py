@@ -1,4 +1,3 @@
-from .state_machines import capture_lambda_handler
+from .tracer import Tracer
 
-
-__all__ = ["capture_lambda_handler"]
+__all__ = [Tracer]
