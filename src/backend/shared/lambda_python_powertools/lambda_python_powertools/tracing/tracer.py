@@ -10,24 +10,22 @@ from aws_xray_sdk.core import models
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
-is_trace_disabled = strtobool(os.getenv("DISABLE_TRACE", False))
 
 
 @dataclass
 class Tracer:
-    service: str
-    is_disabled: bool = is_trace_disabled
+    service: str = None
+    disabled: bool = False
     is_cold_start: bool = True
-    modules_to_patch: tuple = ("boto3", "requests")
     provider: xray_recorder = xray_recorder
     """Tracer using AWS-XRay to provide decorators with known Airline defaults for Lambda functions
 
-    When running locally, it honours DISABLE_TRACE environment variable
+    When running locally, it honours TRACE_DISABLED environment variable
     so end user code doesn't have to be modified to run it locally
     instead Tracer returns dummy segments/subsegments.
 
-    It also patches boto3 and requests modules by default
-    and optionally accepts a tuple of modules to patch if necessary
+    It patches all available libraries supported by X-Ray SDK
+    Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
 
     Example
     -------
@@ -70,7 +68,7 @@ class Tracer:
 
     A Lambda function using Tracer disabled for running it locally
 
-        >>> export DISABLE_TRACE="true"
+        >>> export TRACE_DISABLED="true"
         >>> from lambda_python_powertools.tracing import Tracer
         >>> tracer = Tracer(service="booking")
 
@@ -84,11 +82,9 @@ class Tracer:
     ----------
     service: str
         Service name that will be appended in all tracing metadata
-    is_disabled: bool
-        Flag to disable tracing, useful when running locally. Use DISABLE_TRACE="true" instead
-    modules_to_patch: tuple
-        Tuple with supported modules to patch
-        Reference: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
+    disabled: bool
+        Flag to explicitly disable tracing, useful when running locally.
+        Env: TRACE_DISABLED="true"
 
     Returns
     -------
@@ -98,7 +94,9 @@ class Tracer:
 
     def __post_init__(self):
         logger.debug("Patching modules...")
-        self.__patch(self.modules_to_patch)
+        self.disabled = self.__is_trace_disabled()
+        self.service = self.__is_service_defined()
+        self.__patch()
 
     def capture_lambda_handler(
         self, lambda_handler: Callable[[Dict, Any], Any] = None, process_booking_sfn: bool = False
@@ -238,7 +236,7 @@ class Tracer:
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
-        if self.is_disabled:
+        if self.disabled:
             return
 
         logger.debug(f"Annotating on key '{key}'' with '{value}''")
@@ -266,7 +264,7 @@ class Tracer:
         """
         # Will no longer be needed once #155 is resolved
         # https://github.com/aws/aws-xray-sdk-python/issues/155
-        if self.is_disabled:
+        if self.disabled:
             return
 
         _namespace = namespace or self.service
@@ -326,7 +324,7 @@ class Tracer:
         # https://github.com/aws/aws-xray-sdk-python/issues/155
         subsegment = None
 
-        if self.is_disabled:
+        if self.disabled:
             logger.debug("Tracing has been disabled, return dummy subsegment instead")
             segment = models.dummy_entities.DummySegment()
             subsegment = models.dummy_entities.DummySubsegment(segment)
@@ -347,24 +345,79 @@ class Tracer:
         subsegment : models.subsegment
             Subsegment previously created
         """
-        if self.is_disabled:
+        if self.disabled:
             logger.debug("Tracing has been disabled, return instead")
             return
 
         self.provider.end_subsegment()
 
-    def __patch(self, modules: tuple):
+    def __patch(self):
         """Patch modules for instrumentation
-
-        Parameters
-        ----------
-        modules : tuple
-            Tuple with modules to be patched
         """
-        if self.is_disabled:
+        if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
             return
 
-        from aws_xray_sdk.core import patch
+        from aws_xray_sdk.core import patch_all
 
-        patch(modules)
+        patch_all()
+
+    def __is_trace_disabled(self) -> bool:
+        """Detects whether trace has been disabled
+
+        Tracing is automatically disabled in the following conditions:
+
+        1. Explicitly disabled via TRACE_DISABLED environment variable
+        2. Running in Lambda Emulators where X-Ray Daemon will not be listening
+        3. Explicitly disabled via constructor e.g Tracer(disabled=True)
+
+        Returns
+        -------
+        bool
+        """
+        logger.debug("Verifying whether Tracing has been disabled")
+        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
+        env_option = str(os.getenv("TRACE_DISABLED", "false"))
+        disabled_env = strtobool(env_option)
+
+        if disabled_env:
+            logger.debug("Tracing has been disabled via env var TRACE_DISABLED")
+            return disabled_env
+
+        if self.disabled:
+            logger.debug("Tracing has been explicitly disabled")
+            return self.disabled
+
+        if is_lambda_emulator:
+            logger.debug("Running under SAM CLI env; Tracing has been disabled")
+            return is_lambda_emulator
+
+        return False
+
+    def __is_service_defined(self) -> str:
+        """Detects whether service name has been defined
+
+        Service name is defined in the following conditions:
+
+        1. Explicitly defined via TRACE_SERVICE_NAME environment variable
+        3. Explicitly defined via constructor e.g Tracer(service="booking")
+
+        Returns
+        -------
+        str
+            Service name when defined else "service_name_undefined"
+        """
+        logger.debug("Capturing service name")
+        service_name_env = os.getenv("TRACE_SERVICE_NAME", False)
+
+        if service_name_env:
+            logger.debug("Service name explicitly defined via env var TRACE_SERVICE_NAME")
+            return service_name_env
+
+        if self.service:
+            logger.debug("Service name explicitly defined")
+            return self.service
+
+        logger.debug("Service name not explicitly defined; using TRACE_SERVICE_NAME env instead")
+
+        return "service_name_undefined"
