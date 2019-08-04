@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+black = "*"
+isort = "*"
+pytest-mock = "*"
+pytest = "*"
+pytest-cov = "*"
+flake8 = "*"
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
+
+[packages]
+lambda-python-powertools = {editable = true,path = "."}
