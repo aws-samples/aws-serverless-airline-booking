@@ -13,5 +13,8 @@
     "python.formatting.blackArgs": [
         "--line-length",
         "100"
+    ],
+    "python.testing.pytestArgs": [
+        "--no-cov"
     ]
 }
