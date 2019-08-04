@@ -1,4 +1,3 @@
-import aws_xray_sdk
 import pytest
 
 from lambda_python_powertools.tracing import Tracer
@@ -106,4 +105,3 @@ def test_tracer_env_vars(monkeypatch):
         monkeypatch.setenv("TRACE_DISABLED", disable_option)
         Tracer()
         monkeypatch.delenv("TRACE_DISABLED", raising=False)
-
