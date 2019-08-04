@@ -24,6 +24,8 @@ class Tracer:
     so end user code doesn't have to be modified to run it locally
     instead Tracer returns dummy segments/subsegments.
 
+    When running locally via SAM CLI, it'll automatically disable tracing.
+
     It patches all available libraries supported by X-Ray SDK
     Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
 
@@ -66,11 +68,11 @@ class Tracer:
             >>> response = greeting(name="Heitor")
             >>> return response
 
-    A Lambda function using Tracer disabled for running it locally
+    A Lambda function using service name via TRACE_NAME
 
-        >>> export TRACE_DISABLED="true"
+        >>> export TRACE_NAME="booking"
         >>> from lambda_python_powertools.tracing import Tracer
-        >>> tracer = Tracer(service="booking")
+        >>> tracer = Tracer()
 
         >>> @tracer.capture_lambda_handler
         >>> def handler(event: dict, context: Any) -> Dict:
