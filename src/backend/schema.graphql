@@ -1,0 +1,16 @@
+type Flight @model {
+    id: ID!
+    departureDate: String!
+    departureAirportCode: String!
+    departureAirportName: String!
+    departureCity: String!
+    departureLocale: String!
+    arrivalDate: String!
+    arrivalAirportCode: String!
+    arrivalAirportName: String!
+    arrivalCity: String!
+    arrivalLocale: String!
+    ticketPrice: Int!
+    ticketCurrency: String!
+    flightNumber: Int!
+}
