@@ -1,6 +1,7 @@
 import Flight from "../../shared/models/FlightClass";
 import axios from "axios";
-
+import Amplify, { API, graphqlOperation } from "aws-amplify";
+import { listFlights } from "../../graphql/queries";
 /**
  *
  * Catalog [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchFlights retrieves all flights for a given date, departure and arrival from Catalog service.
@@ -34,7 +35,25 @@ export function fetchFlights({ commit }, { date, departure, arrival }) {
   return new Promise(async (resolve, reject) => {
     commit("SET_LOADER", true);
     try {
-      const { data: flightData } = await axios.get("/mocks/flights.json");
+      // Use graphQL API
+
+      const flightFilter = {
+        filter: {
+          departureDate: {
+            beginsWith: date
+          },
+          departureAirportCode: {
+            eq: departure
+          },
+          arrivalAirportCode: {
+            eq: arrival
+          }
+        }
+      };
+
+      const {
+        data: { listFlights: { items: flightData } }
+      } = await API.graphql(graphqlOperation(listFlights, flightFilter));
       const flights = flightData.map(flight => new Flight(flight));
 
       commit("SET_FLIGHTS", flights);
