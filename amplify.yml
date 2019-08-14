@@ -4,6 +4,7 @@ backend:
     preBuild:
       commands:
         - npm install -g @aws-amplify/cli --unsafe-perm true # install latest amplify-CLI
+        #AMPLIFY IS COOL
         - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
     build:
       commands:
