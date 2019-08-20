@@ -1,14 +1,14 @@
 {
-    "twitch": {
+    "cpjtwitch": {
         "awscloudformation": {
-            "AuthRoleName": "awsserverlessairline-twitch-20190813164631-authRole",
-            "UnauthRoleArn": "arn:aws:iam::529981329863:role/awsserverlessairline-twitch-20190813164631-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::529981329863:role/awsserverlessairline-twitch-20190813164631-authRole",
+            "AuthRoleName": "awsserverlessairline-cpjtwitch-20190820221415-authRole",
+            "UnauthRoleArn": "arn:aws:iam::529981329863:role/awsserverlessairline-cpjtwitch-20190820221415-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::529981329863:role/awsserverlessairline-cpjtwitch-20190820221415-authRole",
             "Region": "eu-west-2",
-            "DeploymentBucketName": "awsserverlessairline-twitch-20190813164631-deployment",
-            "UnauthRoleName": "awsserverlessairline-twitch-20190813164631-unauthRole",
-            "StackName": "awsserverlessairline-twitch-20190813164631",
-            "StackId": "arn:aws:cloudformation:eu-west-2:529981329863:stack/awsserverlessairline-twitch-20190813164631/85adec50-bde1-11e9-844d-0ad01a6c5eea"
+            "DeploymentBucketName": "awsserverlessairline-cpjtwitch-20190820221415-deployment",
+            "UnauthRoleName": "awsserverlessairline-cpjtwitch-20190820221415-unauthRole",
+            "StackName": "awsserverlessairline-cpjtwitch-20190820221415",
+            "StackId": "arn:aws:cloudformation:eu-west-2:529981329863:stack/awsserverlessairline-cpjtwitch-20190820221415/77f95780-c38f-11e9-8ea7-0203b66b1cf8"
         },
         "categories": {
             "auth": {
