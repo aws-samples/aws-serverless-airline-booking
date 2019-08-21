@@ -104,7 +104,7 @@ def test_inject_lambda_context(root_logger, logger, stdout, lambda_context):
         assert key in log
 
 
-def test_inject_lambda_context_log_event_request(monkeypatch, root_logger, logger, stdout):
+def test_inject_lambda_context_log_event_request(root_logger, logger, stdout):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # WHEN logger is setup
     # THEN logger should log event received from Lambda
@@ -113,6 +113,36 @@ def test_inject_lambda_context_log_event_request(monkeypatch, root_logger, logge
     logger_setup()
 
     @logger_inject_lambda_context(log_event=True)
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler(lambda_event, lambda_context)
+
+    # Given that our string buffer has many log statements separated by newline \n
+    # We need to clean it before we can assert on
+    stdout.seek(0)
+    logs = [json.loads(line.strip()) for line in stdout.readlines()]
+
+    event = {}
+    for log in logs:
+        if "greeting" in log["message"]:
+            event = log["message"]
+
+    assert event == lambda_event
+
+
+def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logger, logger, stdout):
+
+    # GIVEN a lambda function is decorated with logger instructed to log event
+    # via POWERTOOLS_LOGGER_LOG_EVENT env
+    # WHEN logger is setup
+    # THEN logger should log event received from Lambda
+    lambda_event = {"greeting": "hello"}
+    monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
+
+    logger_setup()
+
+    @logger_inject_lambda_context()
     def handler(event, context):
         logger.info("Hello")
 

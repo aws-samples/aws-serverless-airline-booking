@@ -1,6 +1,7 @@
 import functools
 import logging
 import os
+from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
 import aws_lambda_logging
@@ -54,6 +55,11 @@ def logger_inject_lambda_context(
     log_event : bool, optional
         Instructs logger to log Lambda Event, by default False
 
+    Environment variables
+    ---------------------
+    POWERTOOLS_LOGGER_LOG_EVENT : str
+        instruct logger to log Lambda Event (e.g. "true", "True", "TRUE")
+
     Example
     -------
     Captures Lambda contextual runtime info (e.g memory, arn, req_id)
@@ -96,6 +102,9 @@ def logger_inject_lambda_context(
     if lambda_handler is None:
         logger.debug("Decorator called with parameters")
         return functools.partial(logger_inject_lambda_context, log_event=log_event)
+
+    log_event_env_option = str(os.getenv("POWERTOOLS_LOGGER_LOG_EVENT", "false"))
+    log_event = strtobool(log_event_env_option) or log_event
 
     @functools.wraps(lambda_handler)
     def decorate(event, context):
