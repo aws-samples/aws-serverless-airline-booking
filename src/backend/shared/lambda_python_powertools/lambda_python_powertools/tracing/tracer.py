@@ -360,8 +360,8 @@ class Tracer:
         """
         logger.debug("Patching modules...")
 
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
-        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
+        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
+        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT")
 
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
@@ -389,7 +389,7 @@ class Tracer:
         bool
         """
         logger.debug("Verifying whether Tracing has been disabled")
-        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
+        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL")
         env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
         disabled_env = strtobool(env_option)
 
