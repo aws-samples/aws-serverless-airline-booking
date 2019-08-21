@@ -363,8 +363,15 @@ class Tracer:
     def __patch(self):
         """Patch modules for instrumentation
         """
+        is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
+        is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
+
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting patch")
+            return
+
+        if is_lambda_emulator or not is_lambda_env:
+            logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
             return
 
         from aws_xray_sdk.core import patch_all
