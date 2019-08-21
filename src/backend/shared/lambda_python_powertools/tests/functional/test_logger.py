@@ -1,11 +1,11 @@
 import io
 import json
 import logging
+from dataclasses import dataclass
 
 import pytest
 
-from dataclasses import dataclass
-from lambda_python_powertools.logging import logger_setup, logger_inject_lambda_context
+from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
 
 
 @pytest.fixture
