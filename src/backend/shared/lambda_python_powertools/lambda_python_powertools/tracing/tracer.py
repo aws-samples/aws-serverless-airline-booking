@@ -14,7 +14,7 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 @dataclass
 class Tracer:
-    service: str = None
+    service: str = "service_undefined"
     disabled: bool = False
     is_cold_start: bool = True
     provider: xray_recorder = xray_recorder
@@ -102,9 +102,8 @@ class Tracer:
     """
 
     def __post_init__(self):
-        logger.debug("Patching modules...")
         self.disabled = self.__is_trace_disabled()
-        self.service = self.__is_service_defined()
+        self.service = os.getenv("POWERTOOLS_SERVICE_NAME") or self.service
         self.__patch()
 
     def capture_lambda_handler(
@@ -288,10 +287,6 @@ class Tracer:
         event : dict
             Process Booking State Machine
         """
-        if event is None:
-            logger.debug("No event to be captured")
-            return
-
         logger.debug("Capturing input from process booking state machine")
         logger.debug(event)
 
@@ -363,6 +358,8 @@ class Tracer:
     def __patch(self):
         """Patch modules for instrumentation
         """
+        logger.debug("Patching modules...")
+
         is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
         is_lambda_env = os.getenv("LAMBDA_TASK_ROOT", False)
 
@@ -374,9 +371,9 @@ class Tracer:
             logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
             return
 
-        from aws_xray_sdk.core import patch_all
+        from aws_xray_sdk.core import patch_all  # pragma: no cover
 
-        patch_all()
+        patch_all()  # pragma: no cover
 
     def __is_trace_disabled(self) -> bool:
         """Detects whether trace has been disabled
@@ -409,34 +406,3 @@ class Tracer:
             return is_lambda_emulator
 
         return False
-
-    def __is_service_defined(self) -> str:
-        """Detects whether service name has been defined
-
-        Service name is defined in the following conditions:
-
-        1. Explicitly defined via POWERTOOLS_SERVICE_NAME environment variable
-        3. Explicitly defined via constructor e.g Tracer(service="booking")
-
-        Returns
-        -------
-        str
-            Service name when defined else "service_name_undefined"
-        """
-        ## TODO: Convert to one liner OR
-        logger.debug("Capturing service name")
-        service_name_env = os.getenv("POWERTOOLS_SERVICE_NAME", False)
-
-        if service_name_env:
-            logger.debug("Service name explicitly defined via env var POWERTOOLS_SERVICE_NAME")
-            return service_name_env
-
-        if self.service:
-            logger.debug("Service name explicitly defined")
-            return self.service
-
-        logger.debug(
-            "Service name not explicitly defined; using POWERTOOLS_SERVICE_NAME env instead"
-        )
-
-        return "service_name_undefined"
