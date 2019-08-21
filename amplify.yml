@@ -4,7 +4,7 @@ backend:
     preBuild:
       commands:
         #- npm install -g @aws-amplify/cli --unsafe-perm true # install latest amplify-CLI
-        npm install -g @aws-amplify/cli@1.7.2
+        npm install -g @aws-amplify/cli@1.7.3-graphql-code-generator.8
         - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
     build:
       commands:
@@ -12,7 +12,7 @@ backend:
         - amplifyPush --simple
         ##
         # Extract Environment data
-        ##
+        #
         - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export AWS_DEFAULT_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
