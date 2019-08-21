@@ -7,6 +7,39 @@ import aws_lambda_logging
 
 
 def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwargs):
+    """Setups root logger to format statements in JSON.
+
+    Includes service name and any additional key=value into logs
+    It also accepts both service name or level explicitly via env vars
+
+    Environment variables
+    ---------------------
+    POWERTOOLS_SERVICE_NAME : str
+        service name
+    LOG_LEVEL: str
+        logging level (e.g. INFO, DEBUG)
+
+    Parameters
+    ----------
+    service : str, optional
+        service name to be appended in logs, by default "service_undefined"
+    level : str, optional
+        logging.level, by default "INFO"
+
+    Example
+    -------
+    Setups structured logging in JSON for Lambda functions
+
+        >>> from lambda_python_powertools.logging import logger_setup
+        >>> import logging
+        >>>
+        >>> logger = logging.getLogger(__name__)
+        >>> logging.setLevel(logging.INFO)
+        >>> logger_setup()
+        >>>
+        >>> def handler(event, context):
+                logger.info("Hello")
+    """
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     aws_lambda_logging.setup(level=level, service=service, **kwargs)
 
@@ -14,6 +47,44 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwar
 def logger_inject_lambda_context(
     lambda_handler: Callable[[Dict, Any], Any] = None, log_event: bool = False
 ):
+    """Decorator to capture Lambda contextual info and inject into struct logging
+
+    Parameters
+    ----------
+    log_event : bool, optional
+        Instructs logger to log Lambda Event, by default False
+
+    Example
+    -------
+    Captures Lambda contextual runtime info (e.g memory, arn, req_id)
+        >>> from lambda_python_powertools.logging import logger_setup, logger_inject_lambda_context
+        >>> import logging
+        >>>
+        >>> logger = logging.getLogger(__name__)
+        >>> logging.setLevel(logging.INFO)
+        >>> logger_setup()
+        >>>
+        >>> @logger_inject_lambda_context
+        >>> def handler(event, context):
+                logger.info("Hello")
+
+    Captures Lambda contextual runtime info and logs incoming request
+        >>> from lambda_python_powertools.logging import logger_setup, logger_inject_lambda_context
+        >>> import logging
+        >>>
+        >>> logger = logging.getLogger(__name__)
+        >>> logging.setLevel(logging.INFO)
+        >>> logger_setup()
+        >>>
+        >>> @logger_inject_lambda_context(log_event=True)
+        >>> def handler(event, context):
+                logger.info("Hello")
+
+    Returns
+    -------
+    decorate : Callable
+        Decorated lambda handler
+    """
 
     logger = logging.getLogger(__name__)
     logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -32,7 +103,7 @@ def logger_inject_lambda_context(
             logger.debug("Event received")
             logger.info(event)
 
-        lambda_context = _capture_lambda_context(event, context)
+        lambda_context = _capture_lambda_context(context)
         logger_setup(**lambda_context)
 
         return lambda_handler(event, context)
@@ -40,7 +111,19 @@ def logger_inject_lambda_context(
     return decorate
 
 
-def _capture_lambda_context(event: Dict, context: object) -> Dict:
+def _capture_lambda_context(context: object) -> Dict:
+    """Captures Lambda function runtime info to be used across all log statements
+
+    Parameters
+    ----------
+    context : object
+        Lambda context object
+
+    Returns
+    -------
+    Dict
+        Lambda context with key fields
+    """
 
     fn_name = getattr(context, "function_name", "")
     memory_size = str(getattr(context, "memory_limit_in_mb", ""))
