@@ -5,8 +5,7 @@ from dataclasses import dataclass
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import models
+from aws_xray_sdk.core import models, xray_recorder
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -107,7 +106,9 @@ class Tracer:
         self.__patch()
 
     def capture_lambda_handler(
-        self, lambda_handler: Callable[[Dict, Any], Any] = None, process_booking_sfn: bool = False
+        self,
+        lambda_handler: Callable[[Dict, Any], Any] = None,
+        process_booking_sfn: bool = False,
     ):
         """Decorator to create subsegment for lambda handlers
 
@@ -276,7 +277,9 @@ class Tracer:
             return
 
         _namespace = namespace or self.service
-        logger.debug(f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''")
+        logger.debug(
+            f"Adding metadata on key '{key}'' with '{value}'' at namespace '{namespace}''"
+        )
         self.provider.put_metadata(key=key, value=value, namespace=_namespace)
 
     def __capture_process_booking_state_machine(self, event: Dict = None):
@@ -394,7 +397,9 @@ class Tracer:
         disabled_env = strtobool(env_option)
 
         if disabled_env:
-            logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
+            logger.debug(
+                "Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED"
+            )
             return disabled_env
 
         if self.disabled:

@@ -131,7 +131,9 @@ def test_inject_lambda_context_log_event_request(root_logger, logger, stdout):
     assert event == lambda_event
 
 
-def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logger, logger, stdout):
+def test_inject_lambda_context_log_event_request_env_var(
+    monkeypatch, root_logger, logger, stdout
+):
 
     # GIVEN a lambda function is decorated with logger instructed to log event
     # via POWERTOOLS_LOGGER_LOG_EVENT env
@@ -161,7 +163,9 @@ def test_inject_lambda_context_log_event_request_env_var(monkeypatch, root_logge
     assert event == lambda_event
 
 
-def test_inject_lambda_context_log_no_request_by_default(monkeypatch, root_logger, logger, stdout):
+def test_inject_lambda_context_log_no_request_by_default(
+    monkeypatch, root_logger, logger, stdout
+):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN logger should not log event received by lambda handler

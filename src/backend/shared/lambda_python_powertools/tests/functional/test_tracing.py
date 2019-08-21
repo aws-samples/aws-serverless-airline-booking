@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 import pytest
 
 from lambda_python_powertools.tracing import Tracer
@@ -66,7 +67,10 @@ def test_tracer_method(mocker, dummy_response, xray_stub):
     end_subsegment_mock = mocker.MagicMock()
 
     xray_provider = xray_stub(
-        put_metadata_mock, put_annotation_mock, begin_subsegment_mock, end_subsegment_mock
+        put_metadata_mock,
+        put_annotation_mock,
+        begin_subsegment_mock,
+        end_subsegment_mock,
     )
     tracer = Tracer(provider=xray_provider, service="booking")
 
@@ -125,7 +129,9 @@ def test_tracer_custom_annotation(mocker, dummy_response, xray_stub):
     handler({}, mocker.MagicMock())
 
     assert put_annotation_mock.call_count == 1
-    assert put_annotation_mock.call_args == mocker.call(key=annotation_key, value=annotation_value)
+    assert put_annotation_mock.call_args == mocker.call(
+        key=annotation_key, value=annotation_value
+    )
 
 
 def test_tracer_custom_metadata(mocker, dummy_response, xray_stub):
