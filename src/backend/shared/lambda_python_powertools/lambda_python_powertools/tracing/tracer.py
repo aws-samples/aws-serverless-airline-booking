@@ -20,7 +20,7 @@ class Tracer:
     provider: xray_recorder = xray_recorder
     """Tracer using AWS-XRay to provide decorators with known Airline defaults for Lambda functions
 
-    When running locally, it honours TRACE_DISABLED environment variable
+    When running locally, it honours POWERTOOLS_TRACE_DISABLED environment variable
     so end user code doesn't have to be modified to run it locally
     instead Tracer returns dummy segments/subsegments.
 
@@ -28,6 +28,13 @@ class Tracer:
 
     It patches all available libraries supported by X-Ray SDK
     Ref: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/thirdparty.html
+
+    Environment variables
+    ---------------------
+    POWERTOOLS_TRACE_DISABLED : str
+        disable tracer (e.g. "true", "True", "TRUE")
+    POWERTOOLS_SERVICE_NAME : str
+        service name
 
     Example
     -------
@@ -68,9 +75,9 @@ class Tracer:
             >>> response = greeting(name="Heitor")
             >>> return response
 
-    A Lambda function using service name via TRACE_NAME
+    A Lambda function using service name via POWERTOOLS_SERVICE_NAME
 
-        >>> export TRACE_NAME="booking"
+        >>> export POWERTOOLS_SERVICE_NAME="booking"
         >>> from lambda_python_powertools.tracing import Tracer
         >>> tracer = Tracer()
 
@@ -86,7 +93,7 @@ class Tracer:
         Service name that will be appended in all tracing metadata
     disabled: bool
         Flag to explicitly disable tracing, useful when running locally.
-        Env: TRACE_DISABLED="true"
+        Env: POWERTOOLS_TRACE_DISABLED="true"
 
     Returns
     -------
@@ -379,11 +386,11 @@ class Tracer:
         """
         logger.debug("Verifying whether Tracing has been disabled")
         is_lambda_emulator = os.getenv("AWS_SAM_LOCAL", False)
-        env_option = str(os.getenv("TRACE_DISABLED", "false"))
+        env_option = str(os.getenv("POWERTOOLS_TRACE_DISABLED", "false"))
         disabled_env = strtobool(env_option)
 
         if disabled_env:
-            logger.debug("Tracing has been disabled via env var TRACE_DISABLED")
+            logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return disabled_env
 
         if self.disabled:
@@ -401,7 +408,7 @@ class Tracer:
 
         Service name is defined in the following conditions:
 
-        1. Explicitly defined via TRACE_SERVICE_NAME environment variable
+        1. Explicitly defined via POWERTOOLS_SERVICE_NAME environment variable
         3. Explicitly defined via constructor e.g Tracer(service="booking")
 
         Returns
@@ -409,17 +416,20 @@ class Tracer:
         str
             Service name when defined else "service_name_undefined"
         """
+        ## TODO: Convert to one liner OR
         logger.debug("Capturing service name")
-        service_name_env = os.getenv("TRACE_SERVICE_NAME", False)
+        service_name_env = os.getenv("POWERTOOLS_SERVICE_NAME", False)
 
         if service_name_env:
-            logger.debug("Service name explicitly defined via env var TRACE_SERVICE_NAME")
+            logger.debug("Service name explicitly defined via env var POWERTOOLS_SERVICE_NAME")
             return service_name_env
 
         if self.service:
             logger.debug("Service name explicitly defined")
             return self.service
 
-        logger.debug("Service name not explicitly defined; using TRACE_SERVICE_NAME env instead")
+        logger.debug(
+            "Service name not explicitly defined; using POWERTOOLS_SERVICE_NAME env instead"
+        )
 
         return "service_name_undefined"

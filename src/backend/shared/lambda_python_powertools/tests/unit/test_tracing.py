@@ -92,7 +92,7 @@ def test_tracer_env_vars(monkeypatch):
     # WHEN service is explicitly defined
     # THEN tracer should have use that service name
     service_name = "booking"
-    monkeypatch.setenv("TRACE_SERVICE_NAME", service_name)
+    monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
     tracer_env_var = Tracer(disabled=True)
 
     assert tracer_env_var.service == service_name
@@ -100,8 +100,7 @@ def test_tracer_env_vars(monkeypatch):
     tracer_explicit = Tracer(disabled=True, service=service_name)
     assert tracer_explicit.service == service_name
 
-    disable_true_options = ("true", "True", "1")
-    for disable_option in disable_true_options:
-        monkeypatch.setenv("TRACE_DISABLED", disable_option)
-        Tracer()
-        monkeypatch.delenv("TRACE_DISABLED", raising=False)
+    monkeypatch.setenv("POWERTOOLS_TRACE_DISABLED", "true")
+    tracer = Tracer()
+
+    assert bool(tracer.disabled) is True
