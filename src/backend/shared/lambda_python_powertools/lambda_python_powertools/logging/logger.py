@@ -42,7 +42,8 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwar
                 logger.info("Hello")
     """
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
-    aws_lambda_logging.setup(level=level, service=service, **kwargs)
+    log_level = os.getenv("LOG_LEVEL") or level
+    aws_lambda_logging.setup(level=log_level, service=service, **kwargs)
 
 
 def logger_inject_lambda_context(
