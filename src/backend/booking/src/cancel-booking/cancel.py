@@ -3,6 +3,7 @@ import os
 
 import boto3
 from botocore.exceptions import ClientError
+
 from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
@@ -17,15 +18,13 @@ table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
 
 
 class BookingCancellationException(Exception):
-    def __init__(
-        self, message="Booking cancellation failed", status_code=500, details={}
-    ):
+    def __init__(self, message=None, status_code=None, details=None):
 
         super(BookingCancellationException, self).__init__()
 
-        self.message = message
-        self.status_code = status_code
-        self.details = details
+        self.message = message or "Booking cancellation failed"
+        self.status_code = status_code or 500
+        self.details = details or {}
 
 
 @tracer.capture_method
