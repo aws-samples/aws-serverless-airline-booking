@@ -7,6 +7,10 @@ Globals:
   Function:
     Timeout: 5
     Tracing: Active
+    Environment:
+        Variables:
+            POWERTOOLS_SERVICE_NAME: booking
+            LOG_LEVEL: INFO
 
 Parameters:
     BookingTable:

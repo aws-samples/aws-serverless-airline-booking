@@ -182,6 +182,7 @@ class Tracer:
         """Decorator to create subsegment for arbitrary functions
 
         It also captures both response and exceptions as metadata
+        and creates a subsegment named `## <method_name>`
 
         Example
         -------
