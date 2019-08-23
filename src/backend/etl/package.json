@@ -1,0 +1,21 @@
+{
+  "name": "etl",
+  "version": "1.0.0",
+  "description": "ETL service to populate Flight details",
+  "dependencies": {
+    "aws-sdk": "^2.464.0"
+  },
+  "devDependencies": {
+    "aws-sdk-mock": "^4.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aws-samples/aws-serverless-airline-booking.git"
+  },
+  "author": "Michele Ricciardi <mriccia@amazon.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aws-samples/aws-serverless-airline-booking/issues"
+  },
+  "homepage": "https://github.com/aws-samples/aws-serverless-airline-booking#readme"
+}

@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Booking service
+
+Globals:
+  Function:
+    Timeout: 5
+
+
+Parameters:
+  FlightTable:
+    Type: String
+    Description: Flight Table
+
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+
+Resources:
+  AddFlightsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambdaHandler
+      Runtime: nodejs8.10
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FlightTable
+      Environment:
+        Variables:
+          BOOKING_TABLE_NAME: !Ref FlightTable
+
+  StatesExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !Sub ${AddFlightsFunction.Arn}
+
+  AddFlights:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionString: !Sub |
+        {
+            "StartAt": "Add Flights",
+            "States": {
+                "Add Flights": {
+                    "Type": "Task",
+                    "Resource": "${AddFlightsFunction.Arn}",
+                    "TimeoutSeconds": 5,
+                    "Retry": [
+                        {
+                            "ErrorEquals": [
+                                "FlightAddingException"
+                            ],
+                            "IntervalSeconds": 1,
+                            "BackoffRate": 2,
+                            "MaxAttempts": 2
+                        }
+                    ],
+                    "Catch": [
+                        {
+                            "ErrorEquals": [
+                                "States.ALL"
+                            ],
+                            "ResultPath": "$.bookingError",
+                            "Next": "Cancel Booking"
+                        }
+                    ],
+                    "ResultPath": "$.taskResult",
+                    "Next": "Flights Added"
+                },
+                "Flights Added": {
+                    "Type": "Pass",
+                    "End": true
+                }
+            }
+        }
+      RoleArn: !Sub ${StatesExecutionRole.Arn}
+
+
+Outputs:
+  AddFlightsStateMachine:
+    Value: !Ref AddFlights
+    Description: The ARN of the Add Flights StateMachine
