@@ -1,31 +1,35 @@
-import json
+import logging
 import os
 import secrets
 
 import boto3
-from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
 
-patch_all()
+from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.tracing import Tracer
+
+logger = logging.getLogger(__name__)
+tracer = Tracer()
+
+logger_setup()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
-table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
+table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
+table = dynamodb.Table(table_name)
 
 
 class BookingConfirmationException(Exception):
-    def __init__(
-        self, message="Booking confirmation failed", status_code=500, details={}
-    ):
+    def __init__(self, message=None, status_code=None, details=None):
 
         super(BookingConfirmationException, self).__init__()
 
-        self.message = message
-        self.status_code = status_code
-        self.details = details
+        self.message = message or "Booking confirmation failed"
+        self.status_code = status_code or 500
+        self.details = details or {}
 
 
-@xray_recorder.capture("## confirm_booking")
+@tracer.capture_method
 def confirm_booking(booking_id):
     """Update existing booking to CONFIRMED and generates a Booking reference
 
@@ -45,6 +49,9 @@ def confirm_booking(booking_id):
         Booking Confirmation Exception including error message upon failure
     """
     try:
+        logger.debug(
+            {"operation": "confirm_booking", "details": {"booking_id": booking_id}}
+        )
         reference = secrets.token_urlsafe(4)
         ret = table.update_item(
             Key={"id": booking_id},
@@ -59,15 +66,18 @@ def confirm_booking(booking_id):
             ReturnValues="UPDATED_NEW",
         )
 
-        subsegment = xray_recorder.current_subsegment()
-        subsegment.put_metadata(booking_id, ret, "booking")
+        logger.info({"operation": "confirm_booking", "details": ret})
+        logger.debug("Adding update item operation result as tracing metadata")
+        tracer.put_metadata(booking_id, ret)
 
         return {"bookingReference": reference}
     except ClientError as err:
+        logger.debug({"operation": "confirm_booking", "details": err})
         raise BookingConfirmationException(details=err)
 
 
-@xray_recorder.capture("## handler")
+@tracer.capture_lambda_handler(process_booking_sfn=True)
+@logger_inject_lambda_context
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to confirm booking
 
@@ -95,23 +105,23 @@ def lambda_handler(event, context):
     """
 
     if "bookingId" not in event:
+        logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking ID")
 
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
-    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
-    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
-
     try:
-        ret = confirm_booking(event["bookingId"])
-        subsegment.put_annotation("BookingReference", ret["bookingReference"])
-        subsegment.put_annotation("BookingStatus", "CONFIRMED")
+        booking_id = event["bookingId"]
+        logger.debug(f"Confirming booking - {booking_id}")
+        ret = confirm_booking(booking_id)
+
+        logger.debug("Adding Booking Status annotation")
+        tracer.put_annotation("BookingReference", ret["bookingReference"])
+        tracer.put_annotation("BookingStatus", "CONFIRMED")
 
         # Step Functions use the return to append `bookingReference` key into the overall output
         return ret["bookingReference"]
     except BookingConfirmationException as err:
-        subsegment.put_annotation("BookingStatus", "ERROR")
-        subsegment.put_metadata("confirm_booking_error", err, "booking")
+        logger.debug("Adding Booking Status annotation, and exception as metadata")
+        tracer.put_annotation("BookingStatus", "ERROR")
+        tracer.put_metadata("confirm_booking_error", err)
+
         raise BookingConfirmationException(details=err)

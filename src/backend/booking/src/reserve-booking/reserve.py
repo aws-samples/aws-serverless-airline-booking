@@ -1,36 +1,41 @@
+import logging
 import datetime
-import json
 import os
 import uuid
 
 import boto3
-from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
 
-patch_all()
+from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.tracing import Tracer
+
+logger = logging.getLogger(__name__)
+tracer = Tracer()
+
+logger_setup()
+
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
-table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
+table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
+table = dynamodb.Table(table_name)
 
 
 class BookingReservationException(Exception):
-    def __init__(
-        self, message="Booking reservation failed", status_code=500, details={}
-    ):
+    def __init__(self, message=None, status_code=None, details=None):
 
         super(BookingReservationException, self).__init__()
 
-        self.message = message
-        self.status_code = status_code
-        self.details = details
+        self.message = message or "Booking reservation failed"
+        self.status_code = status_code or 500
+        self.details = details or {}
 
 
 def is_booking_request_valid(booking):
     return all(x in booking for x in ["outboundFlightId", "customerId", "chargeId"])
 
 
-@xray_recorder.capture("## reserve_booking")
+@tracer.capture_method
 def reserve_booking(booking):
     """Creates a new booking as UNCONFIRMED
 
@@ -58,31 +63,49 @@ def reserve_booking(booking):
         bookingId: string
     """
     try:
-        id = str(uuid.uuid4())
+        booking_id = str(uuid.uuid4())
+        state_machine_execution_id = booking["name"]
+        outbound_flight_id = booking["outboundFlightId"]
+        customer_id = booking["customerId"]
+        payment_token = booking["chargeId"]
 
         booking_item = {
-            "id": id,
-            "stateExecutionId": booking["name"],
+            "id": booking_id,
+            "stateExecutionId": state_machine_execution_id,
             "__typename": "Booking",
-            "bookingOutboundFlightId": booking["outboundFlightId"],
+            "bookingOutboundFlightId": outbound_flight_id,
             "checkedIn": False,
-            "customer": booking["customerId"],
-            "paymentToken": booking["chargeId"],
+            "customer": customer_id,
+            "paymentToken": payment_token,
             "status": "UNCONFIRMED",
             "createdAt": str(datetime.datetime.now()),
         }
 
-        table.put_item(Item=booking_item)
+        logger.debug(
+            {
+                "operation": "reserve_booking",
+                "details": {
+                    "customer_id": customer_id,
+                    "payment_token": payment_token,
+                    "state_execution_id": state_machine_execution_id,
+                    "outbound_flight_id": outbound_flight_id,
+                },
+            }
+        )
+        ret = table.put_item(Item=booking_item)
 
-        subsegment = xray_recorder.current_subsegment()
-        subsegment.put_metadata(id, booking_item, "booking")
+        logger.info({"operation": "reserve_booking", "details": ret})
+        logger.debug("Adding put item operation result as tracing metadata")
+        tracer.put_metadata(booking_id, booking_item, "booking")
 
-        return {"bookingId": id}
+        return {"bookingId": booking_id}
     except ClientError as err:
+        logger.debug({"operation": "reserve_booking", "details": err})
         raise BookingReservationException(details=err)
 
 
-@xray_recorder.capture("## handler")
+@tracer.capture_lambda_handler(process_booking_sfn=True)
+@logger_inject_lambda_context
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to reserve a booking
 
@@ -100,7 +123,7 @@ def lambda_handler(event, context):
         chargeId: string
             Pre-authorization payment token
 
-        customer: string
+        customerId: string
             Customer unique identifier
 
         bookingOutboundFlightId: string
@@ -121,21 +144,20 @@ def lambda_handler(event, context):
         Booking Reservation Exception including error message upon failure
     """
     if not is_booking_request_valid(event):
+        logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking request")
 
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
-    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
-
     try:
+        logger.debug(f"Reserving booking for customer {event['customerId']}")
         ret = reserve_booking(event)
-        subsegment.put_annotation("Booking", ret["bookingId"])
-        subsegment.put_annotation("BookingStatus", "RESERVED")
+        logger.debug("Adding Booking Reservation annotation")
+        tracer.put_annotation("Booking", ret["bookingId"])
+        tracer.put_annotation("BookingStatus", "RESERVED")
 
         # Step Functions use the return to append `bookingId` key into the overall output
         return ret["bookingId"]
     except BookingReservationException as err:
-        subsegment.put_annotation("BookingStatus", "ERROR")
-        subsegment.put_metadata("reserve_booking_error", err, "booking")
+        logger.debug("Adding Booking Reservation annotation, and exception as metadata")
+        tracer.put_annotation("BookingStatus", "ERROR")
+        tracer.put_metadata("reserve_booking_error", err, "booking")
         raise BookingReservationException(details=err)

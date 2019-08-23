@@ -1,11 +1,18 @@
 import json
+import logging
 import os
 
 import boto3
-from aws_xray_sdk.core import patch_all, xray_recorder
 from botocore.exceptions import ClientError
 
-patch_all()
+from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.tracing import Tracer
+
+logger = logging.getLogger(__name__)
+tracer = Tracer()
+
+logger_setup()
+
 
 session = boto3.Session()
 sns = session.client("sns")
@@ -13,18 +20,16 @@ booking_sns_topic = os.getenv("BOOKING_TOPIC", "undefined")
 
 
 class BookingNotificationException(Exception):
-    def __init__(
-        self, message="Booking notification failed", status_code=500, details={}
-    ):
+    def __init__(self, message=None, status_code=None, details=None):
 
         super(BookingNotificationException, self).__init__()
 
-        self.message = message
-        self.status_code = status_code
-        self.details = details
+        self.message = message or "Booking notification failed"
+        self.status_code = status_code or 500
+        self.details = details or {}
 
 
-@xray_recorder.capture("## notify_booking")
+@tracer.capture_method
 def notify_booking(payload, booking_reference):
     """Notify whether a booking have been processed successfully
 
@@ -54,6 +59,7 @@ def notify_booking(payload, booking_reference):
         Booking Notification Exception including error message upon failure
     """
 
+    booking_reference = booking_reference or "most recent booking"
     successful_subject = f"Booking confirmation for {booking_reference}"
     unsuccessful_subject = f"Unable to process booking for {booking_reference}"
 
@@ -61,6 +67,16 @@ def notify_booking(payload, booking_reference):
     booking_status = "confirmed" if booking_reference else "cancelled"
 
     try:
+        logger.debug(
+            {
+                "operation": "notify_booking",
+                "details": {
+                    "customer_id": payload["customerId"],
+                    "booking_price": payload["price"],
+                    "booking_status": booking_status,
+                },
+            }
+        )
         ret = sns.publish(
             TopicArn=booking_sns_topic,
             Message=json.dumps(payload),
@@ -70,17 +86,18 @@ def notify_booking(payload, booking_reference):
             },
         )
 
-        message_id = ret["MessageId"]
+        logger.info({"operation": "notify_booking", "details": ret})
+        logger.debug("Adding publish notification operation result as tracing metadata")
+        tracer.put_metadata(booking_reference, ret)
 
-        subsegment = xray_recorder.current_subsegment()
-        subsegment.put_metadata(booking_reference, ret, "notification")
-
-        return {"notificationId": message_id}
+        return {"notificationId": ret["MessageId"]}
     except ClientError as err:
+        logger.debug({"operation": "notify_booking", "details": err})
         raise BookingNotificationException(details=err)
 
 
-@xray_recorder.capture("## handler")
+@tracer.capture_lambda_handler(process_booking_sfn=True)
+@logger_inject_lambda_context
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to notify booking
 
@@ -120,25 +137,24 @@ def lambda_handler(event, context):
     booking_reference = event.get("bookingReference", False)
 
     if not customer_id and not price:
+        logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid customer and price")
-
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("Payment", event.get("chargeId", "undefined"))
-    subsegment.put_annotation("Booking", event.get("bookingId", "undefined"))
-    subsegment.put_annotation("Customer", event.get("customerId", "undefined"))
-    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
-    subsegment.put_annotation("StateMachineExecution", event.get("name", "undefined"))
-    subsegment.put_annotation("BookingReference", booking_reference)
 
     try:
         payload = {"customerId": customer_id, "price": price}
         ret = notify_booking(payload, booking_reference)
-        subsegment.put_annotation("BookingNotification", ret["notificationId"])
-        subsegment.put_annotation("BookingNotificationStatus", "SUCCESS")
+
+        logger.debug("Adding Booking Notification annotation")
+        tracer.put_annotation("BookingNotification", ret["notificationId"])
+        tracer.put_annotation("BookingNotificationStatus", "SUCCESS")
 
         # Step Functions use the return to append `notificationId` key into the overall output
         return ret["notificationId"]
     except BookingNotificationException as err:
-        subsegment.put_annotation("BookingNotificationStatus", "FAILED")
-        subsegment.put_metadata("notify_booking_error", err, "booking")
+        logger.debug(
+            "Adding Booking Notification annotation, and exception as metadata"
+        )
+        tracer.put_annotation("BookingNotificationStatus", "FAILED")
+        tracer.put_metadata("notify_booking_error", err, "booking")
+
         raise BookingNotificationException(details=err)

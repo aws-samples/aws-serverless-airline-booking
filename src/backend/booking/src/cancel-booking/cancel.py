@@ -14,7 +14,8 @@ logger_setup()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
-table = dynamodb.Table(os.getenv("BOOKING_TABLE_NAME", "undefined"))
+table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
+table = dynamodb.Table(table_name)
 
 
 class BookingCancellationException(Exception):
@@ -30,6 +31,9 @@ class BookingCancellationException(Exception):
 @tracer.capture_method
 def cancel_booking(booking_id):
     try:
+        logger.debug(
+            {"operation": "cancel_booking", "details": {"booking_id": booking_id}}
+        )
         ret = table.update_item(
             Key={"id": booking_id},
             ConditionExpression="id = :idVal",
@@ -39,12 +43,13 @@ def cancel_booking(booking_id):
             ReturnValues="UPDATED_NEW",
         )
 
-        logger.info({"operation": "update_item", "details": ret})
+        logger.info({"operation": "cancel_booking", "details": ret})
+        logger.debug("Adding update item operation result as tracing metadata")
         tracer.put_metadata(booking_id, ret)
 
         return True
     except ClientError as err:
-        logger.exception(err)
+        logger.debug({"operation": "cancel_booking", "details": err})
         raise BookingCancellationException(details=err)
 
 
@@ -75,18 +80,21 @@ def lambda_handler(event, context):
         Booking Cancellation Exception including error message upon failure
     """
     if "bookingId" not in event:
+        logger.error({"detail": "Invalid event received", "details": event})
         raise ValueError("Invalid booking ID")
 
     try:
-        logging.debug(f"Cancelling booking - {event['bookingId']}")
-        ret = cancel_booking(event["bookingId"])
-        logging.debug("Adding Booking Status annotation")
+        booking_id = event["bookingId"]
+        logger.debug(f"Cancelling booking - {booking_id}")
+        ret = cancel_booking(booking_id)
+
+        logger.debug("Adding Booking Status annotation")
         tracer.put_annotation("BookingStatus", "CANCELLED")
 
         return ret
     except BookingCancellationException as err:
-        logging.debug("Adding Booking Status annotation, and exception as metadata")
+        logger.debug("Adding Booking Status annotation, and exception as metadata")
         tracer.put_annotation("BookingStatus", "ERROR")
         tracer.put_metadata("cancel_booking_error", err)
-        logging.exception(err)
+
         raise BookingCancellationException(details=err)

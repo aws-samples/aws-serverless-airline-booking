@@ -28,3 +28,24 @@ build-cancel-booking:
 invoke-cancel-booking: build-cancel-booking
 	sam build CancelBooking
 	sam local invoke --event src/cancel-booking/event.json --env-vars local-env-vars.json CancelBooking --profile ${PROFILE}
+
+build-confirm-booking:
+	sam build ConfirmBooking
+
+invoke-confirm-booking: build-confirm-booking
+	sam build ConfirmBooking
+	sam local invoke --event src/confirm-booking/event.json --env-vars local-env-vars.json ConfirmBooking --profile ${PROFILE}
+
+build-notify-booking:
+	sam build NotifyBooking
+
+invoke-notify-booking: build-notify-booking
+	sam build NotifyBooking
+	sam local invoke --event src/notify-booking/event.json --env-vars local-env-vars.json NotifyBooking --profile ${PROFILE}
+
+build-reserve-booking:
+	sam build ReserveBooking
+
+invoke-reserve-booking: build-reserve-booking
+	sam build ReserveBooking
+	sam local invoke --event src/reserve-booking/event.json --env-vars local-env-vars.json ReserveBooking --profile ${PROFILE}
