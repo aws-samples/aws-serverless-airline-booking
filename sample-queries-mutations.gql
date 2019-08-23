@@ -1,14 +1,13 @@
-## Add a bunch of flights
-### Aviation-edge Open API could come handy in here as an ETL process
+## Add a bunch of flights for December 2nd 2019
 
 mutation flight1 {
     createFlight(input:{
-        departureDate: "2019-05-08T08:00+0000",
+        departureDate: "2019-02-12T08:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-05-08T10:15+0000",
+        arrivalDate: "2019-02-13T10:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -24,12 +23,12 @@ mutation flight1 {
 
 mutation flight2 {
     createFlight(input:{
-        departureDate: "2019-01-16T10:30+0000",
+        departureDate: "2019-02-12T10:30+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-01-16T12:45+0000",
+        arrivalDate: "2019-02-12T12:45+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -45,12 +44,12 @@ mutation flight2 {
 
 mutation flight3 {
     createFlight(input:{
-        departureDate: "2019-01-16T12:00+0000",
+        departureDate: "2019-02-12T12:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-01-16T14:15+0000",
+        arrivalDate: "2019-02-12T14:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -66,12 +65,12 @@ mutation flight3 {
 
 mutation flight4 {
     createFlight(input:{
-        departureDate: "2019-01-16T17:00+0000",
+        departureDate: "2019-02-12T17:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-01-16T19:15+0000",
+        arrivalDate: "2019-02-12T19:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -90,7 +89,7 @@ mutation flight4 {
 query {
   listFlights(limit:2, filter: {
     departureDate: {
-      beginsWith: "2019-01-16T10"
+      beginsWith: "2019-02-12T10"
     }
   }){
     items {
@@ -114,8 +113,6 @@ mutation {
 }
 
 ## Fetch a booking
-### TODO: departureCity in mock will no longer be needed
-
 query {
   getBooking(id:"b46baf62-f9fe-4b0b-b2e3-741f5e11589d") 
   # selection set
