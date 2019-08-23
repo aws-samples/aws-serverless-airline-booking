@@ -15,5 +15,22 @@
                 "cognitoa7d29d9d": {}
             }
         }
+    },
+    "etl": {
+        "awscloudformation": {
+            "AuthRoleName": "awsserverlessairline-etl-20190823122103-authRole",
+            "UnauthRoleArn": "arn:aws:iam::539243999220:role/awsserverlessairline-etl-20190823122103-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::539243999220:role/awsserverlessairline-etl-20190823122103-authRole",
+            "Region": "eu-west-1",
+            "DeploymentBucketName": "awsserverlessairline-etl-20190823122103-deployment",
+            "UnauthRoleName": "awsserverlessairline-etl-20190823122103-unauthRole",
+            "StackName": "awsserverlessairline-etl-20190823122103",
+            "StackId": "arn:aws:cloudformation:eu-west-1:539243999220:stack/awsserverlessairline-etl-20190823122103/18163440-c598-11e9-8177-0290e291f53e"
+        },
+        "categories": {
+            "auth": {
+                "cognitoa7d29d9d": {}
+            }
+        }
     }
 }
