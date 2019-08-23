@@ -1,5 +1,5 @@
 
-type Flight @model {
+type Flight @model(subscriptions: null) {
     id: ID!
     departureDate: String!
     departureAirportCode: String!
@@ -17,7 +17,8 @@ type Flight @model {
     seatAllocation: Int!
 }
 
-type Booking @model @auth(rules: [
+
+type Booking @model(subscriptions: null) @auth(rules: [
       {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
       {allow: groups, groups: ["Admin"]}
     ]) {
