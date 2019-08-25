@@ -23,6 +23,7 @@ isort = "*"
 [packages]
 boto3 = "*"
 lambda-python-powertools = {editable = true,path = "./../../backend/shared/lambda_python_powertools"}
+requests = "*"
 
 [requires]
 python_version = "3.7"
