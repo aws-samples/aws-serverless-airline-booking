@@ -83,11 +83,11 @@ def test_inject_lambda_context(root_logger, logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN lambda contextual info should always be in the logs
-    lambda_context_keys = (
-        "lambda_function_arn",
-        "lambda_function_memory_size",
-        "lambda_function_arn",
-        "lambda_request_id",
+    logger_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
     )
 
     logger_setup()
@@ -100,11 +100,11 @@ def test_inject_lambda_context(root_logger, logger, stdout, lambda_context):
 
     log = json.loads(stdout.getvalue())
 
-    for key in lambda_context_keys:
+    for key in logger_context_keys:
         assert key in log
 
 
-def test_inject_lambda_context_log_event_request(root_logger, logger, stdout):
+def test_inject_lambda_context_log_event_request(root_logger, logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # WHEN logger is setup
     # THEN logger should log event received from Lambda
@@ -132,7 +132,7 @@ def test_inject_lambda_context_log_event_request(root_logger, logger, stdout):
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, root_logger, logger, stdout
+    monkeypatch, root_logger, logger, stdout, lambda_context
 ):
 
     # GIVEN a lambda function is decorated with logger instructed to log event
@@ -164,7 +164,7 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, root_logger, logger, stdout
+    monkeypatch, root_logger, logger, stdout, lambda_context
 ):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
