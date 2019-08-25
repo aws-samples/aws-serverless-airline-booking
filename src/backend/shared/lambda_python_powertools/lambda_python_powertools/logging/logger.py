@@ -6,6 +6,11 @@ from typing import Any, Callable, Dict
 
 import aws_lambda_logging
 
+from ..helper.models import build_lambda_context_model, build_process_booking_model
+
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
+
 
 def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwargs):
     """Setups root logger to format statements in JSON.
@@ -93,9 +98,6 @@ def logger_inject_lambda_context(
         Decorated lambda handler
     """
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
-
     # If handler is None we've been called with parameters
     # We then return a partial function with args filled
     # Next time we're called we'll call our Lambda
@@ -113,38 +115,47 @@ def logger_inject_lambda_context(
             logger.debug("Event received")
             logger.info(event)
 
-        lambda_context = _capture_lambda_context(context)
-        logger_setup(**lambda_context)
+        lambda_context = build_lambda_context_model(context)
+        logger_setup(**lambda_context.__dict__)
 
         return lambda_handler(event, context)
 
     return decorate
 
 
-def _capture_lambda_context(context: object) -> Dict:
-    """Captures Lambda function runtime info to be used across all log statements
+def logger_inject_process_booking_sfn(lambda_handler: Callable[[Dict, Any], Any] = None):
+    """Decorator to capture Process Booking State Machine
+    and Lambda contextual info as the base for structured logging
 
-    Parameters
-    ----------
-    context : object
-        Lambda context object
+    Example
+    -------
+    Captures Lambda contextual runtime and state machine info (e.g memory, arn, req_id, charge, booking, etc.)
+        >>> from lambda_python_powertools.logging import logger_setup, logger_inject_process_booking_sfn
+        >>> import logging
+        >>>
+        >>> logger = logging.getLogger(__name__)
+        >>> logging.setLevel(logging.INFO)
+        >>> logger_setup()
+        >>>
+        >>> @logger_inject_process_booking_sfn
+        >>> def handler(event, context):
+                logger.info("Hello")
 
     Returns
     -------
-    Dict
-        Lambda context with key fields
+    decorate : Callable
+        Decorated lambda handler
     """
 
-    fn_name = getattr(context, "function_name", "")
-    memory_size = str(getattr(context, "memory_limit_in_mb", ""))
-    fn_arn = getattr(context, "invoked_function_arn", "")
-    request_id = getattr(context, "aws_request_id", "")
+    @functools.wraps(lambda_handler)
+    def decorate(event, context):
+        logger.debug("Process booking event received")
+        logger.debug(event)
 
-    lambda_context = {
-        "lambda_function_name": fn_name,
-        "lambda_function_memory_size": memory_size,
-        "lambda_function_arn": fn_arn,
-        "lambda_request_id": request_id,
-    }
+        lambda_context = build_lambda_context_model(context)
+        process_booking_context = build_process_booking_model(event)
+        logger_setup(**lambda_context.__dict__, **process_booking_context.__dict__)
 
-    return lambda_context
+        return lambda_handler(event, context)
+
+    return decorate

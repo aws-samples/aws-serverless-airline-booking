@@ -5,7 +5,11 @@ from dataclasses import dataclass
 
 import pytest
 
-from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.logging import (
+    logger_inject_lambda_context,
+    logger_setup,
+    logger_inject_process_booking_sfn,
+)
 
 
 @pytest.fixture
@@ -190,3 +194,77 @@ def test_inject_lambda_context_log_no_request_by_default(
             event = log["message"]
 
     assert event != lambda_event
+
+
+def test_inject_process_booking_sfn(root_logger, logger, stdout, lambda_context):
+    # GIVEN a lambda function is decorated with process booking logger
+    # WHEN logger is setup
+    # THEN lambda and process booking contextual info should always be in the logs
+    logger_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+        "outbound_flight_id",
+        "customer_id",
+        "charge_id",
+        "state_machine_execution_id",
+        "booking_id",
+    )
+
+    process_booking_event = {
+        "outboundFlightId": "1688a4f6-69dd-4590-833e-f349384df465",
+        "customerId": "d749f277-0950-4ad6-ab04-98988721e475",
+        "chargeId": "ch_1F57JxF4aIiftV70vM1BRI5Z",
+        "bookingTable": "Booking-2pa2xn3qzzdi7ntbhdozirkmiy-twitch",
+        "flightTable": "Flight-2pa2xn3qzzdi7ntbhdozirkmiy-twitch",
+        "name": "7e5ecef7-84c4-4836-9500-2115c4175421",
+        "createdAt": "2019-08-08T08:50:06.362Z",
+        "bookingId": "f0fc04ca-a125-45cd-8c37-d09210d7a560",
+        "payment": {
+            "receiptUrl": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_1F57JxF4aIiftV70vM1BRI5Z/rcpt_FaHtr7NWaZuHsZPEfkqWX5UbKTGIL25",
+            "price": 100,
+        },
+        "bookingReference": "YvSY1Q",
+        "notificationId": "4f984180-ad27-56db-8606-144549af6806",
+    }
+
+    logger_setup()
+
+    @logger_inject_process_booking_sfn
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler(process_booking_event, lambda_context)
+
+    log = json.loads(stdout.getvalue())
+
+    for key in logger_context_keys:
+        assert key in log
+
+
+def test_inject_process_booking_sfn_invalid(root_logger, logger, stdout, lambda_context):
+    # GIVEN a lambda function is decorated with process booking logger
+    # WHEN logger is setup but event doesn't come from process booking state machine
+    # THEN only lambda should be in the logs and no exceptions raised
+    logger_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+    )
+
+    lambda_event = {"some": "value"}
+
+    logger_setup()
+
+    @logger_inject_process_booking_sfn
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler(lambda_event, lambda_context)
+
+    log = json.loads(stdout.getvalue())
+
+    for key in logger_context_keys:
+        assert key in log
