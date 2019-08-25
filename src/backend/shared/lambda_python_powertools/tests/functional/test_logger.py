@@ -7,8 +7,8 @@ import pytest
 
 from lambda_python_powertools.logging import (
     logger_inject_lambda_context,
-    logger_setup,
     logger_inject_process_booking_sfn,
+    logger_setup,
 )
 
 
