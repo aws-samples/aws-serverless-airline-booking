@@ -45,7 +45,7 @@ def notify_booking(payload, booking_reference):
             Flight price
 
     booking_reference: string
-        Confirmed booking reference    
+        Confirmed booking reference
 
     Returns
     -------
@@ -151,9 +151,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `notificationId` key into the overall output
         return ret["notificationId"]
     except BookingNotificationException as err:
-        logger.debug(
-            "Adding Booking Notification annotation, and exception as metadata"
-        )
+        logger.debug("Adding Booking Notification annotation, and exception as metadata")
         tracer.put_annotation("BookingNotificationStatus", "FAILED")
         tracer.put_metadata("notify_booking_error", err, "booking")
 

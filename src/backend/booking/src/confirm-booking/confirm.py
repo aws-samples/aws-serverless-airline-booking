@@ -49,9 +49,7 @@ def confirm_booking(booking_id):
         Booking Confirmation Exception including error message upon failure
     """
     try:
-        logger.debug(
-            {"operation": "confirm_booking", "details": {"booking_id": booking_id}}
-        )
+        logger.debug({"operation": "confirm_booking", "details": {"booking_id": booking_id}})
         reference = secrets.token_urlsafe(4)
         ret = table.update_item(
             Key={"id": booking_id},

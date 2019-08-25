@@ -31,9 +31,7 @@ class BookingCancellationException(Exception):
 @tracer.capture_method
 def cancel_booking(booking_id):
     try:
-        logger.debug(
-            {"operation": "cancel_booking", "details": {"booking_id": booking_id}}
-        )
+        logger.debug({"operation": "cancel_booking", "details": {"booking_id": booking_id}})
         ret = table.update_item(
             Key={"id": booking_id},
             ConditionExpression="id = :idVal",

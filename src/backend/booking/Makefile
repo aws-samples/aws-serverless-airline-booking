@@ -20,7 +20,7 @@ test:
 test-html:
 	pipenv run pytest --cov-report html
 
-pr: lint test 
+pr: lint test
 
 build-cancel-booking:
 	sam build CancelBooking
