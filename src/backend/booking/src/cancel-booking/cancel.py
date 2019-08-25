@@ -80,7 +80,7 @@ def lambda_handler(event, context):
     booking_id = event.get("bookingId")
 
     if not booking_id:
-        logger.error({"detail": "Invalid event received", "details": event})
+        logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking ID")
 
     try:
