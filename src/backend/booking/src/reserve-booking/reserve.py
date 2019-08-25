@@ -81,10 +81,12 @@ def reserve_booking(booking):
             "createdAt": str(datetime.datetime.now()),
         }
 
-        logger.debug({"operation": "reserve_booking"})
+        logger.debug(
+            {"operation": "reserve_booking", "details": {"outbound_flight_id": outbound_flight_id}}
+        )
         ret = table.put_item(Item=booking_item)
 
-        logger.debug({"operation": "reserve_booking", "details": ret})
+        logger.info({"operation": "reserve_booking", "details": ret})
         logger.debug("Adding put item operation result as tracing metadata")
         tracer.put_metadata(booking_id, booking_item, "booking")
 
