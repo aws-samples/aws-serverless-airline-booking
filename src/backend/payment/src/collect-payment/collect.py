@@ -1,28 +1,31 @@
-import json
 import logging
 import os
 
-import aws_lambda_logging
 import requests
-from aws_xray_sdk.core import patch_all, xray_recorder
 
-patch_all()
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
+from lambda_python_powertools.tracing import Tracer
+
+logger = logging.getLogger(__name__)
+tracer = Tracer()
+
+logger_setup()
+
 
 # Payment API Capture URL to collect payment(i.e. https://endpoint/capture)
-payment_endpoint = os.environ["PAYMENT_API_URL"]
+payment_endpoint = os.getenv("PAYMENT_API_URL")
 
 
 class PaymentException(Exception):
-    def __init__(self, message="Payment failed", status_code=500, details={}):
-
+    def __init__(self, message=None, status_code=None, details=None):
         super(PaymentException, self).__init__()
 
-        self.message = message
-        self.status_code = status_code
-        self.details = details
+        self.message = message or "Payment failed"
+        self.status_code = status_code or 500
+        self.details = details or {}
 
 
-@xray_recorder.capture("## collect_payment")
+@tracer.capture_method
 def collect_payment(charge_id):
     """Collects payment from a pre-authorized charge through Payment API
 
@@ -31,7 +34,7 @@ def collect_payment(charge_id):
     Parameters
     ----------
     charge_id : string
-        Pre-authorized charge ID received from Payment API        
+        Pre-authorized charge ID received from Payment API
 
     Returns
     -------
@@ -42,27 +45,43 @@ def collect_payment(charge_id):
         price: int
             amount collected
     """
+    if not payment_endpoint:
+        logger.error({"operation": "invalid_config", "details": os.environ})
+        raise ValueError("Payment API URL is invalid -- Consider reviewing PAYMENT_API_URL env")
+
     payment_payload = {"chargeId": charge_id}
-    logging.info("Collecting payment...")
-    ret = requests.post(payment_endpoint, json=payment_payload)
-    payment_response = ret.json()
 
-    # TODO: Create decorator for tracing
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_metadata(charge_id, ret, "payment")
+    try:
+        logger.debug({"operation": "collect_payment", "details": payment_payload})
+        ret = requests.post(payment_endpoint, json=payment_payload)
+        ret.raise_for_status()
+        logger.info(
+            {
+                "operations": "collect_payment",
+                "details": {
+                    "response_headers": ret.headers,
+                    "response_payload": ret.json(),
+                    "response_status_code": ret.status_code,
+                    "url": ret.url,
+                },
+            }
+        )
+        payment_response = ret.json()
 
-    if ret.status_code != 200:
-        print(payment_response)
-        logging.error("Failed to collect payment")
-        raise PaymentException(status_code=ret.status_code, details=ret.json())
+        logger.debug("Adding collect payment operation result as tracing metadata")
+        tracer.put_metadata(charge_id, ret)
 
-    return {
-        "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
-        "price": payment_response["capturedCharge"]["amount"],
-    }
+        return {
+            "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
+            "price": payment_response["capturedCharge"]["amount"],
+        }
+    except requests.exceptions.RequestException as err:
+        logging.error({"operation": "collect_payment", "details": err})
+        raise PaymentException(status_code=ret.status_code, details=err)
 
 
-@xray_recorder.capture("## handler")
+@tracer.capture_lambda_handler(process_booking_sfn=True)
+@logger_inject_process_booking_sfn
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to collect payment
 
@@ -93,40 +112,26 @@ def lambda_handler(event, context):
         Booking Confirmation Exception including error message upon failure
     """
 
-    customer_id = event.get("customerId", "undefined")
-    booking_id = event.get("bookingId", "undefined")
-    charge_id = event.get("chargeId", "undefined")
-    state_machine_execution_id = event.get("name", "undefined")
+    pre_authorization_token = event.get("chargeId")
+    customer_id = event.get("customerId")
 
-    aws_lambda_logging.setup(
-        level=os.getenv("LOG_LEVEL", "INFO"),
-        lambda_request_id=context.aws_request_id,
-        lambda_arn=context.invoked_function_arn,
-        service="payment",
-        customer_id=customer_id,
-        booking_id=booking_id,
-        charge_id=charge_id,
-    )
-
-    if "chargeId" not in event:
-        logging.error("Invalid event")
-        logging.info(event)
-        raise ValueError(message="Invalid Charge ID", status_code=400)
-
-    subsegment = xray_recorder.current_subsegment()
-    subsegment.put_annotation("Payment", charge_id)
-    subsegment.put_annotation("Booking", booking_id)
-    subsegment.put_annotation("Customer", customer_id)
-    subsegment.put_annotation("Flight", event.get("outboundFlightId", "undefined"))
-    subsegment.put_annotation("StateMachineExecution", state_machine_execution_id)
+    if not pre_authorization_token:
+        logging.error({"operation": "invalid_event", "details": event})
+        raise ValueError("Invalid Charge ID")
 
     try:
-        ret = collect_payment(charge_id)
-        logging.info("Payment has been successful")
-        subsegment.put_annotation("PaymentStatus", "SUCCESS")
+        logger.debug(
+            f"Collecting payment from customer {customer_id} using {pre_authorization_token} token"
+        )
+        ret = collect_payment(pre_authorization_token)
+
+        logger.debug("Adding Payment Status annotation")
+        tracer.put_annotation("PaymentStatus", "SUCCESS")
+
         # Step Functions can append multiple values if you return a single dict
         return ret
     except PaymentException as err:
-        subsegment.put_annotation("PaymentStatus", "FAILED")
-        subsegment.put_metadata("payment_error", err, "payment")
+        logger.debug("Adding Payment Status annotation, and exception as metadata")
+        tracer.put_annotation("PaymentStatus", "FAILED")
+        tracer.put_metadata("payment_error", err)
         raise PaymentException(details=err)
