@@ -5,7 +5,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
 logger = logging.getLogger(__name__)
@@ -97,7 +97,7 @@ def notify_booking(payload, booking_reference):
 
 
 @tracer.capture_lambda_handler(process_booking_sfn=True)
-@logger_inject_lambda_context
+@logger_inject_process_booking_sfn
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to notify booking
 

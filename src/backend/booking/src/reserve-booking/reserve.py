@@ -6,7 +6,7 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
 logger = logging.getLogger(__name__)
@@ -81,20 +81,10 @@ def reserve_booking(booking):
             "createdAt": str(datetime.datetime.now()),
         }
 
-        logger.debug(
-            {
-                "operation": "reserve_booking",
-                "details": {
-                    "customer_id": customer_id,
-                    "payment_token": payment_token,
-                    "state_execution_id": state_machine_execution_id,
-                    "outbound_flight_id": outbound_flight_id,
-                },
-            }
-        )
+        logger.debug({"operation": "reserve_booking"})
         ret = table.put_item(Item=booking_item)
 
-        logger.info({"operation": "reserve_booking", "details": ret})
+        logger.debug({"operation": "reserve_booking", "details": ret})
         logger.debug("Adding put item operation result as tracing metadata")
         tracer.put_metadata(booking_id, booking_item, "booking")
 
@@ -105,7 +95,7 @@ def reserve_booking(booking):
 
 
 @tracer.capture_lambda_handler(process_booking_sfn=True)
-@logger_inject_lambda_context
+@logger_inject_process_booking_sfn
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to reserve a booking
 

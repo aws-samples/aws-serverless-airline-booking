@@ -4,7 +4,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-from lambda_python_powertools.logging import logger_inject_lambda_context, logger_setup
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ def cancel_booking(booking_id):
 
 
 @tracer.capture_lambda_handler(process_booking_sfn=True)
-@logger_inject_lambda_context
+@logger_inject_process_booking_sfn
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to cancel booking
 
@@ -77,12 +77,13 @@ def lambda_handler(event, context):
     BookingCancellationException
         Booking Cancellation Exception including error message upon failure
     """
-    if "bookingId" not in event:
+    booking_id = event.get("bookingId")
+
+    if not booking_id:
         logger.error({"detail": "Invalid event received", "details": event})
         raise ValueError("Invalid booking ID")
 
     try:
-        booking_id = event["bookingId"]
         logger.debug(f"Cancelling booking - {booking_id}")
         ret = cancel_booking(booking_id)
 
