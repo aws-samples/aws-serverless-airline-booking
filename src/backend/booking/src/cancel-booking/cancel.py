@@ -92,8 +92,7 @@ def lambda_handler(event, context):
 
         return ret
     except BookingCancellationException as err:
-        logger.debug("Adding Booking Status annotation, and exception as metadata")
+        logger.debug("Adding Booking Status annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
-        tracer.put_metadata("cancel_booking_error", err)
 
         raise BookingCancellationException(details=err)

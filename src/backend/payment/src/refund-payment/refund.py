@@ -112,7 +112,7 @@ def lambda_handler(event, context):
 
     try:
         logger.debug(f"Refunding payment from customer {customer_id} using {payment_token} token")
-        ret = refund_payment(event["chargeId"])
+        ret = refund_payment(payment_token)
 
         logger.debug("Adding Payment Refund Status annotation")
         tracer.put_annotation("Refund", ret["refundId"])
@@ -120,7 +120,6 @@ def lambda_handler(event, context):
 
         return ret
     except RefundException as err:
-        logger.debug("Adding Payment Refund Status annotation, and exception as metadata")
-        tracer.put_metadata("refund_error", err, "refund")
+        logger.debug("Adding Payment Refund Status annotation before raising error")
         tracer.put_annotation("RefundStatus", "FAILED")
         raise RefundException(details=err)

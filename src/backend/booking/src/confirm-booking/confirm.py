@@ -118,8 +118,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `bookingReference` key into the overall output
         return ret["bookingReference"]
     except BookingConfirmationException as err:
-        logger.debug("Adding Booking Status annotation, and exception as metadata")
+        logger.debug("Adding Booking Status annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
-        tracer.put_metadata("confirm_booking_error", err)
 
         raise BookingConfirmationException(details=err)

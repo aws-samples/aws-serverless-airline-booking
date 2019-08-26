@@ -151,8 +151,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `notificationId` key into the overall output
         return ret["notificationId"]
     except BookingNotificationException as err:
-        logger.debug("Adding Booking Notification annotation, and exception as metadata")
+        logger.debug("Adding Booking Notification annotation before raising error")
         tracer.put_annotation("BookingNotificationStatus", "FAILED")
-        tracer.put_metadata("notify_booking_error", err, "booking")
 
         raise BookingNotificationException(details=err)

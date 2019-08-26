@@ -131,7 +131,6 @@ def lambda_handler(event, context):
         # Step Functions can append multiple values if you return a single dict
         return ret
     except PaymentException as err:
-        logger.debug("Adding Payment Status annotation, and exception as metadata")
+        logger.debug("Adding Payment Status annotation before raising error")
         tracer.put_annotation("PaymentStatus", "FAILED")
-        tracer.put_metadata("payment_error", err)
         raise PaymentException(details=err)
