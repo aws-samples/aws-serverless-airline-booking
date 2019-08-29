@@ -1,22 +1,17 @@
 import functools
 import logging
 import os
-from dataclasses import dataclass
 from distutils.util import strtobool
 from typing import Any, Callable, Dict
 
-from aws_xray_sdk.core import models, xray_recorder
+from aws_xray_sdk.core import models, patch_all, xray_recorder
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
 
-@dataclass
 class Tracer:
-    service: str = "service_undefined"
-    disabled: bool = False
-    provider: xray_recorder = xray_recorder
     """Tracer using AWS-XRay to provide decorators with known Airline defaults for Lambda functions
 
     When running locally, it honours POWERTOOLS_TRACE_DISABLED environment variable
@@ -100,9 +95,15 @@ class Tracer:
         Tracer instance with imported modules patched
     """
 
-    def __post_init__(self):
-        self.disabled = self.__is_trace_disabled()
-        self.service = os.getenv("POWERTOOLS_SERVICE_NAME") or self.service
+    def __init__(
+        self,
+        service: str = "service_undefined",
+        disabled: bool = False,
+        provider: xray_recorder = xray_recorder,
+    ):
+        self.provider = provider or xray_recorder
+        self.disabled = self.__is_trace_disabled() or disabled
+        self.service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
         self.__patch()
 
     def capture_lambda_handler(
@@ -372,8 +373,6 @@ class Tracer:
             logger.debug("Running under SAM CLI env or not in Lambda; aborting patch")
             return
 
-        from aws_xray_sdk.core import patch_all  # pragma: no cover
-
         patch_all()  # pragma: no cover
 
     def __is_trace_disabled(self) -> bool:
@@ -397,10 +396,6 @@ class Tracer:
         if disabled_env:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return disabled_env
-
-        if self.disabled:
-            logger.debug("Tracing has been explicitly disabled")
-            return self.disabled
 
         if is_lambda_emulator:
             logger.debug("Running under SAM CLI env; Tracing has been disabled")
