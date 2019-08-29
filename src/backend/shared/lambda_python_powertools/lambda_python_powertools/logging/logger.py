@@ -11,6 +11,8 @@ from ..helper.models import build_lambda_context_model, build_process_booking_mo
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
+is_cold_start = True
+
 
 def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwargs):
     """Setups root logger to format statements in JSON.
@@ -128,7 +130,9 @@ def logger_inject_lambda_context(
             logger.info(event)
 
         lambda_context = build_lambda_context_model(context)
-        logger_setup(**lambda_context.__dict__)
+        cold_start = __is_cold_start()
+
+        logger_setup(cold_start=cold_start, **lambda_context.__dict__)
 
         return lambda_handler(event, context)
 
@@ -166,8 +170,31 @@ def logger_inject_process_booking_sfn(lambda_handler: Callable[[Dict, Any], Any]
 
         lambda_context = build_lambda_context_model(context)
         process_booking_context = build_process_booking_model(event)
-        logger_setup(**lambda_context.__dict__, **process_booking_context.__dict__)
+        cold_start = __is_cold_start()
+
+        logger_setup(
+            cold_start=cold_start, **lambda_context.__dict__, **process_booking_context.__dict__
+        )
 
         return lambda_handler(event, context)
 
     return decorate
+
+
+def __is_cold_start() -> str:
+    """Verifies whether is cold start and return a string used for struct logging
+
+    Returns
+    -------
+    str
+        lower case bool as a string
+        aws_lambda_logging doesn't support bool; cast cold start value to string
+    """
+    cold_start = "false"
+
+    global is_cold_start
+    if is_cold_start:
+        cold_start = str(is_cold_start).lower()
+        is_cold_start = False
+
+    return cold_start

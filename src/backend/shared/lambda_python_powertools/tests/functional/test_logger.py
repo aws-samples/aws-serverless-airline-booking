@@ -122,13 +122,8 @@ def test_inject_lambda_context_log_event_request(root_logger, stdout, lambda_con
     # We need to clean it before we can assert on
     stdout.seek(0)
     logs = [json.loads(line.strip()) for line in stdout.readlines()]
-
-    event = {}
-    for log in logs:
-        if "greeting" in log["message"]:
-            event = log["message"]
-
-    assert event == lambda_event
+    logged_event, _ = logs
+    assert "greeting" in logged_event["message"]
 
 
 def test_inject_lambda_context_log_event_request_env_var(
@@ -264,3 +259,43 @@ def test_inject_process_booking_sfn_invalid(root_logger, stdout, lambda_context)
 
     for key in logger_context_keys:
         assert key in log
+
+
+def test_inject_lambda_cold_start(root_logger, stdout, lambda_context):
+    # GIVEN a lambda function is decorated with logger, and called twice
+    # WHEN logger is setup
+    # THEN cold_start key should only be true in the first call
+
+    from lambda_python_powertools.logging import logger
+
+    # # As we run tests in parallel global cold_start value can be false
+    # # here we reset to simulate the correct behaviour
+    # # since Lambda will only import our logger lib once per concurrent execution
+    logger.is_cold_start = True
+
+    logger = logger_setup()
+
+    def custom_method():
+        logger.info("Hello from method")
+
+    @logger_inject_lambda_context
+    def handler(event, context):
+        custom_method()
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    # Given that our string buffer has many log statements separated by newline \n
+    # We need to clean it before we can assert on
+    stdout.seek(0)
+    logs = [json.loads(line.strip()) for line in stdout.readlines()]
+    first_log, second_log, third_log, fourth_log = logs
+
+    # First execution
+    assert "true" == first_log["cold_start"]
+    assert "true" == second_log["cold_start"]
+
+    # Second execution
+    assert "false" == third_log["cold_start"]
+    assert "false" == fourth_log["cold_start"]
