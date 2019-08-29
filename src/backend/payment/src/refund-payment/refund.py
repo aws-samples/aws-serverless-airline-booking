@@ -1,4 +1,3 @@
-import logging
 import os
 
 import requests
@@ -6,10 +5,8 @@ import requests
 from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
-logger = logging.getLogger(__name__)
+logger = logger_setup()
 tracer = Tracer()
-
-logger_setup()
 
 
 # Payment API Capture URL to collect payment(i.e. https://endpoint/capture)

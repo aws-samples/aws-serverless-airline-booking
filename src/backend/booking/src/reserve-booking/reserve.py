@@ -1,5 +1,4 @@
 import datetime
-import logging
 import os
 import uuid
 
@@ -9,11 +8,8 @@ from botocore.exceptions import ClientError
 from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
-logger = logging.getLogger(__name__)
+logger = logger_setup()
 tracer = Tracer()
-
-logger_setup()
-
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
