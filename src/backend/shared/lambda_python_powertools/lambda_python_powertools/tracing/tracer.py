@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict
 
 from aws_xray_sdk.core import models, xray_recorder
 
+is_cold_start = True
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 
@@ -15,7 +16,6 @@ logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
 class Tracer:
     service: str = "service_undefined"
     disabled: bool = False
-    is_cold_start: bool = True
     provider: xray_recorder = xray_recorder
     """Tracer using AWS-XRay to provide decorators with known Airline defaults for Lambda functions
 
@@ -334,10 +334,11 @@ class Tracer:
             subsegment = models.dummy_entities.DummySubsegment(segment)
         else:
             subsegment = self.provider.begin_subsegment(name=name)
-            if self.is_cold_start:
+            global is_cold_start
+            if is_cold_start:
                 logger.debug("Annotating cold start")
                 subsegment.put_annotation("ColdStart", True)
-                self.is_cold_start = False
+                is_cold_start = False
 
         return subsegment
 
