@@ -23,11 +23,6 @@ def handler(stdout):
 
 
 @pytest.fixture
-def logger():
-    return logging.getLogger(__name__)
-
-
-@pytest.fixture
 def root_logger(handler):
     logging.root.addHandler(handler)
     yield logging.root
@@ -46,44 +41,45 @@ def lambda_context():
     return Context()
 
 
-def test_setup_service_name(root_logger, logger, stdout):
+def test_setup_service_name(root_logger, stdout):
     # GIVEN service is explicitly defined
     # WHEN logger is setup
     # THEN service field should be equals service given
     service_name = "payment"
-    logger_setup(service=service_name)
+    logger = logger_setup(service=service_name)
     logger.info("Hello")
     log = json.loads(stdout.getvalue())
 
     assert service_name == log["service"]
 
 
-def test_setup_no_service_name(root_logger, logger, stdout):
+def test_setup_no_service_name(root_logger, stdout):
     # GIVEN no service is explicitly defined
     # WHEN logger is setup
     # THEN service field should be "service_undefined"
     logger_setup()
+    logger = logger_setup()
     logger.info("Hello")
     log = json.loads(stdout.getvalue())
 
     assert "service_undefined" == log["service"]
 
 
-def test_setup_service_env_var(monkeypatch, root_logger, logger, stdout):
+def test_setup_service_env_var(monkeypatch, root_logger, stdout):
     # GIVEN service is explicitly defined via POWERTOOLS_SERVICE_NAME env
     # WHEN logger is setup
     # THEN service field should be equals POWERTOOLS_SERVICE_NAME value
     service_name = "payment"
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
 
-    logger_setup(service=service_name)
+    logger = logger_setup()
     logger.info("Hello")
     log = json.loads(stdout.getvalue())
 
     assert service_name == log["service"]
 
 
-def test_inject_lambda_context(root_logger, logger, stdout, lambda_context):
+def test_inject_lambda_context(root_logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN lambda contextual info should always be in the logs
@@ -94,7 +90,7 @@ def test_inject_lambda_context(root_logger, logger, stdout, lambda_context):
         "function_request_id",
     )
 
-    logger_setup()
+    logger = logger_setup()
 
     @logger_inject_lambda_context
     def handler(event, context):
@@ -108,13 +104,13 @@ def test_inject_lambda_context(root_logger, logger, stdout, lambda_context):
         assert key in log
 
 
-def test_inject_lambda_context_log_event_request(root_logger, logger, stdout, lambda_context):
+def test_inject_lambda_context_log_event_request(root_logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with logger instructed to log event
     # WHEN logger is setup
     # THEN logger should log event received from Lambda
     lambda_event = {"greeting": "hello"}
 
-    logger_setup()
+    logger = logger_setup()
 
     @logger_inject_lambda_context(log_event=True)
     def handler(event, context):
@@ -136,7 +132,7 @@ def test_inject_lambda_context_log_event_request(root_logger, logger, stdout, la
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, root_logger, logger, stdout, lambda_context
+    monkeypatch, root_logger, stdout, lambda_context
 ):
 
     # GIVEN a lambda function is decorated with logger instructed to log event
@@ -146,7 +142,7 @@ def test_inject_lambda_context_log_event_request_env_var(
     lambda_event = {"greeting": "hello"}
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
 
-    logger_setup()
+    logger = logger_setup()
 
     @logger_inject_lambda_context()
     def handler(event, context):
@@ -168,14 +164,14 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, root_logger, logger, stdout, lambda_context
+    monkeypatch, root_logger, stdout, lambda_context
 ):
     # GIVEN a lambda function is decorated with logger
     # WHEN logger is setup
     # THEN logger should not log event received by lambda handler
     lambda_event = {"greeting": "hello"}
 
-    logger_setup()
+    logger = logger_setup()
 
     @logger_inject_lambda_context()
     def handler(event, context):
@@ -196,7 +192,7 @@ def test_inject_lambda_context_log_no_request_by_default(
     assert event != lambda_event
 
 
-def test_inject_process_booking_sfn(root_logger, logger, stdout, lambda_context):
+def test_inject_process_booking_sfn(root_logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with process booking logger
     # WHEN logger is setup
     # THEN lambda and process booking contextual info should always be in the logs
@@ -229,7 +225,7 @@ def test_inject_process_booking_sfn(root_logger, logger, stdout, lambda_context)
         "notificationId": "4f984180-ad27-56db-8606-144549af6806",
     }
 
-    logger_setup()
+    logger = logger_setup()
 
     @logger_inject_process_booking_sfn
     def handler(event, context):
@@ -243,7 +239,7 @@ def test_inject_process_booking_sfn(root_logger, logger, stdout, lambda_context)
         assert key in log
 
 
-def test_inject_process_booking_sfn_invalid(root_logger, logger, stdout, lambda_context):
+def test_inject_process_booking_sfn_invalid(root_logger, stdout, lambda_context):
     # GIVEN a lambda function is decorated with process booking logger
     # WHEN logger is setup but event doesn't come from process booking state machine
     # THEN only lambda should be in the logs and no exceptions raised
@@ -256,7 +252,7 @@ def test_inject_process_booking_sfn_invalid(root_logger, logger, stdout, lambda_
 
     lambda_event = {"some": "value"}
 
-    logger_setup()
+    logger = logger_setup()
 
     @logger_inject_process_booking_sfn
     def handler(event, context):

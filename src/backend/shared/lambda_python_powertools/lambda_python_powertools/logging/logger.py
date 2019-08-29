@@ -34,21 +34,33 @@ def logger_setup(service: str = "service_undefined", level: str = "INFO", **kwar
 
     Example
     -------
-    Setups structured logging in JSON for Lambda functions
+    Setups structured logging in JSON for Lambda functions with explicit service name
 
         >>> from lambda_python_powertools.logging import logger_setup
-        >>> import logging
-        >>>
-        >>> logger = logging.getLogger(__name__)
-        >>> logging.setLevel(logging.INFO)
-        >>> logger_setup()
+        >>> logger = logger_setup(service="payment")
         >>>
         >>> def handler(event, context):
                 logger.info("Hello")
+
+    Setups structured logging in JSON for Lambda functions using env vars
+
+        $ export POWERTOOLS_SERVICE_NAME="payment"
+        >>> from lambda_python_powertools.logging import logger_setup
+        >>> logger = logger_setup()
+        >>>
+        >>> def handler(event, context):
+                logger.info("Hello")
+
     """
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     log_level = os.getenv("LOG_LEVEL") or level
+    logger = logging.getLogger(name=service)
+    logger.setLevel(log_level)
+
+    # Patch logger by structuring its outputs as JSON
     aws_lambda_logging.setup(level=log_level, service=service, **kwargs)
+
+    return logger
 
 
 def logger_inject_lambda_context(
