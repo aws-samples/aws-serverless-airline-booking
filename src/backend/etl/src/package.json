@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "ETL service to populate Flight details",
   "dependencies": {
-    "aws-sdk": "^2.464.0"
+    "aws-sdk": "^2.464.0",
+    "faker": "^4.1.0",
+    "js-combinatorics": "^0.5.4",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "aws-sdk-mock": "^4.4.0"

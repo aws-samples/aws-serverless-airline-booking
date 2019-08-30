@@ -95,6 +95,21 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 				Stage=$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID}
 
+deploy.etl: ##=> Deploy etl service using SAM
+	$(info [*] Packaging and deploying ETL service...)
+	cd src/backend/etl && \
+		npm install && \
+		sam package \
+			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
+			--output-template-file packaged.yaml && \
+		sam deploy \
+			--template-file packaged.yaml \
+			--stack-name $${STACK_NAME}-etl-$${AWS_BRANCH} \
+			--capabilities CAPABILITY_IAM \
+			--parameter-overrides \
+				FlightTable=$${FLIGHT_TABLE_NAME} \
+				Stage=$${AWS_BRANCH}
+
 #############
 #  Helpers  #
 #############
