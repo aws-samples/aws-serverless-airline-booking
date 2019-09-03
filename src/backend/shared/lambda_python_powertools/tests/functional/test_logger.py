@@ -308,7 +308,7 @@ def test_log_metric(capsys):
     # WHEN log_metric is called
     # THEN custom metric line should be match given values
     log_metric(service="payment", name="test_metric", unit=MetricUnit.Seconds, value=60)
-    expected = "MONITORING|60|Seconds|test_metric|ServerlessAirline|service=payment"
+    expected = "MONITORING|60|Seconds|test_metric|ServerlessAirline|service=payment\n"
     captured = capsys.readouterr()
 
     assert captured.out == expected
@@ -322,7 +322,7 @@ def test_log_metric_env_var(monkeypatch, capsys):
     monkeypatch.setenv("POWERTOOLS_SERVICE_NAME", service_name)
 
     log_metric(name="test_metric", unit=MetricUnit.Seconds, value=60)
-    expected = "MONITORING|60|Seconds|test_metric|ServerlessAirline|service=payment"
+    expected = "MONITORING|60|Seconds|test_metric|ServerlessAirline|service=payment\n"
     captured = capsys.readouterr()
 
     assert captured.out == expected
@@ -335,7 +335,7 @@ def test_log_metric_multiple_dimensions(capsys):
     log_metric(
         name="test_metric", unit=MetricUnit.Seconds, value=60, customer="abc", charge_id="123"
     )
-    expected = "MONITORING|60|Seconds|test_metric|ServerlessAirline|service=service_undefined,customer=abc,charge_id=123"
+    expected = "MONITORING|60|Seconds|test_metric|ServerlessAirline|service=service_undefined,customer=abc,charge_id=123\n"
     captured = capsys.readouterr()
 
     assert captured.out == expected
@@ -346,11 +346,11 @@ def test_log_metric_multiple_dimensions(capsys):
     [
         (
             {"unit": "seconds"},
-            "MONITORING|0|Seconds|test_metric|ServerlessAirline|service=service_undefined",
+            "MONITORING|0|Seconds|test_metric|ServerlessAirline|service=service_undefined\n",
         ),
         (
             {"unit": "Seconds", "customer": None, "charge_id": "123", "payment_status": ""},
-            "MONITORING|0|Seconds|test_metric|ServerlessAirline|service=service_undefined,charge_id=123",
+            "MONITORING|0|Seconds|test_metric|ServerlessAirline|service=service_undefined,charge_id=123\n",
         ),
     ],
     ids=["metric unit as string lower case", "empty dimension value"],

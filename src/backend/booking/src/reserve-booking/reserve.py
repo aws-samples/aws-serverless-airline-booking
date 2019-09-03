@@ -5,7 +5,14 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
+
+from lambda_python_powertools.logging import (
+    logger_inject_process_booking_sfn,
+    logger_setup,
+    MetricUnit,
+    log_metric,
+)
+
 from lambda_python_powertools.tracing import Tracer
 
 logger = logger_setup()
@@ -15,6 +22,8 @@ session = boto3.Session()
 dynamodb = session.resource("dynamodb")
 table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
 table = dynamodb.Table(table_name)
+
+_cold_start = True
 
 
 class BookingReservationException(Exception):
@@ -131,13 +140,28 @@ def lambda_handler(event, context):
     BookingReservationException
         Booking Reservation Exception including error message upon failure
     """
+    global _cold_start
+    if _cold_start:
+        log_metric(
+            name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
+        )
+        _cold_start = False
+
     if not is_booking_request_valid(event):
+        log_metric(
+            name="InvalidBookingRequest",
+            unit=MetricUnit.Count,
+            value=1,
+            operation="reserve_booking",
+        )
         logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking request")
 
     try:
         logger.debug(f"Reserving booking for customer {event['customerId']}")
         ret = reserve_booking(event)
+
+        log_metric(name="SuccessfulReservation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Reservation annotation")
         tracer.put_annotation("Booking", ret["bookingId"])
         tracer.put_annotation("BookingStatus", "RESERVED")
@@ -145,6 +169,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `bookingId` key into the overall output
         return ret["bookingId"]
     except BookingReservationException as err:
+        log_metric(name="FailedReservation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Reservation annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
         raise BookingReservationException(details=err)

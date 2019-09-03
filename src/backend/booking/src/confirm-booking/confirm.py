@@ -4,7 +4,12 @@ import secrets
 import boto3
 from botocore.exceptions import ClientError
 
-from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
+from lambda_python_powertools.logging import (
+    MetricUnit,
+    log_metric,
+    logger_inject_process_booking_sfn,
+    logger_setup,
+)
 from lambda_python_powertools.tracing import Tracer
 
 logger = logger_setup()
@@ -14,6 +19,8 @@ session = boto3.Session()
 dynamodb = session.resource("dynamodb")
 table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
 table = dynamodb.Table(table_name)
+
+_cold_start = True
 
 
 class BookingConfirmationException(Exception):
@@ -99,8 +106,21 @@ def lambda_handler(event, context):
         Booking Confirmation Exception including error message upon failure
     """
 
+    global _cold_start
+    if _cold_start:
+        log_metric(
+            name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
+        )
+        _cold_start = False
+
     booking_id = event.get("bookingId")
     if not booking_id:
+        log_metric(
+            name="InvalidBookingRequest",
+            unit=MetricUnit.Count,
+            value=1,
+            operation="confirm_booking",
+        )
         logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking ID")
 
@@ -108,6 +128,7 @@ def lambda_handler(event, context):
         logger.debug(f"Confirming booking - {booking_id}")
         ret = confirm_booking(booking_id)
 
+        log_metric(name="SuccessfulConfirmation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation")
         tracer.put_annotation("BookingReference", ret["bookingReference"])
         tracer.put_annotation("BookingStatus", "CONFIRMED")
@@ -115,6 +136,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `bookingReference` key into the overall output
         return ret["bookingReference"]
     except BookingConfirmationException as err:
+        log_metric(name="FailedConfirmation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
 

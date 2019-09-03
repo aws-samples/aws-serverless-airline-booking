@@ -287,7 +287,7 @@ def log_metric(
     if dimensions:
         metric = f"MONITORING|{value}|{unit.name}|{name}|{namespace}|service={service},{dimensions}"
 
-    print(metric, end="")
+    print(metric)
 
 
 def __build_dimensions(**dimensions) -> str:

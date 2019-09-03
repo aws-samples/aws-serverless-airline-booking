@@ -1,9 +1,15 @@
 import os
 
+
 import boto3
 from botocore.exceptions import ClientError
 
-from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
+from lambda_python_powertools.logging import (
+    logger_inject_process_booking_sfn,
+    logger_setup,
+    MetricUnit,
+    log_metric,
+)
 from lambda_python_powertools.tracing import Tracer
 
 logger = logger_setup()
@@ -13,6 +19,8 @@ session = boto3.Session()
 dynamodb = session.resource("dynamodb")
 table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
 table = dynamodb.Table(table_name)
+
+_cold_start = True
 
 
 class BookingCancellationException(Exception):
@@ -74,9 +82,19 @@ def lambda_handler(event, context):
     BookingCancellationException
         Booking Cancellation Exception including error message upon failure
     """
+    global _cold_start
+    if _cold_start:
+        log_metric(
+            name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
+        )
+        _cold_start = False
+
     booking_id = event.get("bookingId")
 
     if not booking_id:
+        log_metric(
+            name="InvalidBookingRequest", unit=MetricUnit.Count, value=1, operation="cancel_booking"
+        )
         logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking ID")
 
@@ -84,11 +102,13 @@ def lambda_handler(event, context):
         logger.debug(f"Cancelling booking - {booking_id}")
         ret = cancel_booking(booking_id)
 
+        log_metric(name="SuccessfulCancellation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation")
         tracer.put_annotation("BookingStatus", "CANCELLED")
 
         return ret
     except BookingCancellationException as err:
+        log_metric(name="FailedCancellation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
 
