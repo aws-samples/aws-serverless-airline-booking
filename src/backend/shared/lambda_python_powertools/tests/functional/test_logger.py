@@ -345,31 +345,18 @@ def test_log_metric_multiple_dimensions(capsys):
     "invalid_input,expected",
     [
         (
-            {"unit": "Seconds"},
+            {"unit": "seconds"},
             "MONITORING|0|Seconds|test_metric|ServerlessAirline|service=service_undefined",
-        ),
-        (
-            {"unit": "Blah"},
-            "MONITORING|0|Count|test_metric|ServerlessAirline|service=service_undefined",
-        ),
-        (
-            {"unit": None},
-            "MONITORING|0|Count|test_metric|ServerlessAirline|service=service_undefined",
         ),
         (
             {"unit": "Seconds", "customer": None, "charge_id": "123", "payment_status": ""},
             "MONITORING|0|Seconds|test_metric|ServerlessAirline|service=service_undefined,charge_id=123",
         ),
     ],
-    ids=[
-        "metric unit as string",
-        "invalid metric unit",
-        "invalid unit value",
-        "empty dimension value",
-    ],
+    ids=["metric unit as string lower case", "empty dimension value"],
 )
-def test_log_metric_invalid_unit(capsys, invalid_input, expected):
-    # GIVEN invalid arguments are provided such as invalid metric units, empty dimension values
+def test_log_metric_partially_correct_args(capsys, invalid_input, expected):
+    # GIVEN invalid arguments are provided such as empty dimension values and metric units in strings
     # WHEN log_metric is called
     # THEN default values should be used such as "Count" as a unit, invalid dimensions not included
     # and no exception raised
@@ -377,3 +364,17 @@ def test_log_metric_invalid_unit(capsys, invalid_input, expected):
     captured = capsys.readouterr()
 
     assert captured.out == expected
+
+
+@pytest.mark.parametrize(
+    "invalid_input,expected",
+    [({"unit": "Blah"}, ValueError), ({"unit": None}, ValueError), ({}, TypeError)],
+    ids=["invalid metric unit as str", "unit as None", "missing required unit"],
+)
+def test_log_metric_invalid_unit(invalid_input, expected):
+    # GIVEN invalid units are provided
+    # WHEN log_metric is called
+    # THEN ValueError exception should be raised
+
+    with pytest.raises(expected):
+        log_metric(name="test_metric", **invalid_input)
