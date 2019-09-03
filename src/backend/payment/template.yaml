@@ -13,6 +13,10 @@ Parameters:
 Globals:
   Function:
     Tracing: Active
+    Environment:
+        Variables:
+            POWERTOOLS_SERVICE_NAME: booking
+            LOG_LEVEL: INFO
 
 Resources:
   StripePaymentApplication:
