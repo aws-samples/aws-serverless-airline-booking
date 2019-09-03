@@ -276,6 +276,9 @@ def log_metric(
         keyword arguments as additional dimensions (e.g. customer=customerId)
     """
 
+    logger.debug(
+        f"Building new custom metric. Name: {name}, Service: {service}, Unit: {unit}, Value: {value}, Dimensions: {dimensions}"
+    )
     service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
     dimensions = __build_dimensions(**dimensions)
     unit = build_metric_unit_from_str(unit)
