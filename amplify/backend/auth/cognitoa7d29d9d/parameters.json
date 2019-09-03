@@ -1,5 +1,5 @@
 {
-    "identityPoolName": "cognitoa7d29d9d_identitypool_bb5f6f54",
+    "identityPoolName": "cognitoa7d29d9d_identitypool_5b837e17",
     "allowUnauthenticatedIdentities": false,
     "resourceNameTruncated": "cognitbb5f6f54",
     "userPoolName": "awsserverlessairlinea7d29d9d_userpool_a7d29d9d",
@@ -66,5 +66,11 @@
             "Arn"
         ]
     },
-    "dependsOn": []
+    "dependsOn": [],
+    "triggers": "{}",
+    "hostedUI": false,
+    "parentStack": {
+        "Ref": "AWS::StackId"
+    },
+    "permissions": []
 }
