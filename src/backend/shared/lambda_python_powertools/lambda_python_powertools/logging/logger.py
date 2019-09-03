@@ -1,4 +1,5 @@
 import functools
+import itertools
 import logging
 import os
 from distutils.util import strtobool
@@ -6,7 +7,12 @@ from typing import Any, Callable, Dict
 
 import aws_lambda_logging
 
-from ..helper.models import build_lambda_context_model, build_process_booking_model
+from ..helper.models import (
+    MetricUnit,
+    build_lambda_context_model,
+    build_metric_unit_from_str,
+    build_process_booking_model,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -198,3 +204,107 @@ def __is_cold_start() -> str:
         is_cold_start = False
 
     return cold_start
+
+
+def log_metric(
+    name: str,
+    unit: MetricUnit,
+    value: float = 0,
+    service: str = "service_undefined",
+    namespace: str = "ServerlessAirline",
+    **dimensions,
+):
+    """Logs a custom metric in a statsD-esque format to stdout.
+
+    Creating Custom Metrics synchronously would impact on performance/execution time
+    Logging a metric to CloudWatch Logs allows us to pick them up asynchronously
+    and create them as a metric in an external process
+    leaving the actual business function compute time to its logic only
+
+    By default, it adds service name as a dimension, and any additional key=value arg
+    It takes up to 9 dimensions that will be used to further categorize a custom metric
+
+    Output: MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>
+
+    Metric units are available via MetricUnit Enum
+
+    Environment variables
+    ---------------------
+    POWERTOOLS_SERVICE_NAME : str
+        service name
+
+    Example
+    -------
+    Log metric to count number of successful payments
+
+        $ export POWERTOOLS_SERVICE_NAME="payment"
+        >>> from lambda_python_powertools.logging import MetricUnit, log_metric
+        >>> log_metric(
+            name="SuccessfulPayments",
+            unit=MetricUnit.Count,
+            value=1,
+            namespace="ServerlessAirline"
+        )
+
+    Log metric to count number of successful payments per campaign & customer
+
+        $ export POWERTOOLS_SERVICE_NAME="payment"
+        >>> from lambda_python_powertools.logging import MetricUnit, log_metric
+        >>> log_metric(
+            name="SuccessfulPayments",
+            unit=MetricUnit.Count,
+            value=1,
+            namespace="ServerlessAirline",
+            campaign=campaign_id,
+            customer=customer_id
+        )
+
+    Parameters
+    ----------
+    name : str
+        metric name, by default None
+    unit : MetricUnit, by default MetricUnit.Count
+        metric unit enum value (e.g. MetricUnit.Seconds), by default None
+        API Info: https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html
+    value : float, optional
+        metric value, by default 0
+    service : str, optional
+        service name used as dimension, by default "service_undefined"
+    namespace : str, optional
+        metric namespace (e.g. application name), by default None
+    dimensions: dict, optional
+        keyword arguments as additional dimensions (e.g. customer=customerId)
+    """
+
+    service = os.getenv("POWERTOOLS_SERVICE_NAME") or service
+    dimensions = __build_dimensions(**dimensions)
+    unit = build_metric_unit_from_str(unit)
+
+    metric = f"MONITORING|{value}|{unit.name}|{name}|{namespace}|service={service}"
+    if dimensions:
+        metric = f"MONITORING|{value}|{unit.name}|{name}|{namespace}|service={service},{dimensions}"
+
+    print(metric, end="")
+
+
+def __build_dimensions(**dimensions) -> str:
+    """Builds correct format for custom metric dimensions from kwargs
+
+    Returns
+    -------
+    str
+        Dimensions in the form of "key=value,key2=value2"
+    """
+    dimension = ""
+
+    # CloudWatch accepts a max of 10 dimensions per metric
+    # We include service name as a dimension
+    # so we take up to 9 values as additional dimensions
+    # before we convert everything to a string of key=value
+    dimensions_partition = dict(itertools.islice(dimensions.items(), 9))
+    dimensions_list = [
+        dimension + "=" + value for dimension, value in dimensions_partition.items() if value
+    ]
+    dimension = ",".join(dimensions_list)
+
+    return dimension

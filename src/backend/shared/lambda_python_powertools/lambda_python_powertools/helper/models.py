@@ -4,7 +4,8 @@ key data used in more than one place.
 """
 
 from dataclasses import dataclass
-from typing import Dict
+from enum import Enum
+from typing import Dict, Union
 
 
 @dataclass
@@ -128,3 +129,58 @@ def build_lambda_context_model(context: object) -> LambdaContextModel:
     }
 
     return LambdaContextModel(**context)
+
+
+class MetricUnit(Enum):
+    Seconds = "Seconds"
+    Microseconds = "Microseconds"
+    Milliseconds = "Milliseconds"
+    Bytes = "Bytes"
+    Kilobytes = "Kilobytes"
+    Megabytes = "Megabytes"
+    Gigabytes = "Gigabytes"
+    Terabytes = "Terabytes"
+    Bits = "Bits"
+    Kilobits = "Kilobits"
+    Megabits = "Megabits"
+    Gigabits = "Gigabits"
+    Terabits = "Terabits"
+    Percent = "Percent"
+    Count = "Count"
+    BytesPerSecond = "Second"
+    KilobytesPerSecond = "Second"
+    MegabytesPerSecond = "Second"
+    GigabytesPerSecond = "Second"
+    TerabytesPerSecond = "Second"
+    BitsPerSecond = "Second"
+    KilobitsPerSecond = "Second"
+    MegabitsPerSecond = "Second"
+    GigabitsPerSecond = "Second"
+    TerabitsPerSecond = "Second"
+    CountPerSecond = "Second"
+
+
+def build_metric_unit_from_str(unit: Union[str, MetricUnit]) -> MetricUnit:
+    """Builds correct metric unit value from string or return Count as default
+
+    Parameters
+    ----------
+    unit : str, MetricUnit
+        metric unit
+
+    Returns
+    -------
+    MetricUnit
+        Metric Unit enum from string value or MetricUnit.Count as a default
+    """
+    if isinstance(unit, MetricUnit):
+        return unit
+
+    metric_unit = None
+
+    try:
+        metric_unit = MetricUnit[unit]
+    except (TypeError, KeyError):
+        metric_unit = MetricUnit.Count
+
+    return metric_unit
