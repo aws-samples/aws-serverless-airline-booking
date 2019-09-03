@@ -26,12 +26,10 @@ build-collect-payment:
 	sam build CollectPayment
 
 invoke-collect-payment: build-collect-payment
-	sam build CollectPayment
 	sam local invoke --event src/collect-payment/event.json --env-vars local-env-vars.json CollectPayment --profile ${PROFILE}
 
 build-refund-payment:
 	sam build RefundPayment
 
 invoke-refund-payment: build-refund-payment
-	sam build RefundPayment
 	sam local invoke --event src/refund-payment/event.json --env-vars local-env-vars.json RefundPayment --profile ${PROFILE}
