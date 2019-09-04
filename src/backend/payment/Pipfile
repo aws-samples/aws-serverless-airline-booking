@@ -1,0 +1,32 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+cfn-lint = "*"
+black = "*"
+pytest-mock = "*"
+pytest = "*"
+pytest-cov = "*"
+flake8 = "*"
+flake8-builtins = "*"
+flake8-comprehensions = "*"
+flake8-fixme = "*"
+flake8-bugbear = "*"
+flake8-eradicate = "*"
+flake8-black = "*"
+flake8-debugger = "*"
+flake8-variables-names = "*"
+isort = "*"
+
+[packages]
+boto3 = "*"
+lambda-python-powertools = {editable = true,path = "./../../backend/shared/lambda_python_powertools"}
+requests = "*"
+
+[requires]
+python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
