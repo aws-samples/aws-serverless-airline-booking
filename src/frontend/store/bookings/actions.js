@@ -41,20 +41,20 @@ export function fetchBooking({ commit }) {
     });
 
     try {
-      // TODO: Fix Enum value passing
-      // const bookingFilter = {
-      //   filter: {
-      //     status: {
-      //       eq: "CONFIRMED"
-      //     }
-      //   }
-      // };
+      const BookingStatus = Object.freeze({ CONFIRMED: "CONFIRMED" });
+      const bookingFilter = {
+        filter: {
+          status: {
+            eq: BookingStatus.CONFIRMED
+          }
+        }
+      };
       const {
         // @ts-ignore
         data: {
           listBookings: { items: bookingData }
         }
-      } = await API.graphql(graphqlOperation(listBookings));
+      } = await API.graphql(graphqlOperation(listBookings, bookingFilter));
 
       let bookings = bookingData.map(booking => new Booking(booking));
 

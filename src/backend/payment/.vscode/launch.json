@@ -1,0 +1,31 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "CollectPayment Fn",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/.aws-sam/build/CollectPayment",
+                    "remoteRoot": "/var/task"
+                }
+            ]
+        },
+        {
+            "name": "RefundPayment Fn",
+            "type": "python",
+            "request": "attach",
+            "port": 5890,
+            "host": "localhost",
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/.aws-sam/build/RefundPayment",
+                    "remoteRoot": "/var/task"
+                }
+            ]
+        },
+    ]
+}
