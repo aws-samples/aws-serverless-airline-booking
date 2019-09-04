@@ -46,16 +46,14 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-subscribe-log-group-to-arn
         SemanticVersion: 1.1.2
       Parameters:
-        # The ARN of the Lambda function or Kinesis stream to subscribe a newly created CloudWatch log group to.
+        # The ARN of the Lambda function or Kinesis stream to subscribe a newly created CloudWatch log group to
         DestinationArn: !Sub ${LogProcessingStream.Arn}
-        # (Optional) if specified then log groups that match the prefix will not be subscribed. E.g. '/aws/lambda/my-function-' will exclude Lambda function logs for functions that start with 'my-function-'
-        # ExcludePrefix: '' # Uncomment to override default value
-        # (Optional) if specified, will override the filter name for the subscription.
-        # FilterName: 'ship-logs' # Uncomment to override default value
-        # (Optional) if specified, will override the filter pattern used to create the subscription.
-        # FilterPattern: '[timestamp=*Z, request_id="*-*", event]' # Uncomment to override default value
-        # (Optional) if specified then only log groups with the prefix will be subscribed.  E.g. '/aws/lambda/' will subscribe only Lambda function logs
-        # Prefix: '' # Uncomment to override default value
+        ## Disables processing of own logs
+        ExcludePrefix: 'ProcessCustomMetricsAsync' # Uncomment to override default value
+        # Only subscribe to functions created for this project
+        ## Otherwise we'd override all CloudWatch Logs by subscribing to our Kinesis
+        Prefix: '/aws/lambda/awsserverlessairline' # Uncomment to override default value
+
 
 Outputs:
   LogProcessingStream:
