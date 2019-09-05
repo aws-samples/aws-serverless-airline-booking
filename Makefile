@@ -33,7 +33,7 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
 	## Disabled until resolution of https://github.com/aws-samples/aws-serverless-airline-booking/issues/57
-	# $(MAKE) deploy.log-processing
+	$(MAKE) deploy.log-processing
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
