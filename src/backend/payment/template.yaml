@@ -15,7 +15,7 @@ Globals:
     Tracing: Active
     Environment:
         Variables:
-            POWERTOOLS_SERVICE_NAME: booking
+            POWERTOOLS_SERVICE_NAME: payment
             LOG_LEVEL: INFO
 
 Resources:
