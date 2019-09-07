@@ -53,6 +53,8 @@ Resources:
         # Only subscribe to functions created for this project
         ## Otherwise we'd override all CloudWatch Logs by subscribing to our Kinesis
         Prefix: '/aws/lambda/awsserverlessairline' # Uncomment to override default value
+        # Only captures REPORT and Custom Metrics log events; reduces cost and unnecessary noise
+        FilterPattern: '?REPORT ?MONITORING'
 
 
 Outputs:
