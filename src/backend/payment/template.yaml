@@ -33,6 +33,7 @@ Resources:
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub CollectPayment-${Stage}-${AWS::StackName}
       Handler: collect.lambda_handler
       Runtime: python3.7
       CodeUri: src/collect-payment
@@ -40,10 +41,12 @@ Resources:
       Environment:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.CaptureApiUrl
+          STAGE: !Ref Stage
 
   RefundPayment:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub RefundPayment-${Stage}-${AWS::StackName}
       Handler: refund.lambda_handler
       CodeUri: src/refund-payment
       Runtime: python3.7
@@ -51,6 +54,7 @@ Resources:
       Environment:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
+          STAGE: !Ref Stage
 
   CollectPaymentParameter:
     Type: "AWS::SSM::Parameter"

@@ -55,6 +55,7 @@ Resources:
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub IngestLoyalty-${Stage}-${AWS::StackName}
       CodeUri: build/ingest
       Handler: index.handler
       Runtime: nodejs8.10
@@ -64,6 +65,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
       Events:
         Listener:
           Type: SNS
@@ -76,6 +78,7 @@ Resources:
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub GetLoyalty-${Stage}-${AWS::StackName}
       CodeUri: build/get
       Handler: index.handler
       Runtime: nodejs8.10
@@ -85,6 +88,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
       Events:
         Api:
           Type: Api
@@ -103,7 +107,7 @@ Resources:
   LoyaltyApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub 'LoyaltyApi-${Stage}'
+      Name: !Sub LoyaltyApi-${Stage}
       StageName: Prod
       # Cors:
       #   AllowOrigin: "'*'"
