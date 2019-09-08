@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   loyalty service
-  
+
 Globals:
   Function:
     Timeout: 5
@@ -28,7 +28,7 @@ Resources:
   LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub LoyaltyData-${Stage}
+      TableName: !Sub Airline-LoyaltyData-${Stage}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: customerId
@@ -55,7 +55,7 @@ Resources:
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub IngestLoyalty-${Stage}
+      FunctionName: !Sub Airline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
       Runtime: nodejs8.10
@@ -78,7 +78,7 @@ Resources:
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub GetLoyalty-${Stage}
+      FunctionName: !Sub Airline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
       Runtime: nodejs8.10
@@ -96,7 +96,7 @@ Resources:
             Method: GET
             Path: /loyalty/{customerId}
             RestApiId: !Ref LoyaltyApi
-  
+
   LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
@@ -107,7 +107,7 @@ Resources:
   LoyaltyApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub LoyaltyApi-${Stage}
+      Name: !Sub Airline-Loyalty-${Stage}
       StageName: Prod
       # Cors:
       #   AllowOrigin: "'*'"

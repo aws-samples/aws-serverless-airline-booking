@@ -5,7 +5,7 @@ Parameters:
     Stage:
         Type: String
         Description: Environment stage or git branch
-    
+
     StripeKey:
         Type: String
         Description: Stripe Secret Key for SAR App
@@ -33,7 +33,7 @@ Resources:
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub CollectPayment-${Stage}
+      FunctionName: !Sub Airline-CollectPayment-${Stage}
       Handler: collect.lambda_handler
       Runtime: python3.7
       CodeUri: src/collect-payment
@@ -46,7 +46,7 @@ Resources:
   RefundPayment:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub RefundPayment-${Stage}
+      FunctionName: !Sub Airline-RefundPayment-${Stage}
       Handler: refund.lambda_handler
       CodeUri: src/refund-payment
       Runtime: python3.7
@@ -58,25 +58,25 @@ Resources:
 
   CollectPaymentParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/payment/collect-function/${Stage}
         Description: Collect Payment Lambda ARN
         Type: String
         Value: !Sub ${CollectPayment.Arn}
-  
+
   RefundPaymentParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/payment/refund-function/${Stage}
         Description: Refund Payment Lambda ARN
         Type: String
         Value: !Sub ${RefundPayment.Arn}
-  
+
   StripePaymentApplicationKeyParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/payment/stripe-secret-key/${Stage}
-        Description: Stripe Key for SAR App 
+        Description: Stripe Key for SAR App
         Type: String
         Value: !Ref StripeKey
 
@@ -84,19 +84,19 @@ Outputs:
   CollectPaymentFunction:
     Value: !Sub ${CollectPayment.Arn}
     Description: Collect Payment Lambda Function
-  
+
   RefundPaymentFunction:
     Value: !Sub ${RefundPayment.Arn}
     Description: Refund Payment Lambda Function
-  
+
   PaymentCaptureUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
     Description: Payment Endpoint for capturing payments
-  
+
   PaymentChargeUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
     Description: Payment Endpoint for collecting payments
-  
+
   RefundApiUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
     Description: Payment Endpoint for refunding payments

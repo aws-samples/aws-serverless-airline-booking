@@ -41,7 +41,7 @@ Resources:
   ConfirmBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ConfirmBooking-${Stage}
+      FunctionName: !Sub Airline-ConfirmBooking-${Stage}
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
       Runtime: python3.7
@@ -56,7 +56,7 @@ Resources:
   CancelBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub CancelBooking-${Stage}
+      FunctionName: !Sub Airline-CancelBooking-${Stage}
       Handler: cancel.lambda_handler
       CodeUri: src/cancel-booking
       Runtime: python3.7
@@ -71,7 +71,7 @@ Resources:
   ReserveBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ReserveBooking-${Stage}
+      FunctionName: !Sub Airline-ReserveBooking-${Stage}
       Handler: reserve.lambda_handler
       CodeUri: src/reserve-booking
       Runtime: python3.7
@@ -89,7 +89,7 @@ Resources:
   NotifyBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub NotifyBooking-${Stage}
+      FunctionName: !Sub Airline-NotifyBooking-${Stage}
       Handler: notify.lambda_handler
       CodeUri: src/notify-booking
       Runtime: python3.7
@@ -155,6 +155,7 @@ Resources:
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      StateMachineName: !Sub Airline-ProcessBooking-${Stage}
       DefinitionString: !Sub |
         {
             "StartAt": "Reserve Flight",
