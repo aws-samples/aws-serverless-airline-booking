@@ -41,7 +41,7 @@ Resources:
   ConfirmBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ConfirmBooking-${Stage}-${AWS::StackName}
+      FunctionName: !Sub ConfirmBooking-${Stage}
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
       Runtime: python3.7
@@ -56,7 +56,7 @@ Resources:
   CancelBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub CancelBooking-${Stage}-${AWS::StackName}
+      FunctionName: !Sub CancelBooking-${Stage}
       Handler: cancel.lambda_handler
       CodeUri: src/cancel-booking
       Runtime: python3.7
@@ -71,7 +71,7 @@ Resources:
   ReserveBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ReserveBooking-${Stage}-${AWS::StackName}
+      FunctionName: !Sub ReserveBooking-${Stage}
       Handler: reserve.lambda_handler
       CodeUri: src/reserve-booking
       Runtime: python3.7
@@ -89,7 +89,7 @@ Resources:
   NotifyBooking:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub NotifyBooking-${Stage}-${AWS::StackName}
+      FunctionName: !Sub NotifyBooking-${Stage}
       Handler: notify.lambda_handler
       CodeUri: src/notify-booking
       Runtime: python3.7

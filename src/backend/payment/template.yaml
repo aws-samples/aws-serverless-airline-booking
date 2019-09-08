@@ -33,7 +33,7 @@ Resources:
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub CollectPayment-${Stage}-${AWS::StackName}
+      FunctionName: !Sub CollectPayment-${Stage}
       Handler: collect.lambda_handler
       Runtime: python3.7
       CodeUri: src/collect-payment
@@ -46,7 +46,7 @@ Resources:
   RefundPayment:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub RefundPayment-${Stage}-${AWS::StackName}
+      FunctionName: !Sub RefundPayment-${Stage}
       Handler: refund.lambda_handler
       CodeUri: src/refund-payment
       Runtime: python3.7
