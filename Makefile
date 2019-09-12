@@ -32,13 +32,13 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
-	$(MAKE) deploy.log-processing
+#	$(MAKE) deploy.log-processing
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
-	$(MAKE) delete.log-processing
+#	$(MAKE) delete.log-processing
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
