@@ -1,5 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
+Description: > 
+  Log Processing utilities stack.
+  Provides a dedicated Kinesis stream for log ingestion.
+  Subscribe new and existing Lambda function logs named `Airline` to Kinesis
+  and only log entries that have `REPORT` or `MONITORING` as strings
+  Expire ALL log entries after 14 days
+  Creates Custom Metrics for Memory Used, Size, and Estimated Cost for each function and version
+  Also creates custom metrics based on "MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>" format
 
 
 Resources:
@@ -17,7 +25,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/async-custom-metrics
-        SemanticVersion: 1.0.0
+        SemanticVersion: 1.2.0
       Parameters:
         # What's the event source you will intend to use? If logs are pushed from CloudWatch Logs to Lambda directly, then use 'Lambda'. If logs are pushed to a Kinesis Stream first, then use 'Kinesis'. Other event sources are not supported (yet).
         EventSourceType: 'Kinesis' # Uncomment to override default value
@@ -33,7 +41,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-set-log-group-retention
-        SemanticVersion: 1.0.1
+        SemanticVersion: 1.1.0
       Parameters:
         # The number of days to retain logs in CloudWatch Logs for.
         RetentionDays: '14' # Uncomment to override default value
@@ -44,7 +52,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-subscribe-log-group-to-arn
-        SemanticVersion: 1.1.2
+        SemanticVersion: 1.4.0
       Parameters:
         # The ARN of the Lambda function or Kinesis stream to subscribe a newly created CloudWatch log group to
         DestinationArn: !Sub ${LogProcessingStream.Arn}
@@ -52,7 +60,9 @@ Resources:
         ExcludePrefix: 'ProcessCustomMetricsAsync' # Uncomment to override default value
         # Only subscribe to functions created for this project
         ## Otherwise we'd override all CloudWatch Logs by subscribing to our Kinesis
-        Prefix: '/aws/lambda/awsserverlessairline' # Uncomment to override default value
+        Prefix: '/aws/lambda/Airline' # Uncomment to override default value
+        # Only captures REPORT and Custom Metrics log events; reduces cost and unnecessary noise
+        FilterPattern: '?REPORT ?MONITORING'
 
 
 Outputs:

@@ -5,7 +5,7 @@ Parameters:
     Stage:
         Type: String
         Description: Environment stage or git branch
-    
+
     StripeKey:
         Type: String
         Description: Stripe Secret Key for SAR App
@@ -15,7 +15,7 @@ Globals:
     Tracing: Active
     Environment:
         Variables:
-            POWERTOOLS_SERVICE_NAME: booking
+            POWERTOOLS_SERVICE_NAME: payment
             LOG_LEVEL: INFO
 
 Resources:
@@ -25,7 +25,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge
-        SemanticVersion: 4.1.0
+        SemanticVersion: 4.4.0
       Parameters:
         EnableInstantCapture: "false"
         SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
@@ -33,6 +33,7 @@ Resources:
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-CollectPayment-${Stage}
       Handler: collect.lambda_handler
       Runtime: python3.7
       CodeUri: src/collect-payment
@@ -40,10 +41,12 @@ Resources:
       Environment:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.CaptureApiUrl
+          STAGE: !Ref Stage
 
   RefundPayment:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-RefundPayment-${Stage}
       Handler: refund.lambda_handler
       CodeUri: src/refund-payment
       Runtime: python3.7
@@ -51,28 +54,29 @@ Resources:
       Environment:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
+          STAGE: !Ref Stage
 
   CollectPaymentParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/payment/collect-function/${Stage}
         Description: Collect Payment Lambda ARN
         Type: String
         Value: !Sub ${CollectPayment.Arn}
-  
+
   RefundPaymentParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/payment/refund-function/${Stage}
         Description: Refund Payment Lambda ARN
         Type: String
         Value: !Sub ${RefundPayment.Arn}
-  
+
   StripePaymentApplicationKeyParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
+    Properties:
         Name: !Sub /service/payment/stripe-secret-key/${Stage}
-        Description: Stripe Key for SAR App 
+        Description: Stripe Key for SAR App
         Type: String
         Value: !Ref StripeKey
 
@@ -80,19 +84,19 @@ Outputs:
   CollectPaymentFunction:
     Value: !Sub ${CollectPayment.Arn}
     Description: Collect Payment Lambda Function
-  
+
   RefundPaymentFunction:
     Value: !Sub ${RefundPayment.Arn}
     Description: Refund Payment Lambda Function
-  
+
   PaymentCaptureUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
     Description: Payment Endpoint for capturing payments
-  
+
   PaymentChargeUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
     Description: Payment Endpoint for collecting payments
-  
+
   RefundApiUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
     Description: Payment Endpoint for refunding payments

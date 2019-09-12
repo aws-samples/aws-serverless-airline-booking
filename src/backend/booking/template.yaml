@@ -41,12 +41,14 @@ Resources:
   ConfirmBooking:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-ConfirmBooking-${Stage}
       Handler: confirm.lambda_handler
       CodeUri: src/confirm-booking
       Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
+          STAGE: !Ref Stage
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
@@ -54,12 +56,14 @@ Resources:
   CancelBooking:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-CancelBooking-${Stage}
       Handler: cancel.lambda_handler
       CodeUri: src/cancel-booking
       Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
+          STAGE: !Ref Stage
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
@@ -67,12 +71,14 @@ Resources:
   ReserveBooking:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-ReserveBooking-${Stage}
       Handler: reserve.lambda_handler
       CodeUri: src/reserve-booking
       Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TABLE_NAME: !Ref BookingTable
+          STAGE: !Ref Stage
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref BookingTable
@@ -83,12 +89,14 @@ Resources:
   NotifyBooking:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-NotifyBooking-${Stage}
       Handler: notify.lambda_handler
       CodeUri: src/notify-booking
       Runtime: python3.7
       Environment:
         Variables:
           BOOKING_TOPIC: !Ref BookingTopic
+          STAGE: !Ref Stage
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !Sub ${BookingTopic.TopicName}
@@ -147,6 +155,7 @@ Resources:
   ProcessBooking:
     Type: AWS::StepFunctions::StateMachine
     Properties:
+      StateMachineName: !Sub Airline-ProcessBooking-${Stage}
       DefinitionString: !Sub |
         {
             "StartAt": "Reserve Flight",
