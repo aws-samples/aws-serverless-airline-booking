@@ -25,7 +25,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge
-        SemanticVersion: 4.1.0
+        SemanticVersion: 4.4.0
       Parameters:
         EnableInstantCapture: "false"
         SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
