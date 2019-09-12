@@ -1,5 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
+Description: > 
+  Log Processing utilities stack.
+  Provides a dedicated Kinesis stream for log ingestion.
+  Subscribe new and existing Lambda function logs named `Airline` to Kinesis
+  and only log entries that have `REPORT` or `MONITORING` as strings
+  Expire ALL log entries after 14 days
+  Creates Custom Metrics for Memory Used, Size, and Estimated Cost for each function and version
+  Also creates custom metrics based on "MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>" format
 
 
 Resources:
