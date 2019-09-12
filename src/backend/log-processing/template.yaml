@@ -25,7 +25,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/async-custom-metrics
-        SemanticVersion: 1.2.0
+        SemanticVersion: 1.4.0
       Parameters:
         # What's the event source you will intend to use? If logs are pushed from CloudWatch Logs to Lambda directly, then use 'Lambda'. If logs are pushed to a Kinesis Stream first, then use 'Kinesis'. Other event sources are not supported (yet).
         EventSourceType: 'Kinesis' # Uncomment to override default value
