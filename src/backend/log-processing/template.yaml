@@ -52,7 +52,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-subscribe-log-group-to-arn
-        SemanticVersion: 1.4.0
+        SemanticVersion: 1.7.0
       Parameters:
         # The ARN of the Lambda function or Kinesis stream to subscribe a newly created CloudWatch log group to
         DestinationArn: !Sub ${LogProcessingStream.Arn}
