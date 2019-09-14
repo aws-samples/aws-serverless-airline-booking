@@ -12,6 +12,7 @@ Parameters:
 
 Globals:
   Function:
+    Timeout: 5
     Tracing: Active
     MemorySize: 512
     Environment:
