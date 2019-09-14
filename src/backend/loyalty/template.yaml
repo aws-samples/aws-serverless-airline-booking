@@ -10,6 +10,7 @@ Globals:
     MemorySize: 512
   Api:
     TracingEnabled: true
+    EndpointConfiguration: REGIONAL
 
 Parameters:
   Stage:
