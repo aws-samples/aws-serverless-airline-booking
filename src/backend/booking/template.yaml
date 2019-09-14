@@ -7,6 +7,7 @@ Globals:
   Function:
     Timeout: 5
     Tracing: Active
+    MemorySize: 512
     Environment:
         Variables:
             POWERTOOLS_SERVICE_NAME: booking
@@ -93,6 +94,7 @@ Resources:
       Handler: notify.lambda_handler
       CodeUri: src/notify-booking
       Runtime: python3.7
+      MemorySize: 256
       Environment:
         Variables:
           BOOKING_TOPIC: !Ref BookingTopic

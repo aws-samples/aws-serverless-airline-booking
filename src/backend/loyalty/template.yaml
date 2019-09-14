@@ -7,6 +7,7 @@ Globals:
   Function:
     Timeout: 5
     Tracing: Active
+    MemorySize: 512
   Api:
     TracingEnabled: true
 
