@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ECR repository for gatling application
+Parameters:
+  ClusterName:
+    Type: String
+    Default: load-test-cluster
+  RepositoryName:
+    Type: String
+    Description: Name for the Elastic Container Registry's repository
+  AllowedAccounts:
+    Type: String
+    Description: Account that are granted access to push/pull containers to/from registry
+    Default: ${AWS::AccountId}
+Resources:
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Join ['', [!Ref ClusterName, Cluster]]
+  GatlingRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: !Ref RepositoryName
+      RepositoryPolicyText:
+        Version: "2012-10-17"
+        Statement: 
+          - Sid: AllowPushPullForOtherAccounts
+            Effect: Allow
+            Principal: 
+              AWS: !Ref AllowedAccounts
+            Action: 
+              - "ecr:GetDownloadUrlForLayer"
+              - "ecr:BatchGetImage"
+              - "ecr:BatchCheckLayerAvailability"
+              - "ecr:PutImage"
+              - "ecr:InitiateLayerUpload"
+              - "ecr:UploadLayerPart"
+              - "ecr:CompleteLayerUpload"
+
+Outputs:
+  Uri:
+    Description: ECR URI
+    Value: !GetAtt GatlingRepository.Arn
+    Export:
+      Name: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${RepositoryName}"

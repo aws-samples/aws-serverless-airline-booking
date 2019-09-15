@@ -1,0 +1,2 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Master Cloudformation template that sets up the required stack for load testing

@@ -1,0 +1,47 @@
+
+import io.gatling.core.Predef._
+import io.gatling.core.Predef.{constantUsersPerSec,atOnceUsers,_}
+import io.gatling.http.Predef._
+import scala.concurrent.duration._
+import java.util.concurrent.ThreadLocalRandom
+import scala.util.Random
+
+class setupUsers extends Simulation {
+
+val COGNITO_URL = "https://cognito-idp.eu-west-2.amazonaws.com/"
+val CLIENT_ID   = "1k0ip9j0e6ne61m49cjh8fjete" 
+
+// Where we provide a CSV file with x username and password and the below will create those users in Cognito
+object Create {
+
+    val userAccountList = csv("user.csv").random
+
+    val headerMaps = Map("Content-Type" -> "application/x-amz-json-1.1", 
+                            "Accept" -> "*/*",
+                            "Origin" ->  "https://cognito-idp.eu-west-2.amazonaws.com/test",
+                            "X-Amz-Target" -> "AWSCognitoIdentityProviderService.SignUp",
+                            "X-Amz-User-Agent" -> "aws-amplify/0.1.x js",
+                            "Sec-Fetch-Mode" -> "cors",
+                            "Sec-Fetch-Site" -> "cross-site",
+                            "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"                          
+                          )
+
+    val account = feed(userAccountList)
+                    .exec(http("Create Account")
+                    .post(COGNITO_URL)
+                    .headers(headerMaps)
+                    .body(StringBody("""{"ClientId":"1k0ip9j0e6ne61m49cjh8fjete","Username":"${username}","Password":"${password}","UserAttributes":[{"Name":"given_name","Value":"${given_name}"},{"Name":"family_name","Value":"${family_name}"},{"Name":"email","Value":"${email}"},{"Name":"phone_number","Value":"${phone_number}"}],"ValidationData":null}"""))
+                    .check(bodyString.saveAs("CreateUserResponse"))
+                    .check(status.not(404), status.not(500))
+                    )
+                    .exec(session => {
+                       println(session)
+                       session
+                    })                    
+      .pause(1)
+  }
+
+   val newUser = scenario("Create New Users").exec(Create.account)
+
+    setUp(newUser.inject(constantConcurrentUsers(10) during (1 seconds)))
+}
