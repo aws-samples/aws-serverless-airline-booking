@@ -1,6 +1,7 @@
 const etlBucketName = process.env.ETL_BUCKET_NAME;
 const AWS = require('aws-sdk');
 const faker = require('faker');
+const moment = require('moment');
 const s3 = new AWS.S3();
 
 let response;
@@ -21,9 +22,8 @@ exports.generate = async (event, context) => {
   //for each route
   const allFlights = routes.map(route => generateFlights(route))
                            .reduce((acc, x) => acc.concat(x), []);
-  //Create 2 flights for the next 30 days
-  console.log(allFlights);
 
+   console.log("all Flights ", allFlights.length);
   //write the file
   const chunkFilename = `raw/${execution}/flights/${index}_flights.json`
   return s3.upload({
@@ -39,29 +39,45 @@ function generateFlights(route){
   const airport1 = route[0];
   const airport2 = route[1];
 
-  const outboundFlight = createFlight(airport1, airport2);
-  const inboundFlight = createFlight(airport1, airport2);
+  // Create for the next 30 days
+  const next30Days = [...Array(30)].map((x, i) => {
+    const start = moment().utc().add(i+1, 'days').startOf('day').toDate();
+    const end = moment().utc().add(i+1, 'days').endOf('day').toDate();
 
-  return [outboundFlight, inboundFlight];
+    const outboundFlight = createFlight(airport1, airport2, start, end);
+    const inboundFlight = createFlight(airport2, airport1, start, end);
+
+    return [outboundFlight, inboundFlight];
+  }).reduce((arr, x) => arr.concat(x), []);
+
+  return next30Days;
 }
 
-function createFlight(departureAirport, arrivalAirport){
+function createFlight(departureAirport, arrivalAirport, start, end){
+  const flightDeparture = getRandomDate(start, end);
+  const flightArrival = getRandomDate(flightDeparture, end);
+  const flightNumber = (faker.hacker.abbreviation()+faker.random.number());
   const flight = {
     id: faker.random.uuid(),
-    departureDate: new Date(),
+    departureDate: flightDeparture,
     departureAirportCode: departureAirport.code,
     departureAirportName: departureAirport.name,
     departureCity: departureAirport.city,
     departureLocale: faker.random.locale,
-    arrivalDate: new Date(),
+    arrivalDate: flightArrival,
     arrivalAirportCode: arrivalAirport.code,
     arrivalAirportName: arrivalAirport.name,
     arrivalCity: arrivalAirport.city,
     arrivalLocale: faker.random.locale(),
     ticketPrice: faker.finance.amount(),
     ticketCurrency: faker.finance.currencyCode(),
-    flightNumber: (faker.hacker.abbreviation()+faker.random.number()),
-    seatAllocation: (Math.floor(Math.random() * Math.floor(50))+1)+faker.random.arrayElement()
+    flightNumber: flightNumber.length > 4 ? flightNumber.substring(0, 4) : flightNumber,
+    seatAllocation: (Math.floor(Math.random() * Math.floor(50))+1)
   };
   return flight;
+}
+
+function getRandomDate(start, end){
+  start = start.getTime(), end = end.getTime();
+  return new Date(start + Math.random() * (end - start));
 }

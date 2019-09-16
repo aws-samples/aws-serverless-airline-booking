@@ -83,6 +83,32 @@ Resources:
           ETL_BUCKET_NAME: !Ref ETLBucket
           FLIGHTS_TABLE_NAME: !Ref FlightTable
 
+  ScheduledExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: StateMachineExecutionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:DescribeExecution
+                  - states:DescribeStateMachineForExecution
+                  - states:GetExecutionHistory
+                  - states:StopExecution
+                  - states:StartExecution
+                Resource:
+                  - !Ref AddFlights
+
   StatesExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -107,6 +133,18 @@ Resources:
                   - !Sub ${CreateFlightRoutesFunction.Arn}
                   - !Sub ${GenerateFlightsFunction.Arn}
                   - !Sub ${AddFlightsFunction.Arn}
+
+  ScheduledExecution:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Scheduled execution for ETL"
+      ScheduleExpression: "rate(30 days)"
+      State: ENABLED
+      Targets:
+        -
+          Arn: !Ref AddFlights
+          Id: "ETLStepFunction"
+          RoleArn: !Sub ${ScheduledExecutionRole.Arn}
 
   AddFlights:
     Type: AWS::StepFunctions::StateMachine
@@ -173,7 +211,7 @@ Resources:
                       "ResultPath": "$.routes[0].flightsFile",
                       "OutputPath": "$.routes[0].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 0
                       }
@@ -182,7 +220,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -202,7 +240,7 @@ Resources:
                       "ResultPath": "$.routes[1].flightsFile",
                       "OutputPath": "$.routes[1].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 1
                       }
@@ -211,7 +249,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -231,7 +269,7 @@ Resources:
                       "ResultPath": "$.routes[2].flightsFile",
                       "OutputPath": "$.routes[2].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 2
                       }
@@ -240,7 +278,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -260,7 +298,7 @@ Resources:
                       "ResultPath": "$.routes[3].flightsFile",
                       "OutputPath": "$.routes[3].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 3
                       }
@@ -269,7 +307,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -289,7 +327,7 @@ Resources:
                       "ResultPath": "$.routes[4].flightsFile",
                       "OutputPath": "$.routes[4].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 4
                       }
@@ -298,7 +336,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -318,7 +356,7 @@ Resources:
                       "ResultPath": "$.routes[5].flightsFile",
                       "OutputPath": "$.routes[5].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 5
                       }
@@ -327,7 +365,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -347,7 +385,7 @@ Resources:
                       "ResultPath": "$.routes[6].flightsFile",
                       "OutputPath": "$.routes[6].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 6
                       }
@@ -356,7 +394,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -376,7 +414,7 @@ Resources:
                       "ResultPath": "$.routes[7].flightsFile",
                       "OutputPath": "$.routes[7].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 7
                       }
@@ -385,7 +423,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -405,7 +443,7 @@ Resources:
                       "ResultPath": "$.routes[8].flightsFile",
                       "OutputPath": "$.routes[8].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 8
                       }
@@ -414,7 +452,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
@@ -434,7 +472,7 @@ Resources:
                       "ResultPath": "$.routes[9].flightsFile",
                       "OutputPath": "$.routes[9].flightsFile",
                       "Parameters": {
-                        "routeFileKey.$": "$.key",
+                        "routeFileKey.$": "$.Key",
                         "execution.$": "$$.Execution.Name",
                         "index": 9
                       }
@@ -443,7 +481,7 @@ Resources:
                       "Type": "Task",
                       "Resource": "${AddFlightsFunction.Arn}",
                       "End": true,
-                      "InputPath": "$.key",
+                      "InputPath": "$.Key",
                       "Parameters": {
                         "flightsFileKey.$": "$",
                         "execution.$": "$$.Execution.Name",
