@@ -154,12 +154,6 @@ object Make {
         .pause(1)
   }
 
-  // val httpProtocol = http
-  //   .baseUrl("https://cognito-idp.us-east-2.amazonaws.com/")
-  //   .doNotTrackHeader("1") 
-
-  val newUser = scenario("Create New User").exec(Create.account)
-
   val searchFlight = scenario("Search Flights").exec(Flight.query)
   val profile = scenario("Retrieve User Profile").exec(User.profile)
   val listUserBookings = scenario("List User Bookings").exec(User.bookings)

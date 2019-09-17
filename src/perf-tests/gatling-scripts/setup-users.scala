@@ -8,8 +8,8 @@ import scala.util.Random
 
 class setupUsers extends Simulation {
 
-val COGNITO_URL = "https://cognito-idp.eu-west-2.amazonaws.com/"
-val CLIENT_ID   = "1k0ip9j0e6ne61m49cjh8fjete" 
+val COGNITO_URL = sys.env("COGNITO_URL")
+val CLIENT_ID = sys.env("COGNITO_CLIENT_ID")
 
 // Where we provide a CSV file with x username and password and the below will create those users in Cognito
 object Create {
@@ -18,7 +18,7 @@ object Create {
 
     val headerMaps = Map("Content-Type" -> "application/x-amz-json-1.1", 
                             "Accept" -> "*/*",
-                            "Origin" ->  "https://cognito-idp.eu-west-2.amazonaws.com/test",
+                            "Origin" ->  COGNITO_URL,
                             "X-Amz-Target" -> "AWSCognitoIdentityProviderService.SignUp",
                             "X-Amz-User-Agent" -> "aws-amplify/0.1.x js",
                             "Sec-Fetch-Mode" -> "cors",
@@ -27,10 +27,11 @@ object Create {
                           )
 
     val account = feed(userAccountList)
+                    .exec( _.set("CLIENT_ID", CLIENT_ID) )
                     .exec(http("Create Account")
                     .post(COGNITO_URL)
                     .headers(headerMaps)
-                    .body(StringBody("""{"ClientId":"1k0ip9j0e6ne61m49cjh8fjete","Username":"${username}","Password":"${password}","UserAttributes":[{"Name":"given_name","Value":"${given_name}"},{"Name":"family_name","Value":"${family_name}"},{"Name":"email","Value":"${email}"},{"Name":"phone_number","Value":"${phone_number}"}],"ValidationData":null}"""))
+                    .body(StringBody("""{"ClientId":"${CLIENT_ID}","Username":"${username}","Password":"${password}","UserAttributes":[{"Name":"given_name","Value":"${given_name}"},{"Name":"family_name","Value":"${family_name}"},{"Name":"email","Value":"${email}"},{"Name":"phone_number","Value":"${phone_number}"}],"ValidationData":null}"""))
                     .check(bodyString.saveAs("CreateUserResponse"))
                     .check(status.not(404), status.not(500))
                     )
@@ -43,5 +44,5 @@ object Create {
 
    val newUser = scenario("Create New Users").exec(Create.account)
 
-    setUp(newUser.inject(constantConcurrentUsers(10) during (1 seconds)))
+    setUp(newUser.inject(constantConcurrentUsers(10) during (5 seconds)))
 }

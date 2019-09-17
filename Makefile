@@ -33,6 +33,7 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
 #	$(MAKE) deploy.log-processing
+	$(MAKE) deploy.perftest
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
@@ -110,6 +111,13 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 			--template-file template.yaml \
 			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+
+deploy.perftest: ##=> Deploying Gatling componet for performance testing
+	$(info [*] Deploying Gatling componet for performance testing ...)
+	cd src/perf-tests/cdk-load-test && \
+		npm install -g aws-cdk && \
+		npm install && \
+		cdk deploy
 
 #############
 #  Helpers  #

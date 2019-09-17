@@ -7,7 +7,7 @@ Things to do
 docker run -it gatling:local -s setupUsers
 
 ```
-    aws ecr get-login --region <region> --profile <profile>
+    aws ecr get-login --no-include-email --region <region> --profile <profile>
     docker build -t gatling:latest .
     docker tag gatling:latest <ECR_URI>
     docker push <ECR_URI>
