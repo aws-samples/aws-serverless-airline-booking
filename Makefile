@@ -117,6 +117,7 @@ deploy.perftest: ##=> Deploying Gatling componet for performance testing
 	cd src/perf-tests/cdk-load-test && \
 		npm install -g aws-cdk && \
 		npm install && \
+		npm run build && \
 		cdk deploy
 
 #############
