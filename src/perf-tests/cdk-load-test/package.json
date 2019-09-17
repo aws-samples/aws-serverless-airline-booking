@@ -5,7 +5,7 @@
     "cdk-load-test": "bin/cdk-load-test.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "./node_modules/.bin/tsc",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk"
