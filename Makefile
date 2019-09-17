@@ -112,13 +112,11 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
-deploy.perftest: ##=> Deploying Gatling componet for performance testing
-	$(info [*] Deploying Gatling componet for performance testing ...)
+deploy.perftest: ##=> Deploying Gatling components for performance testing
+	$(info [*] Deploying Gatling components for performance testing ...)
 	cd src/perf-tests/cdk-load-test && \
 		npm install -g aws-cdk && \
-		npm install && \
-		npm run build && \
-		cdk deploy
+		npm install
 
 #############
 #  Helpers  #
