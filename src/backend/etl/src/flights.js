@@ -4,28 +4,33 @@ const faker = require('faker');
 const moment = require('moment');
 const s3 = new AWS.S3();
 
-let response;
 
 exports.generate = async (event, context) => {
-  console.log(event);
+
+  if (!(event.execution && event.routeFileKey && Number.isInteger(event.index))){
+    console.log("Missing parameters", event);
+    throw new Error("Missing event parameters");
+  }
 
   const execution = event.execution;
   const index = event.index;
+  console.log("Retrieving Route file: ", event.routeFileKey);
   const response = await s3.getObject({
     Bucket: etlBucketName,
     Key: event.routeFileKey
   }).promise();
 
   let routes = JSON.parse(response.Body.toString('utf-8'));
-  console.log(routes.length);
+  console.log("Number of routes to process: ", routes.length);
 
   //for each route
   const allFlights = routes.map(route => generateFlights(route))
-                           .reduce((acc, x) => acc.concat(x), []);
+                           .reduce((arr, x) => arr.concat(x), []); //flatten array
 
-   console.log("all Flights ", allFlights.length);
+  console.log("Generated flights for chunk %i: %i", index, allFlights.length);
   //write the file
   const chunkFilename = `raw/${execution}/flights/${index}_flights.json`
+  console.log("Uploading file to S3: ", chunkFilename);
   return s3.upload({
     Bucket: etlBucketName,
     Key: chunkFilename,
@@ -48,7 +53,7 @@ function generateFlights(route){
     const inboundFlight = createFlight(airport2, airport1, start, end);
 
     return [outboundFlight, inboundFlight];
-  }).reduce((arr, x) => arr.concat(x), []);
+  }).reduce((arr, x) => arr.concat(x), []); //flatten array
 
   return next30Days;
 }

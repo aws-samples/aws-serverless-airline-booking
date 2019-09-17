@@ -7,18 +7,25 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 
 
 exports.addToDatabase = async (event, context) => {
-  console.log(event);
+
+  if (!(event.execution && event.flightsFileKey && Number.isInteger(event.index))){
+    console.log("Missing parameters", event);
+    throw new Error("Missing event parameters");
+  }
+
   const execution = event.execution;
   const index = event.index;
 
+  console.log("Retrieving Flights file: ", event.flightsFileKey);
   const response = await s3.getObject({
     Bucket: etlBucketName,
     Key: event.flightsFileKey
   }).promise();
 
   let flights = JSON.parse(response.Body.toString('utf-8'));
-  console.log(flights.length);
+  console.log("Total number of flights to add: ", flights.length);
 
+  //TODO use BatchWrite to batch writes by 25 records
   const putRequests = flights.map((flight) => {
     return ddb.put({
       TableName: flightsTable,

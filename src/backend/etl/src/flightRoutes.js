@@ -4,11 +4,15 @@ const Combinatorics = require('js-combinatorics');
 const s3 = new AWS.S3();
 const chunks = 10;
 
-let response;
-
 exports.create = async (event, context) => {
-  console.log(event);
 
+  if (!(event.execution && event.airportFileKey)){
+    console.log("Missing parameters", event);
+    throw new Error("Missing event parameters");
+  }
+
+  console.log("Retrieving file: ", event.airportFileKey);
+  //Get airports file from S3
   const execution = event.execution;
   const response = await s3.getObject({
     Bucket: etlBucketName,
@@ -16,14 +20,14 @@ exports.create = async (event, context) => {
   }).promise();
 
   const airports = JSON.parse(response.Body.toString('utf-8'));
-  console.log(airports.length);
+  console.log("Number of airports: ", airports.length);
 
+  //Generate flight routes by getting all possible combinations of airport pairs
   const flightRoutes = Combinatorics.bigCombination(airports,2).toArray();
   console.log("number of combinations: ", flightRoutes.length);
   const routeChunks = chunkArray(flightRoutes, chunks);
-  console.log(routeChunks.length);
 
-  console.log("Uploading chunks to S3");
+  console.log("Uploading %i chunks to S3", routeChunks.length);
   const s3UploadRequests = routeChunks.map((chunk, i) => {
     const chunkFilename = `raw/${execution}/routes/${i}_routes.json`
     return s3.upload({
@@ -34,7 +38,7 @@ exports.create = async (event, context) => {
   });
 
   const results = await Promise.all(s3UploadRequests);
-  console.log(results);
+  console.log("Route chunks uploaded to S3: ", results);
   return results;
 };
 

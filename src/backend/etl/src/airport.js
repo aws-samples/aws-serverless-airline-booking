@@ -10,20 +10,21 @@ exports.add = async (event, context) => {
 
   const execution = event.execution;
   const validAirports = airports.filter(airport => (airport.code && airport.country && airport.city && airport.name));
-  console.log(airports.length);
-  console.log(validAirports.length);
-  const s3FileName = `raw/${execution}/airports/${(new Date()).toISOString()}_airports.json`;
-  console.log("Uploading ", s3FileName);
+  console.log("Number of airports from file: ", airports.length);
+  console.log("Number of valid airports: ", validAirports.length);
+  const s3FileName = `raw/${execution}/airports/airports.json`;
+  console.log("Uploading to S3: ", s3FileName);
 
   const result = await uploadAirportData(etlBucketName, s3FileName, validAirports);
-  console.log(result);
+  console.log("File uploaded: ",result);
+
   return {
     airportFileKey: s3FileName
   };
 };
 
 // upload Cleaned file to S3
-async function uploadAirportData(etlBucketName, s3FileName, validAirports){
+function uploadAirportData(etlBucketName, s3FileName, validAirports){
   const params = {
     Bucket: etlBucketName,
     Key: s3FileName,
