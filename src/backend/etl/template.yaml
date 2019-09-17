@@ -23,6 +23,10 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub etl-bucket-${AWS::StackName}
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 30
+            Status: Enabled
 
   AddAirportsFunction:
     Type: AWS::Serverless::Function

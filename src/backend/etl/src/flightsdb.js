@@ -33,5 +33,10 @@ exports.addToDatabase = async (event, context) => {
     }).promise();
   });
 
-  return await Promise.all(putRequests);
+  const ddbResults = await Promise.all(putRequests);
+
+  return {
+    flightsAdded: flights.length,
+    flightsFileKey: event.flightsFileKey
+  };
 }
