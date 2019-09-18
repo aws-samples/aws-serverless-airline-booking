@@ -77,7 +77,8 @@ function createFlight(departureAirport, arrivalAirport, start, end){
     ticketPrice: faker.finance.amount(),
     ticketCurrency: faker.finance.currencyCode(),
     flightNumber: flightNumber.length > 4 ? flightNumber.substring(0, 4) : flightNumber,
-    seatAllocation: (Math.floor(Math.random() * Math.floor(50))+1)
+    seatAllocation: (Math.floor(Math.random() * Math.floor(50))+1),
+    ttl: Math.floor(flightArrival / 1000) //Delete flight after arrival
   };
   return flight;
 }

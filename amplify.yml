@@ -23,6 +23,10 @@ backend:
         - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
         - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
         ##
+        # Enable TTL configuration on the Flight Table
+        ##
+        - aws dynamodb update-time-to-live --table-name $FLIGHT_TABLE_NAME --time-to-live-specification "Enabled=true, AttributeName=ttl"
+        ##
         # Deploy SAM based back-end
         ##
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
