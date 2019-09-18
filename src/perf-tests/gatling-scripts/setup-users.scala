@@ -6,7 +6,7 @@ import scala.concurrent.duration._
 import java.util.concurrent.ThreadLocalRandom
 import scala.util.Random
 
-class setupUsers extends Simulation {
+class SetUpUsers extends Simulation {
 
 val COGNITO_URL = sys.env("COGNITO_URL")
 val CLIENT_ID = sys.env("COGNITO_CLIENT_ID")
