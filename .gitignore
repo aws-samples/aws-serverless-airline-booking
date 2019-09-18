@@ -320,7 +320,6 @@ awsconfiguration.json
 # Custom
 TEMPORARY/
 codebuild_build.sh
-Dockerfile
 packaged.yaml
 *.aws-sam/
 artifacts/

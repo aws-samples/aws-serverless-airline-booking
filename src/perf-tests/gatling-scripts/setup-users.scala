@@ -10,11 +10,11 @@ class setupUsers extends Simulation {
 
 val COGNITO_URL = sys.env("COGNITO_URL")
 val CLIENT_ID = sys.env("COGNITO_CLIENT_ID")
+val USER_CSV =sys.env("USER_CSV") 
 
-// Where we provide a CSV file with x username and password and the below will create those users in Cognito
 object Create {
 
-    val userAccountList = csv("user.csv").random
+    val userAccountList = csv(USER_CSV).random
 
     val headerMaps = Map("Content-Type" -> "application/x-amz-json-1.1", 
                             "Accept" -> "*/*",
