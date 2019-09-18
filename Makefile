@@ -97,8 +97,9 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 
 deploy.etl: ##=> Deploy etl service using SAM
 	$(info [*] Packaging and deploying ETL service...)
+	cd src/backend/etl/src && \
+		npm install
 	cd src/backend/etl && \
-		npm install && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
 			--output-template-file packaged.yaml && \
