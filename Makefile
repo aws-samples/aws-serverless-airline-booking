@@ -32,14 +32,14 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
-#	$(MAKE) deploy.log-processing
+	$(MAKE) deploy.log-processing
 	$(MAKE) deploy.perftest
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
-#	$(MAKE) delete.log-processing
+	$(MAKE) delete.log-processing
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
@@ -115,9 +115,8 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 deploy.perftest: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
 	cd src/perf-tests/cdk-load-test && \
-		npm install -g aws-cdk && \
-		npm install && \
-		npm run build
+		npm run build && \
+		cdk deploy --require-approval never
 
 #############
 #  Helpers  #
@@ -128,6 +127,8 @@ _install_os_packages:
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to the latest version...)
 	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
+	npm -g install aws-cdk
+	cdk bootstrap
 
 define HELP_MESSAGE
 
