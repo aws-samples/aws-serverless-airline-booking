@@ -8,18 +8,18 @@ import scala.util.Random
 
 class Airline extends Simulation {
 
-val GRAPHQL_URL = "https://qz6v5gusl5e2xdcevlxrbxtgim.appsync-api.eu-west-2.amazonaws.com/graphql"
-val API_URL     = "https://1rwnkmerpi.execute-api.eu-west-2.amazonaws.com/prod/charge"
-
-val COGNITO_URL = "https://cognito-idp.eu-west-2.amazonaws.com/"
+val GRAPHQL_URL = sys.env("GRAPHQL_URL") 
+val API_URL     = sys.env("API_URL") 
+val COGNITO_URL = sys.env("COGNITO_URL") 
+val TOKEN_CSV = sys.env("TOKEN_CSV")
 
 object Flight {
 
-      val randomString = csv("user-with-token.csv").circular
+      val randomString = csv(TOKEN_CSV).circular
 
       val headerMaps = Map("Content-Type" -> "application/json; charset=UTF-8", 
                               "Accept" -> "application/json, text/plain, */*",
-                              "Origin" -> "https://develop.d3p67q4romop9c.amplifyapp.com",
+                              "Origin" -> COGNITO_URL,
                               "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"                          
                             )
 
@@ -82,7 +82,7 @@ object User {
 
 object Make {
 
-      val randomString = csv("user-with-token.csv").circular
+      val randomString = csv(TOKEN_CSV).circular
 
       val headerMaps = Map("Content-Type" -> "application/x-www-form-urlencoded", 
                               "Accept" -> "application/json",
