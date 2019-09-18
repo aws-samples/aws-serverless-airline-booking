@@ -40,6 +40,7 @@ delete: ##=> Delete services
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
 	$(MAKE) delete.log-processing
+	$(MAKE) delete.perftest
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
@@ -52,6 +53,9 @@ delete.loyalty: ##=> Delete booking service
 
 delete.log-processing:
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
+
+delete.perftest:
+	cdk destroy CdkLoadTestStack
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
