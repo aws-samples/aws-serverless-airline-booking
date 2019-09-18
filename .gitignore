@@ -55,3 +55,5 @@ src/e2e-tests/ui/**/cypress/screenshots
 ## Exceptions
 !*.vscode/tasks.json
 !*.vscode/launch.json
+
+amplify/mock-data
