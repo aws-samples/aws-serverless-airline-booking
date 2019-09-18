@@ -128,7 +128,6 @@ _install_os_packages:
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to the latest version...)
 	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
 	npm -g install aws-cdk
-	cdk bootstrap
 
 define HELP_MESSAGE
 
