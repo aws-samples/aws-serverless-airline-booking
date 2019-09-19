@@ -55,7 +55,7 @@ delete.log-processing:
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
 
 delete.perftest:
-	cdk destroy CdkLoadTestStack
+	cdk destroy $${STACK_NAME}-perftest-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -121,7 +121,7 @@ deploy.perftest: ##=> Deploying Gatling components for performance testing
 	cd src/perf-tests/cdk-load-test && \
 		npm install && \
 		npm run build && \
-		cdk deploy --require-approval never
+		cdk deploy $${STACK_NAME}-perftest-$${AWS_BRANCH} --require-approval never
 
 #############
 #  Helpers  #

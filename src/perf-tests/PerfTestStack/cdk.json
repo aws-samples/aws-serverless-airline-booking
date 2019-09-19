@@ -1,0 +1,3 @@
+{
+  "app": "npx ts-node bin/perf_test_stack.ts"
+}

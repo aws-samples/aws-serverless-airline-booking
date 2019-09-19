@@ -1,13 +1,13 @@
 {
-  "name": "cdk-load-test",
+  "name": "perf_test_stack",
   "version": "0.1.0",
   "bin": {
-    "cdk-load-test": "bin/cdk-load-test.js"
+    "perf_test_stack": "bin/perf_test_stack.js"
   },
   "scripts": {
-    "build": "./node_modules/.bin/tsc",
+    "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "STACK_NAME=airline-stack jest",
     "cdk": "cdk"
   },
   "devDependencies": {

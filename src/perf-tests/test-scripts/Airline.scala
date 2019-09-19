@@ -14,7 +14,6 @@ val COGNITO_URL = sys.env("COGNITO_URL")
 val TOKEN_CSV = sys.env("TOKEN_CSV")
 
 object Flight {
-
       val randomString = csv(TOKEN_CSV).circular
 
       val headerMaps = Map("Content-Type" -> "application/json; charset=UTF-8", 
@@ -163,13 +162,13 @@ setUp(
   // //  newUser.inject(constantConcurrentUsers(10) during (1 seconds)))
  
     searchFlight.inject(
-       constantUsersPerSec(10) during (5 minutes) randomized),
+       constantUsersPerSec(20) during (5 minutes) randomized),
     profile.inject(
-      rampUsersPerSec(1) to 10 during (5 minutes) randomized), 
+      rampUsersPerSec(1) to 20 during (5 minutes) randomized), 
     listUserBookings.inject(
-      rampUsersPerSec(1) to 10 during (5 minutes) randomized), 
+      rampUsersPerSec(1) to 20 during (5 minutes) randomized), 
     newBooking.inject(
-      constantUsersPerSec(10) during (5 minutes) randomized))
+      constantUsersPerSec(20) during (5 minutes) randomized))
 
   //   searchFlight.inject(
   //       rampUsersPerSec(0) to 10 during (5 minutes)),
