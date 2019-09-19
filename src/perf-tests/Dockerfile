@@ -8,6 +8,6 @@ ENV GRAPHQL_URL "https://qz6v5gusl5e2xdcevlxrbxtgim.appsync-api.eu-west-2.amazon
 ENV API_URL "https://1rwnkmerpi.execute-api.eu-west-2.amazonaws.com/prod/charge"
 ENV TOKEN_CSV user-with-token.csv
 
-ADD ./csv/user.csv /opt/gatling/user-files/resources
-ADD ./gatling-scripts/* /opt/gatling/user-files/simulations/
+ADD ./data/user.csv /opt/gatling/user-files/resources
+ADD ./test-scripts/* /opt/gatling/user-files/simulations/
 ADD ./logback.xml /opt/gatling/conf

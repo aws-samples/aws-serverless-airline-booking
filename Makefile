@@ -118,7 +118,7 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 
 deploy.perftest: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
-	cd src/perf-tests/cdk-load-test && \
+	cd src/perf-tests/PerfTestStack && \
 		npm install && \
 		npm run build && \
 		cdk deploy $${STACK_NAME}-perftest-$${AWS_BRANCH} --require-approval never
