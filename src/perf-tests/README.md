@@ -1,7 +1,9 @@
 Things to do
 - [ ] Have all the parameters as Environment variables
-- [ ] Add Lambda to auto-approve users
+- [ ] New Lambda to auto-approve users
 - [ ] Enable admin srp-auth
+- [ ] New Lambda listen to ECS stop status to signal step function to go to next task
+
 
 docker run -it gatling:local -s setupUsers
 

@@ -128,7 +128,7 @@ def lambda_handler(event, context):
         logger.debug(f"Confirming booking - {booking_id}")
         ret = confirm_booking(booking_id)
 
-        log_metric(name="SuccessfulConfirmation", unit=MetricUnit.Count, value=1)
+        log_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation")
         tracer.put_annotation("BookingReference", ret["bookingReference"])
         tracer.put_annotation("BookingStatus", "CONFIRMED")
@@ -136,7 +136,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `bookingReference` key into the overall output
         return ret["bookingReference"]
     except BookingConfirmationException as err:
-        log_metric(name="FailedConfirmation", unit=MetricUnit.Count, value=1)
+        log_metric(name="FailedBooking", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
 
