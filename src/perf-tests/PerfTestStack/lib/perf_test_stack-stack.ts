@@ -101,7 +101,7 @@ export class PerfTestStack extends cdk.Stack {
           command: Data.listAt('$.commands'),
           environment: [
             {
-              name: 'pputhran-complete',
+              name: 'setup-complete',
               value: Context.taskToken
             }
           ]
@@ -110,9 +110,21 @@ export class PerfTestStack extends cdk.Stack {
       })
     })
 
+    const generateTokens = new sfn.Task(this, "Generate Tokens", {
+      task: new tasks.RunEcsFargateTask({
+        cluster,
+        taskDefinition: fargateTaskDefinition,
+        assignPublicIp: true,
+        containerOverrides: [{
+          containerName: appContainer.containerName,
+          command: Data.listAt('$.commands')
+        }]
+      })
+    })
+
 
     const stepfuncDefinition = setupUsers
-    // .next(generateAccessTokens)
+                                  .next(generateTokens)
     // .next(loadFlights)
     // .next(runGatling)
     // .next(generateReport)
