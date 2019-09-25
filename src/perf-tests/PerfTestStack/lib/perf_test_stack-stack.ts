@@ -91,18 +91,26 @@ export class PerfTestStack extends cdk.Stack {
       cpu: CPU
     });
 
-    const logging = new ecs.AwsLogDriver({
+    const gatlingLogging = new ecs.AwsLogDriver({
       logGroup: new LogGroup(this, 'loggroup', {
         logGroupName: `/ecs/${cluster.clusterName}`,
         retention: RetentionDays.ONE_WEEK
       }),
-      streamPrefix: CONTAINER_NAME
+      streamPrefix: GATLING_CONTAINER_NAME
+    })
+
+    const mockDatalogging = new ecs.AwsLogDriver({
+      logGroup: new LogGroup(this, 'loggroup', {
+        logGroupName: `/ecs/${cluster.clusterName}`,
+        retention: RetentionDays.ONE_WEEK
+      }),
+      streamPrefix: MOCKDATA_CONTAINER_NAME
     })
 
     // Create container from local `Dockerfile` for Gatling
     const gatlingAppContainer = gatlingTaskDefinition.addContainer(GATLING_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(gatlingRepository),
-      logging: logging
+      logging: gatlingLogging
     });
 
     // Step function for setting the load test
@@ -127,7 +135,7 @@ export class PerfTestStack extends cdk.Stack {
 
     const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
-      logging: logging
+      logging: mockDatalogging
     });
 
     const generateTokens = new sfn.Task(this, "Generate Tokens", {
