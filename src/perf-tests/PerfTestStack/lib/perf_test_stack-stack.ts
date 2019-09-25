@@ -106,7 +106,7 @@ export class PerfTestStack extends cdk.Stack {
         logGroupName: `/aws/ecs/${GATLING_CONTAINER_NAME}`,
         retention: RetentionDays.ONE_WEEK
       }),
-      streamPrefix: GATLING_CONTAINER_NAME
+      streamPrefix: "gatling"
     })
 
     const mockDatalogging = new ecs.AwsLogDriver({
@@ -114,7 +114,7 @@ export class PerfTestStack extends cdk.Stack {
         logGroupName: `/aws//ecs/${MOCKDATA_CONTAINER_NAME}`,
         retention: RetentionDays.ONE_WEEK
       }),
-      streamPrefix: MOCKDATA_CONTAINER_NAME
+      streamPrefix: "mockdata"
     })
 
     // Create container from local `Dockerfile` for Gatling
@@ -134,7 +134,7 @@ export class PerfTestStack extends cdk.Stack {
           command: Data.listAt('$.commands'),
           environment: [
             {
-              name: 'setup-complete',
+              name: 'setup-users',
               value: Context.taskToken
             }
           ]
@@ -155,6 +155,44 @@ export class PerfTestStack extends cdk.Stack {
         assignPublicIp: true,
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
+          command: Data.listAt('$.commands'),
+          environment: [
+            {
+              name: 'generate-tokens',
+              value: Context.taskToken
+            }
+          ]
+        }],
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+      })
+    })
+
+    const loadFlights = new sfn.Task(this, "Load Flights", {
+      task: new tasks.RunEcsFargateTask({
+        cluster,
+        taskDefinition: mockDataTaskDefinition,
+        assignPublicIp: true,
+        containerOverrides: [{
+          containerName: mockDataAppContainer.containerName,
+          command: Data.listAt('$.commands'),
+          environment: [
+            {
+              name: 'load-flights',
+              value: Context.taskToken
+            }
+          ]
+        }],
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+      })
+    })
+
+    const runGatling = new sfn.Task(this, "Run Gatling", {
+      task: new tasks.RunEcsFargateTask({
+        cluster,
+        taskDefinition: gatlingTaskDefinition,
+        assignPublicIp: true,
+        containerOverrides: [{
+          containerName: gatlingAppContainer.containerName,
           command: Data.listAt('$.commands')
         }]
       })
@@ -163,8 +201,8 @@ export class PerfTestStack extends cdk.Stack {
 
     const stepfuncDefinition = setupUsers
                                   .next(generateTokens)
-    // .next(loadFlights)
-    // .next(runGatling)
+                                  .next(loadFlights)
+                                  .next(runGatling)
     // .next(generateReport)
 
     new sfn.StateMachine(this, STATE_MACHINE_NAME, {
