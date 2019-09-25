@@ -92,16 +92,16 @@ export class PerfTestStack extends cdk.Stack {
     });
 
     const gatlingLogging = new ecs.AwsLogDriver({
-      logGroup: new LogGroup(this, 'loggroup', {
-        logGroupName: `/ecs/${GATLING_CONTAINER_NAME}`,
+      logGroup: new LogGroup(this, GATLING_CONTAINER_NAME, {
+        logGroupName: `/aws/ecs/${GATLING_CONTAINER_NAME}`,
         retention: RetentionDays.ONE_WEEK
       }),
       streamPrefix: GATLING_CONTAINER_NAME
     })
 
     const mockDatalogging = new ecs.AwsLogDriver({
-      logGroup: new LogGroup(this, 'loggroup', {
-        logGroupName: `/ecs/${MOCKDATA_CONTAINER_NAME}`,
+      logGroup: new LogGroup(this, MOCKDATA_CONTAINER_NAME, {
+        logGroupName: `/aws//ecs/${MOCKDATA_CONTAINER_NAME}`,
         retention: RetentionDays.ONE_WEEK
       }),
       streamPrefix: MOCKDATA_CONTAINER_NAME
