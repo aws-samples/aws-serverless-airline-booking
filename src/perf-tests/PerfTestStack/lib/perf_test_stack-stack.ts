@@ -15,9 +15,11 @@ const ROLE_NAME = `${STACK_NAME}-fargate-role`;
 const VPC_NAME = `${STACK_NAME}-vpc`;
 const CIDR_BLOCK = `198.162.0.0/24`;
 const MAX_AZs = 2
-const ECR_REPO_NAME = `${STACK_NAME}-gatling`
+const ECR_GATLING_REPO_NAME = `${STACK_NAME}-gatling`
+const ECR_MOCKDATA_REPO_NAME = `${STACK_NAME}-mockdata`
 const ECS_CLUSTER = `${STACK_NAME}-cluster`
-const FARGATE_TASK_DEF = `${STACK_NAME}-fargate-task-def`
+const GATLING_FARGATE_TASK_DEF = `${STACK_NAME}-gatling-task-def`
+const MOCKDATA_FARGATE_TASK_DEF = `${STACK_NAME}-mockdata-task-def`
 const MEMORY_LIMIT = 2048
 const CPU = 1024
 const CONTAINER_NAME = `${STACK_NAME}-container`
@@ -36,31 +38,35 @@ export class PerfTestStack extends cdk.Stack {
       ]
     })
 
-    // const bucket = new s3.Bucket(this, "s3bucket", {
-    //   bucketName: S3_BUCKET_NAME       
-    // })
+    const bucket = new s3.Bucket(this, "s3bucket", {
+      bucketName: S3_BUCKET_NAME       
+    })
 
-    // role.addToPolicy(new PolicyStatement({
-    //   resources : [
-    //     `${bucket.bucketArn}`,
-    //     `${bucket.bucketArn}/*`
-    //   ],
-    //   actions: [
-    //     's3:PutObject',
-    //     's3:GetObjectAcl',
-    //     's3:GetObject',
-    //     's3:ListBucket',
-    //     's3:PutObjectAcl'
-    //   ]
-    // }))
+    role.addToPolicy(new PolicyStatement({
+      resources : [
+        `${bucket.bucketArn}`,
+        `${bucket.bucketArn}/*`
+      ],
+      actions: [
+        's3:PutObject',
+        's3:GetObjectAcl',
+        's3:GetObject',
+        's3:ListBucket',
+        's3:PutObjectAcl'
+      ]
+    }))
    
     const vpc = new ec2.Vpc(this, VPC_NAME, {
       cidr: CIDR_BLOCK,
       maxAzs: MAX_AZs
     })
 
-    const repository = new ecr.Repository(this, ECR_REPO_NAME, {
-      repositoryName: ECR_REPO_NAME
+    const gatlingRepository = new ecr.Repository(this, ECR_GATLING_REPO_NAME, {
+      repositoryName: ECR_GATLING_REPO_NAME
+    });
+
+    const mockDataRepository = new ecr.Repository(this, ECR_MOCKDATA_REPO_NAME, {
+      repositoryName: ECR_MOCKDATA_REPO_NAME
     });
 
     const cluster = new ecs.Cluster(this, ECS_CLUSTER, {
@@ -68,8 +74,16 @@ export class PerfTestStack extends cdk.Stack {
       clusterName: ECS_CLUSTER
     });
 
-    const fargateTaskDefinition = new ecs.FargateTaskDefinition(this, FARGATE_TASK_DEF, {
-      family: FARGATE_TASK_DEF,
+    const gatlingTaskDefinition = new ecs.FargateTaskDefinition(this, GATLING_FARGATE_TASK_DEF, {
+      family: GATLING_FARGATE_TASK_DEF,
+      executionRole: role,
+      taskRole: role,
+      memoryLimitMiB: MEMORY_LIMIT,
+      cpu: CPU
+    });
+
+    const mockDataTaskDefinition = new ecs.FargateTaskDefinition(this, MOCKDATA_FARGATE_TASK_DEF, {
+      family: MOCKDATA_FARGATE_TASK_DEF,
       executionRole: role,
       taskRole: role,
       memoryLimitMiB: MEMORY_LIMIT,
@@ -84,9 +98,9 @@ export class PerfTestStack extends cdk.Stack {
       streamPrefix: CONTAINER_NAME
     })
 
-    // Create container from local `Dockerfile`
-    const appContainer = fargateTaskDefinition.addContainer(CONTAINER_NAME, {
-      image: ecs.ContainerImage.fromEcrRepository(repository),
+    // Create container from local `Dockerfile` for Gatling
+    const gatlingAppContainer = gatlingTaskDefinition.addContainer(CONTAINER_NAME, {
+      image: ecs.ContainerImage.fromEcrRepository(gatlingRepository),
       logging: logging
     });
 
@@ -94,10 +108,10 @@ export class PerfTestStack extends cdk.Stack {
     const setupUsers = new sfn.Task(this, "Setup Users", {
       task: new tasks.RunEcsFargateTask({
         cluster,
-        taskDefinition: fargateTaskDefinition,
+        taskDefinition: gatlingTaskDefinition,
         assignPublicIp: true,
         containerOverrides: [{
-          containerName: appContainer.containerName,
+          containerName: gatlingAppContainer.containerName,
           command: Data.listAt('$.commands'),
           environment: [
             {
@@ -110,13 +124,18 @@ export class PerfTestStack extends cdk.Stack {
       })
     })
 
+    const mockDataAppContainer = mockDataTaskDefinition.addContainer(CONTAINER_NAME, {
+      image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
+      logging: logging
+    });
+
     const generateTokens = new sfn.Task(this, "Generate Tokens", {
       task: new tasks.RunEcsFargateTask({
         cluster,
-        taskDefinition: fargateTaskDefinition,
+        taskDefinition: mockDataTaskDefinition,
         assignPublicIp: true,
         containerOverrides: [{
-          containerName: appContainer.containerName,
+          containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands')
         }]
       })
