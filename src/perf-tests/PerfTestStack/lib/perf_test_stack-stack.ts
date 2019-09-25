@@ -22,7 +22,8 @@ const GATLING_FARGATE_TASK_DEF = `${STACK_NAME}-gatling-task-def`
 const MOCKDATA_FARGATE_TASK_DEF = `${STACK_NAME}-mockdata-task-def`
 const MEMORY_LIMIT = 2048
 const CPU = 1024
-const CONTAINER_NAME = `${STACK_NAME}-container`
+const GATLING_CONTAINER_NAME = `${STACK_NAME}-gatling-container`
+const MOCKDATA_CONTAINER_NAME = `${STACK_NAME}-mockdata-container`
 const STATE_MACHINE_NAME = `loadtest-${STACK_NAME}`
 const S3_BUCKET_NAME = `${STACK_NAME}-loadtest`
 
@@ -99,7 +100,7 @@ export class PerfTestStack extends cdk.Stack {
     })
 
     // Create container from local `Dockerfile` for Gatling
-    const gatlingAppContainer = gatlingTaskDefinition.addContainer(CONTAINER_NAME, {
+    const gatlingAppContainer = gatlingTaskDefinition.addContainer(GATLING_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(gatlingRepository),
       logging: logging
     });
@@ -124,7 +125,7 @@ export class PerfTestStack extends cdk.Stack {
       })
     })
 
-    const mockDataAppContainer = mockDataTaskDefinition.addContainer(CONTAINER_NAME, {
+    const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
       logging: logging
     });
