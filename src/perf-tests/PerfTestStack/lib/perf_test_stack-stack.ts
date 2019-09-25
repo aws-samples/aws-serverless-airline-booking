@@ -33,10 +33,10 @@ export class PerfTestStack extends cdk.Stack {
 
     const role = new Role(this, ROLE_NAME, {
       roleName: ROLE_NAME,
-      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com'),
-      managedPolicies: [
-        ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
-      ]
+      assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com')
+      // managedPolicies: [
+      //   ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
+      // ]
     })
 
     const bucket = new s3.Bucket(this, "s3bucket", {
@@ -56,6 +56,16 @@ export class PerfTestStack extends cdk.Stack {
         's3:PutObjectAcl'
       ]
     }))
+
+    role.addToPolicy(new PolicyStatement({
+      resources : [
+        `arn:aws:cognito-idp:eu-west-1:963887453151:userpool/eu-west-1_BDDCLzdwo` // need to find out a way to get this from ENV
+      ],
+      actions: [
+        'cognito-idp:AdminInitiateAuth'
+      ]
+    }))
+  
    
     const vpc = new ec2.Vpc(this, VPC_NAME, {
       cidr: CIDR_BLOCK,
