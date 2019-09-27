@@ -59,7 +59,10 @@ export class PerfTestStack extends cdk.Stack {
         `arn:aws:cognito-idp:eu-west-1:963887453151:userpool/eu-west-1_BDDCLzdwo` // need to find out a way to get this from ENV
       ],
       actions: [
-        'cognito-idp:AdminInitiateAuth'
+        'cognito-idp:AdminInitiateAuth',
+        'cognito-idp:AdminCreateUser',
+        'cognito-idp:AdminCreateUser',
+        'cognito-idp:AdminSetUserPassword'
       ]
     }))
   
