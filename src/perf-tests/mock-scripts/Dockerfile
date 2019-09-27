@@ -3,7 +3,7 @@ MAINTAINER Pawan Puthran (pputhran@amazon.com)
 
 WORKDIR /usr/src/app
 
-COPY generate-token.py load-flight-data.py requirements.txt user.csv ./
+COPY setup-users.py load-flight-data.py requirements.txt user.csv ./
 
 RUN pip3 install -r requirements.txt
 

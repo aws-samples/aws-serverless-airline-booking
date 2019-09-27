@@ -34,9 +34,6 @@ export class PerfTestStack extends cdk.Stack {
     const role = new Role(this, ROLE_NAME, {
       roleName: ROLE_NAME,
       assumedBy: new ServicePrincipal('ecs-tasks.amazonaws.com')
-      // managedPolicies: [
-      //   ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy')
-      // ]
     })
 
     const bucket = new s3.Bucket(this, "s3bucket", {
@@ -123,14 +120,19 @@ export class PerfTestStack extends cdk.Stack {
       logging: gatlingLogging
     });
 
+    const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
+      image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
+      logging: mockDatalogging
+    });
+
     // Step function for setting the load test
     const setupUsers = new sfn.Task(this, "Setup Users", {
       task: new tasks.RunEcsFargateTask({
         cluster,
-        taskDefinition: gatlingTaskDefinition,
+        taskDefinition: mockDataTaskDefinition,
         assignPublicIp: true,
         containerOverrides: [{
-          containerName: gatlingAppContainer.containerName,
+          containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands'),
           environment: [
             {
@@ -143,29 +145,24 @@ export class PerfTestStack extends cdk.Stack {
       })
     })
 
-    const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
-      image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
-      logging: mockDatalogging
-    });
-
-    const generateTokens = new sfn.Task(this, "Generate Tokens", {
-      task: new tasks.RunEcsFargateTask({
-        cluster,
-        taskDefinition: mockDataTaskDefinition,
-        assignPublicIp: true,
-        containerOverrides: [{
-          containerName: mockDataAppContainer.containerName,
-          command: Data.listAt('$.commands'),
-          environment: [
-            {
-              name: 'generate-tokens',
-              value: Context.taskToken
-            }
-          ]
-        }],
-        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
-      })
-    })
+    // const generateTokens = new sfn.Task(this, "Generate Tokens", {
+    //   task: new tasks.RunEcsFargateTask({
+    //     cluster,
+    //     taskDefinition: mockDataTaskDefinition,
+    //     assignPublicIp: true,
+    //     containerOverrides: [{
+    //       containerName: mockDataAppContainer.containerName,
+    //       command: Data.listAt('$.commands'),
+    //       environment: [
+    //         {
+    //           name: 'generate-tokens',
+    //           value: Context.taskToken
+    //         }
+    //       ]
+    //     }],
+    //     integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+    //   })
+    // })
 
     const loadFlights = new sfn.Task(this, "Load Flights", {
       task: new tasks.RunEcsFargateTask({
@@ -193,14 +190,19 @@ export class PerfTestStack extends cdk.Stack {
         assignPublicIp: true,
         containerOverrides: [{
           containerName: gatlingAppContainer.containerName,
-          command: Data.listAt('$.commands')
-        }]
+          command: Data.listAt('$.commands'),
+          environment: [
+            {
+              name: 'run-gatling',
+              value: Context.taskToken
+            }
+          ]
+        }],
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
 
-
     const stepfuncDefinition = setupUsers
-                                  .next(generateTokens)
                                   .next(loadFlights)
                                   .next(runGatling)
     // .next(generateReport)
