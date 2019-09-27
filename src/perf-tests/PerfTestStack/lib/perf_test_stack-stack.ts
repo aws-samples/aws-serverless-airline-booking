@@ -62,7 +62,8 @@ export class PerfTestStack extends cdk.Stack {
         'cognito-idp:AdminInitiateAuth',
         'cognito-idp:AdminCreateUser',
         'cognito-idp:AdminCreateUser',
-        'cognito-idp:AdminSetUserPassword'
+        'cognito-idp:AdminSetUserPassword',
+        'cognito-idp:UpdateUserPoolClient'
       ]
     }))
   
