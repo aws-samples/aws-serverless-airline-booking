@@ -12,6 +12,8 @@ ENV API_URL https://w7ifcw6ai5.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV AWS_REGION eu-west-1
 ENV S3_BUCKET pputhran-load-test
+ENV USER_COUNT 5
+ENV DURING_TIME 240
 
 ADD ./Airline.scala /opt/gatling/user-files/simulations/
 ADD ./logback.xml /opt/gatling/conf

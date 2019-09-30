@@ -17,6 +17,8 @@ if os.path.exists(TOKEN_CSV):
     os.remove(TOKEN_CSV)
 
 try:
+    # creates the users from user.csv
+
     with open(USER_CSV, mode='r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader, None)
@@ -52,6 +54,9 @@ try:
         ClientId = CLIENT_ID,
         ExplicitAuthFlows=['ADMIN_NO_SRP_AUTH']
     )
+
+     # This simulates login and generates access token which is later uploaded to an S3
+     # that is used in Gatling scripts 
 
     with open(TOKEN_CSV, mode='a') as csv_file:
 

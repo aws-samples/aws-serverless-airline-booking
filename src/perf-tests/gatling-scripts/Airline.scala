@@ -12,6 +12,8 @@ val GRAPHQL_URL = sys.env("GRAPHQL_URL")
 val API_URL     = sys.env("API_URL") 
 val COGNITO_URL = sys.env("COGNITO_URL") 
 val TOKEN_CSV = sys.env("TOKEN_CSV")
+val USER_COUNT = sys.env("USER_COUNT").toInt
+val DURING_TIME = sys.env("DURING_TIME").toInt
 
 object Flight {
       val randomString = csv(TOKEN_CSV).circular
@@ -87,7 +89,10 @@ object Make {
                               "Accept" -> "application/json",
                               "Origin" -> "https://js.stripe.com",
                               "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"                          
-                            )                 
+                            ) 
+
+      val randSelect: Random = new Random()
+      val randNum: Int = randSelect.nextInt(50)           
 
       val booking =  feed(randomString)    
                       .exec(http("Search Rand Flights")
@@ -97,8 +102,8 @@ object Make {
                      .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50, "filter":{"departureDate":{"beginsWith":"2019"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
                       .asJson
                       .check(bodyString.saveAs("Query Flights"))
-                      .check(jsonPath("$..id").find(0).saveAs("bookingId"))
-                      .check(jsonPath("$..ticketPrice").find(0).saveAs("ticketPrice"))
+                      .check(jsonPath("$..id").find(randNum).saveAs("bookingId"))
+                      .check(jsonPath("$..ticketPrice").find(randNum).saveAs("ticketPrice"))
                       .check(status.not(404), status.not(500)))
                       .exec(session => {
                         println(session)
@@ -107,8 +112,8 @@ object Make {
                       .exec(http("Stripe tokenization")
                       .post("https://api.stripe.com/v1/tokens")
                       .headers(headerMaps)
-                      .formParam("card[name]","Pawan")
-                      .formParam("card[address_zip]","HA2+8PXY")
+                      .formParam("card[name]","John")
+                      .formParam("card[address_zip]","NC2+8234")
                       .formParam("card[address_country]", "UK")
                       .formParam("card[number]", "4242424242424242")
                       .formParam("card[cvc]","123")
@@ -158,30 +163,13 @@ object Make {
   val listUserBookings = scenario("List User Bookings").exec(User.bookings)
   val newBooking = scenario("New Booking").exec(Make.booking)
 
-setUp(
-  // //  newUser.inject(constantConcurrentUsers(10) during (1 seconds)))
- 
+setUp( 
     searchFlight.inject(
-       constantUsersPerSec(20) during (5 minutes) randomized),
+       constantUsersPerSec(USER_COUNT) during (DURING_TIME) randomized),
     profile.inject(
-      rampUsersPerSec(1) to 20 during (5 minutes) randomized), 
+      rampUsersPerSec(1) to USER_COUNT during (DURING_TIME) randomized), 
     listUserBookings.inject(
-      rampUsersPerSec(1) to 20 during (5 minutes) randomized), 
+      rampUsersPerSec(1) to USER_COUNT during (DURING_TIME) randomized), 
     newBooking.inject(
-      constantUsersPerSec(20) during (5 minutes) randomized))
-
-  //   searchFlight.inject(
-  //       rampUsersPerSec(0) to 10 during (5 minutes)),
-  //   profile.inject(
-  //     rampUsersPerSec(0) to 10 during (5 minutes)),
-  //   listUserBookings.inject(
-  //     rampUsersPerSec(0) to 10 during (5 minutes)),
-  //   newBooking.inject(
-  //     rampUsersPerSec(0) to 6 during (5 minutes))
-  // ).throttle(
-  //         reachRps(20) in (120 seconds),
-  //         holdFor(1 minute),
-  //         jumpToRps(10),
-  //         holdFor(1 minute))
-
+      constantUsersPerSec(USER_COUNT) during (DURING_TIME) randomized))
 }
