@@ -8,7 +8,6 @@ import tasks = require('@aws-cdk/aws-stepfunctions-tasks');
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { Data, ServiceIntegrationPattern, Context } from '@aws-cdk/aws-stepfunctions';
 import s3 = require('@aws-cdk/aws-s3');
-import { Bucket } from '@aws-cdk/aws-s3';
 
 const STACK_NAME = process.env.STACK_NAME;
 const ROLE_NAME = `${STACK_NAME}-fargate-role`;
@@ -148,25 +147,6 @@ export class PerfTestStack extends cdk.Stack {
         integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
-
-    // const generateTokens = new sfn.Task(this, "Generate Tokens", {
-    //   task: new tasks.RunEcsFargateTask({
-    //     cluster,
-    //     taskDefinition: mockDataTaskDefinition,
-    //     assignPublicIp: true,
-    //     containerOverrides: [{
-    //       containerName: mockDataAppContainer.containerName,
-    //       command: Data.listAt('$.commands'),
-    //       environment: [
-    //         {
-    //           name: 'generate-tokens',
-    //           value: Context.taskToken
-    //         }
-    //       ]
-    //     }],
-    //     integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
-    //   })
-    // })
 
     const loadFlights = new sfn.Task(this, "Load Flights", {
       task: new tasks.RunEcsFargateTask({
