@@ -201,300 +201,36 @@ Resources:
               "Next": "Create Flights"
             },
             "Create Flights": {
-              "Type": "Parallel",
-              "Next": "Flights Added",
-              "Branches": [
-                {
-                  "StartAt": "ProcessRoutes0",
-                  "States": {
-                    "ProcessRoutes0": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase0",
-                      "InputPath": "$.routes[0]",
-                      "ResultPath": "$.routes[0].flightsFile",
-                      "OutputPath": "$.routes[0].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 0
-                      }
+              "Type": "Map",
+              "InputPath": "$",
+              "ItemsPath": "$.routes",
+              "Parameters": {
+                "routeFileKey.$": "$$.Map.Item.Value.Key",
+                "execution.$": "$$.Execution.Name",
+                "index.$": "$$.Map.Item.Index"
+              },
+              "Iterator": {
+                "StartAt": "ProcessRoutes",
+                "States": {
+                  "ProcessRoutes": {
+                    "Type": "Task",
+                    "Resource": "${GenerateFlightsFunction.Arn}",
+                    "Next": "AddFlightsToDatabase"
+                  },
+                  "AddFlightsToDatabase": {
+                    "Type": "Task",
+                    "Resource": "${AddFlightsFunction.Arn}",
+                    "Parameters": {
+                      "flightsFileKey.$": "$.Key",
+                      "execution.$": "$$.Execution.Name",
+                      "index.$": "$$.Map.Item.Index"
                     },
-                    "AddFlightsToDatabase0": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 0
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes1",
-                  "States": {
-                    "ProcessRoutes1": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase1",
-                      "InputPath": "$.routes[1]",
-                      "ResultPath": "$.routes[1].flightsFile",
-                      "OutputPath": "$.routes[1].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 1
-                      }
-                    },
-                    "AddFlightsToDatabase1": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 1
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes2",
-                  "States": {
-                    "ProcessRoutes2": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase2",
-                      "InputPath": "$.routes[2]",
-                      "ResultPath": "$.routes[2].flightsFile",
-                      "OutputPath": "$.routes[2].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 2
-                      }
-                    },
-                    "AddFlightsToDatabase2": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 2
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes3",
-                  "States": {
-                    "ProcessRoutes3": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase3",
-                      "InputPath": "$.routes[3]",
-                      "ResultPath": "$.routes[3].flightsFile",
-                      "OutputPath": "$.routes[3].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 3
-                      }
-                    },
-                    "AddFlightsToDatabase3": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 3
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes4",
-                  "States": {
-                    "ProcessRoutes4": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase4",
-                      "InputPath": "$.routes[4]",
-                      "ResultPath": "$.routes[4].flightsFile",
-                      "OutputPath": "$.routes[4].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 4
-                      }
-                    },
-                    "AddFlightsToDatabase4": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 4
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes5",
-                  "States": {
-                    "ProcessRoutes5": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase5",
-                      "InputPath": "$.routes[5]",
-                      "ResultPath": "$.routes[5].flightsFile",
-                      "OutputPath": "$.routes[5].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 5
-                      }
-                    },
-                    "AddFlightsToDatabase5": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 5
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes6",
-                  "States": {
-                    "ProcessRoutes6": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase6",
-                      "InputPath": "$.routes[6]",
-                      "ResultPath": "$.routes[6].flightsFile",
-                      "OutputPath": "$.routes[6].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 6
-                      }
-                    },
-                    "AddFlightsToDatabase6": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 6
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes7",
-                  "States": {
-                    "ProcessRoutes7": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase7",
-                      "InputPath": "$.routes[7]",
-                      "ResultPath": "$.routes[7].flightsFile",
-                      "OutputPath": "$.routes[7].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 7
-                      }
-                    },
-                    "AddFlightsToDatabase7": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 7
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes8",
-                  "States": {
-                    "ProcessRoutes8": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase8",
-                      "InputPath": "$.routes[8]",
-                      "ResultPath": "$.routes[8].flightsFile",
-                      "OutputPath": "$.routes[8].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 8
-                      }
-                    },
-                    "AddFlightsToDatabase8": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 8
-                      }
-                    }
-                  }
-                },
-                {
-                  "StartAt": "ProcessRoutes9",
-                  "States": {
-                    "ProcessRoutes9": {
-                      "Type": "Task",
-                      "Resource": "${GenerateFlightsFunction.Arn}",
-                      "Next": "AddFlightsToDatabase9",
-                      "InputPath": "$.routes[9]",
-                      "ResultPath": "$.routes[9].flightsFile",
-                      "OutputPath": "$.routes[9].flightsFile",
-                      "Parameters": {
-                        "routeFileKey.$": "$.Key",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 9
-                      }
-                    },
-                    "AddFlightsToDatabase9": {
-                      "Type": "Task",
-                      "Resource": "${AddFlightsFunction.Arn}",
-                      "End": true,
-                      "InputPath": "$.Key",
-                      "Parameters": {
-                        "flightsFileKey.$": "$",
-                        "execution.$": "$$.Execution.Name",
-                        "index": 9
-                      }
-                    }
+                    "End": true
                   }
                 }
-              ]
+              },
+              "ResultPath": "$.createdFlights",
+              "Next": "Flights Added"
             },
             "Flights Added": {
               "Type": "Pass",
