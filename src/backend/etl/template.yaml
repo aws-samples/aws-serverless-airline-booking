@@ -215,15 +215,16 @@ Resources:
                   "ProcessRoutes": {
                     "Type": "Task",
                     "Resource": "${GenerateFlightsFunction.Arn}",
-                    "Next": "AddFlightsToDatabase"
+                    "Next": "AddFlightsToDatabase",
+                    "ResultPath" : "$.routesOutput"
                   },
                   "AddFlightsToDatabase": {
                     "Type": "Task",
                     "Resource": "${AddFlightsFunction.Arn}",
                     "Parameters": {
-                      "flightsFileKey.$": "$.Key",
-                      "execution.$": "$$.Execution.Name",
-                      "index.$": "$$.Map.Item.Index"
+                      "flightsFileKey.$": "$.routesOutput.Key",
+                      "execution.$": "$.execution",
+                      "index.$": "$.index"
                     },
                     "End": true
                   }
