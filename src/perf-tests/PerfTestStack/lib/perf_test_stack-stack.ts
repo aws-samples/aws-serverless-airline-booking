@@ -185,11 +185,23 @@ export class PerfTestStack extends cdk.Stack {
         integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
+    
+    const cleanUp = new sfn.Task(this, "Clean Up", {
+      task: new tasks.RunEcsFargateTask({
+        cluster,
+        taskDefinition: mockDataTaskDefinition,
+        assignPublicIp: true,
+        containerOverrides: [{
+          containerName: mockDataAppContainer.containerName,
+          command: Data.listAt('$.commands')
+        }]
+      })
+    })
 
     const stepfuncDefinition = setupUsers
                                   .next(loadFlights)
                                   .next(runGatling)
-    // .next(generateReport)
+                                  .next(cleanUp)
 
     new sfn.StateMachine(this, STATE_MACHINE_NAME, {
       stateMachineName: STATE_MACHINE_NAME,

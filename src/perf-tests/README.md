@@ -1,9 +1,7 @@
-Things to do
+Things to do:
 - [ ] Have all the parameters as Environment variables
-- [ ] New Lambda to auto-approve users
-- [ ] Enable admin srp-auth
-- [ ] New Lambda listen to ECS stop status to signal step function to go to next task
-
+- [ ] Fake usernames for load testing
+- [ ] Allow load test to run from one's laptop (Docker)
 
 docker run -it gatling:local -s setupUsers
 
