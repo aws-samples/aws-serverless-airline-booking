@@ -15,7 +15,7 @@ ENV API_URL https://jgqf4edwli.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV PATH ./
 ENV AWS_REGION eu-west-1
-ENV USER_POOL_ID eu-west-1_BDDCLzdwo
+ENV USER_POOL_ID eu-west-1_PIv41OQcx
 ENV APPSYNC_API_KEY wmlz4yivuzfo5jjhiqqbzjerxu
 ENV S3_BUCKET pputhran-load-test
 
