@@ -5,10 +5,10 @@ RUN apk update
 RUN apk add python3
 RUN pip3 install awscli
 
-ENV COGNITO_CLIENT_ID 2hdal963uk66tjh5t8c4cpqn3e
+ENV COGNITO_CLIENT_ID q45qk8hjt0gbi0fm2ep29invc
 ENV COGNITO_URL https://cognito-idp.eu-west-1.amazonaws.com/ 
-ENV GRAPHQL_URL https://ktxb6n35anaw7kzru24clold2e.appsync-api.eu-west-1.amazonaws.com/graphql
-ENV API_URL https://w7ifcw6ai5.execute-api.eu-west-1.amazonaws.com/prod/charge
+ENV GRAPHQL_URL https://kvifwfsonrbovkwqtkadkfrlfe.appsync-api.eu-west-1.amazonaws.com/graphql
+ENV API_URL https://jgqf4edwli.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV AWS_REGION eu-west-1
 ENV S3_BUCKET pputhran-load-test

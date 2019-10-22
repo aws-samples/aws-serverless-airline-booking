@@ -12,7 +12,7 @@ APPSYNC_API_KEY = os.environ['APPSYNC_API_KEY']
 APPSYNC_API_ENDPOINT_URL = os.environ['GRAPHQL_URL']
 S3_BUCKET = os.environ['S3_BUCKET']
 START_DATE = os.getenv('START_DATE') or datetime.now()
-END_DATE = os.getenv('END_DATE') or datetime.now() + timedelta(days=1)
+END_DATE = os.getenv('END_DATE') or datetime.now() + timedelta(days=7)
 
 s3 = boto3.client('s3')
 
