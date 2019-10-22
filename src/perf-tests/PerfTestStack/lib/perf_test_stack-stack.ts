@@ -55,7 +55,7 @@ export class PerfTestStack extends cdk.Stack {
 
     role.addToPolicy(new PolicyStatement({
       resources : [
-        `arn:aws:cognito-idp:eu-west-1:963887453151:userpool/eu-west-1_BDDCLzdwo` // need to find out a way to get this from ENV
+        `arn:aws:cognito-idp:eu-west-1:963887453151:userpool/eu-west-1_PIv41OQcx` // need to find out a way to get this from ENV
       ],
       actions: [
         'cognito-idp:AdminInitiateAuth',
