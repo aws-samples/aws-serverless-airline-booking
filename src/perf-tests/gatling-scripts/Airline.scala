@@ -83,7 +83,7 @@ object User {
 
 object Make {
 
-      val randomString = csv(TOKEN_CSV).circular
+      val randomString = csv(TOKEN_CSV).random
 
       val headerMaps = Map("Content-Type" -> "application/x-www-form-urlencoded", 
                               "Accept" -> "application/json",
