@@ -21,7 +21,7 @@ Amplify.configure(aws_exports);
 Amplify.configure({
   API: {
     graphql_headers: async () => ({
-      "X-airline-request-id": uid()
+      "x-correlation-id": uid() // experiment with X-AMZN-Trace-Id
     })
   }
 });
