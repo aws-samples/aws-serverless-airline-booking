@@ -1,4 +1,5 @@
 
+# Flight uses API authorization level
 type Flight 
     @model(subscriptions: null) 
     @key(name: "ByDepartureSchedule", 
@@ -22,7 +23,9 @@ type Flight
     seatAllocation: Int!
 }
 
-
+# Booking uses API authorization level
+# and fine-grained auth to only allow book owners to see their own bookings
+# and any authenticated user member of Admin group (e.g. could be travel agency, etc.)
 type Booking @model(subscriptions: null) @auth(rules: [
       {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
       {allow: groups, groups: ["Admin"]}
@@ -54,6 +57,9 @@ input CreateBookingInput {
   bookingOutboundFlightId: ID!
 }
 
+# Loyalty uses API authorization level
+# and loyalty owner is resolved at the resolver level using auth claims
+# to unlock admin use case, `customer/owner` field could be added
 type Loyalty {
     points: Int
     level: String
