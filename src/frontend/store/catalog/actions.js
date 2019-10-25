@@ -1,6 +1,7 @@
 import Flight from "../../shared/models/FlightClass";
 import { API, graphqlOperation } from "aws-amplify";
-import { listFlights, getFlight } from "../../graphql/queries";
+import { getFlight } from "../../graphql/queries";
+import { getFlightBySchedule } from "./graphql";
 
 /**
  *
@@ -34,17 +35,12 @@ import { listFlights, getFlight } from "../../graphql/queries";
 export async function fetchFlights({ commit }, { date, departure, arrival }) {
   commit("SET_LOADER", true);
   try {
-    // listFlights query filter
-    const flightFilter = {
-      filter: {
-        departureDate: {
-          beginsWith: date
-        },
-        departureAirportCode: {
-          eq: departure
-        },
-        arrivalAirportCode: {
-          eq: arrival
+    const flightOpts = {
+      departureAirportCode: departure,
+      arrivalAirportCodeDepartureDate: {
+        beginsWith: {
+          arrivalAirportCode: arrival,
+          departureDate: date
         }
       }
     };
@@ -52,9 +48,9 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
     const {
       // @ts-ignore
       data: {
-        listFlights: { items: flightData }
+        getFlightBySchedule: { items: flightData }
       }
-    } = await API.graphql(graphqlOperation(listFlights, flightFilter));
+    } = await API.graphql(graphqlOperation(getFlightBySchedule, flightOpts));
 
     // data mutations happen within a Flight class
     // here we convert graphQL results into an array of Flights

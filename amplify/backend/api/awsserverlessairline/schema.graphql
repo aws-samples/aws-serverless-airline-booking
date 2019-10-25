@@ -1,5 +1,10 @@
 
-type Flight @model(subscriptions: null) {
+type Flight 
+    @model(subscriptions: null) 
+    @key(name: "ByDepartureSchedule", 
+        fields: ["departureAirportCode", "arrivalAirportCode", "departureDate"],
+        queryField: "getFlightBySchedule")
+{
     id: ID!
     departureDate: String!
     departureAirportCode: String!
