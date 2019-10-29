@@ -34,6 +34,7 @@ export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
     accessToken: rootGetters['profile/accessToken']
   }
 
+  console.group('store/loyalty/actions/fetchLoyalty')
   console.log('Credentials retrieved')
   console.log(credentials)
 
@@ -86,9 +87,12 @@ export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
     commit('SET_LOYALTY', loyalty)
 
     Loading.hide()
+    console.groupEnd()
     return loyalty
   } catch (err) {
     Loading.hide()
-    throw new Error(err)
+    console.log(err)
+    console.groupEnd()
+    throw err
   }
 }

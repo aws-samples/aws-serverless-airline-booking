@@ -42,6 +42,7 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
     accessToken: rootGetters['profile/accessToken']
   }
 
+  console.group('store/booking/actions/fetchFlights')
   console.log('Credentials retrieved')
   console.log(credentials)
 
@@ -134,9 +135,11 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
 
     commit('SET_FLIGHTS', flights)
     commit('SET_LOADER', false)
+    console.groupEnd()
   } catch (error) {
     console.error(error)
     commit('SET_LOADER', false)
+    console.groupEnd()
     throw error
   }
 }
@@ -171,6 +174,7 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
     accessToken: rootGetters['profile/accessToken']
   }
 
+  console.group('store/booking/actions/fetchByFlightId')
   console.log('Credentials retrieved')
   console.log(credentials)
 
@@ -239,10 +243,12 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
 
     const flight = new Flight(flightData)
     commit('SET_LOADER', false)
+    console.groupEnd()
     return flight
   } catch (error) {
     console.error(error)
     commit('SET_LOADER', false)
+    console.groupEnd()
     throw error
   }
 }

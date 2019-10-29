@@ -49,6 +49,7 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
     accessToken: rootGetters['profile/accessToken']
   }
 
+  console.group('store/bookings/actions/fetchBooking')
   console.log('Credentials retrieved')
   console.log(credentials)
 
@@ -139,10 +140,12 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
     commit('SET_BOOKINGS', bookings)
     Loading.hide()
 
+    console.groupEnd()
     return bookings
   } catch (err) {
     Loading.hide()
     console.error(err)
+    console.groupEnd()
     throw new Error(err)
   }
 }
@@ -197,10 +200,10 @@ export async function createBooking (
     accessToken: rootGetters['profile/accessToken']
   }
 
+  console.group('store/bookings/actions/createBooking')
   console.log('Credentials retrieved')
   console.log(credentials)
 
-  console.log('Getting in there...')
   const chargeToken = await processPayment({
     endpoint: paymentEndpoint,
     paymentToken: paymentToken,
@@ -222,6 +225,7 @@ export async function createBooking (
     credentials
   })
 
+  console.groupEnd()
   return bookingProcessId
 }
 
@@ -265,6 +269,7 @@ async function processPayment ({
     email: customerEmail
   }
 
+  console.group('store/bookings/actions/processPayment')
   console.info('Sending data to pre-authorize payment...')
   console.log(chargeData)
 
@@ -289,10 +294,12 @@ async function processPayment ({
     } = data
 
     console.log(chargeId)
+    console.groupEnd()
 
     return chargeId
   } catch (err) {
     console.error(err)
+    console.groupEnd()
     throw err
   }
 }
@@ -319,7 +326,8 @@ async function processPayment ({
  *   );
  */
 async function processBooking ({ chargeToken, outboundFlight, credentials }) {
-  console.info('Processing booking....')
+  console.group('store/bookings/actions/processBooking')
+  console.info(`Processing booking for flight ${outboundFlight} with token ${chargeToken}`)
   try {
     Loading.show({
       message: 'Creating a new booking...'
@@ -389,9 +397,11 @@ async function processBooking ({ chargeToken, outboundFlight, credentials }) {
       bookingId: bookingProcessId
     } = data
 
+    console.groupEnd()
     return bookingProcessId
   } catch (err) {
     console.error(err)
+    console.groupEnd()
     throw err
   }
 }
