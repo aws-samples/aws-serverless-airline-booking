@@ -329,6 +329,7 @@ artifacts/
 src/frontend/.env
 datasources.json
 test_report/
+src/frontend/graphql
 
 # Cypress videos and screenshots
 src/e2e-tests/ui/**/cypress/videos

@@ -1,7 +1,6 @@
 import Flight from "../../shared/models/FlightClass";
 import { API, graphqlOperation } from "aws-amplify";
-import { getFlight } from "../../graphql/queries";
-import { getFlightBySchedule } from "./graphql";
+import { getFlightBySchedule, getFlight } from "./graphql";
 
 /**
  *
@@ -42,7 +41,8 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
           arrivalAirportCode: arrival,
           departureDate: date
         }
-      }
+      },
+      filter: { seatAllocation: { gt: 0 } }
     };
 
     const {

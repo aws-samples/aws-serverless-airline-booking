@@ -35,3 +35,23 @@ export const getFlightBySchedule = `query GetFlightBySchedule(
   }
 }
 `;
+
+export const getFlight = `query GetFlight($id: ID!) {
+  getFlight(id: $id) {
+    id
+    departureDate
+    departureAirportCode
+    departureAirportName
+    departureCity
+    departureLocale
+    arrivalDate
+    arrivalAirportCode
+    arrivalAirportName
+    arrivalCity
+    arrivalLocale
+    ticketPrice
+    ticketCurrency
+    flightNumber
+  }
+}
+`;
