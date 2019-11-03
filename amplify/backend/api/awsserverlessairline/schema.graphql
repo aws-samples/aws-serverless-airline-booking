@@ -5,8 +5,7 @@
 type Flight 
     @model(subscriptions: null)
     @auth(rules:[
-        {allow: private, operations: [read]},
-        {allow: groups, groups: ["Admin"]}
+        {allow: private, operations: [read]}
     ])
     @key(name: "ByDepartureSchedule", 
         fields: ["departureAirportCode", "arrivalAirportCode", "departureDate"],
