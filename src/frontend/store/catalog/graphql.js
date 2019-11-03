@@ -29,7 +29,7 @@ export const getFlightBySchedule = `query GetFlightBySchedule(
       ticketPrice
       ticketCurrency
       flightNumber
-      seatAllocation
+      seatCapacity
     }
     nextToken
   }

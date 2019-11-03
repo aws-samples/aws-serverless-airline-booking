@@ -42,7 +42,7 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
           departureDate: date
         }
       },
-      filter: { seatAllocation: { gt: 0 } }
+      filter: { seatCapacity: { gt: 0 } }
     };
 
     const {

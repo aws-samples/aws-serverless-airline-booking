@@ -15,7 +15,7 @@ mutation flight1 {
         ticketPrice: 100,
         ticketCurrency: "EUR",
         flightNumber: 1830,
-	seatAllocation: 10
+	      seatCapacity: 10
     }) {
         id
     }
@@ -36,7 +36,7 @@ mutation flight2 {
         ticketPrice: 200,
         ticketCurrency: "EUR",
         flightNumber: 1813,
-        seatAllocation: 2
+        seatCapacity: 2
     }) {
         id
     }
@@ -57,7 +57,7 @@ mutation flight3 {
         ticketPrice: 1000,
         ticketCurrency: "EUR",
         flightNumber: 1814,
-        seatAllocation: 2
+        seatCapacity: 2
     }) {
         id
     }
@@ -78,7 +78,7 @@ mutation flight4 {
         ticketPrice: 500,
         ticketCurrency: "EUR",
         flightNumber: 1815,
-        seatAllocation: 2
+        seatCapacity: 2
     }) {
         id
     }
