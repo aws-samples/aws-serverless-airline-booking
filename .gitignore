@@ -311,6 +311,7 @@ amplify/\#current-cloud-backend
 amplify/.config/local-*
 amplify/backend/amplify-meta.json
 amplify/backend/awscloudformation
+amplify/backend/api/*/resolvers
 build/
 dist/
 node_modules/
@@ -631,3 +632,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/node,linux,macos,python,windows,visualstudiocode
+amplify/mock-data
