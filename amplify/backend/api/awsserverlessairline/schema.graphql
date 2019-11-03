@@ -1,7 +1,11 @@
 
 # Flight uses API authorization level
 type Flight 
-    @model(subscriptions: null) 
+    @model(subscriptions: null)
+    @auth(rules:[
+        {allow: private, operations: [read]},
+        {allow: groups, groups: ["Admin"]}
+    ])
     @key(name: "ByDepartureSchedule", 
         fields: ["departureAirportCode", "arrivalAirportCode", "departureDate"],
         queryField: "getFlightBySchedule")
