@@ -7,3 +7,19 @@
 export const isAuthenticated = state => {
   return !!state.user;
 };
+
+export const firstName = state => {
+  return (
+    (state.user && state.user.attributes && state.user.attributes.given_name) ||
+    "First"
+  );
+};
+
+export const lastName = state => {
+  return (
+    (state.user &&
+      state.user.attributes &&
+      state.user.attributes.family_name) ||
+    "Last Name"
+  );
+};

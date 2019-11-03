@@ -92,11 +92,13 @@ export default {
       user: state => state.profile.user,
       loyalty: state => state.loyalty.loyalty
     }),
-    ...mapGetters("profile", ["isAuthenticated"]),
+    ...mapGetters({
+      isAuthenticated: "profile/isAuthenticated",
+      firstName: "profile/firstName",
+      lastName: "profile/lastName"
+    }),
     fullName() {
-      return `${this.user.attributes.given_name} ${
-        this.user.attributes.family_name
-      }`;
+      return `${this.firstName} ${this.lastName}`;
     }
   },
   methods: {
