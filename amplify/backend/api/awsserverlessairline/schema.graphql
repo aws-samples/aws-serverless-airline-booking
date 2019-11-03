@@ -25,7 +25,7 @@ type Flight
     ticketPrice: Int!
     ticketCurrency: String!
     flightNumber: Int!
-    seatAllocation: Int! @deprecated(reason: "use seatCapacity instead. seatAllocation will be removed in the stable release.")
+    seatAllocation: Int @deprecated(reason: "use seatCapacity instead. seatAllocation will be removed in the stable release.")
     seatCapacity: Int!
 }
 
