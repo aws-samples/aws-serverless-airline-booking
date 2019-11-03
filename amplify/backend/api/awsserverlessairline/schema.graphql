@@ -1,5 +1,7 @@
 
 # Flight uses API authorization level
+# and fine-grained auth to only allow authenticated users to read flights
+# except users member of Admin group
 type Flight 
     @model(subscriptions: null)
     @auth(rules:[
