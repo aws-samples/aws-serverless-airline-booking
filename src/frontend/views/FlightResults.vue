@@ -162,14 +162,21 @@ export default {
      * this guarantees we attempt talking to Catalog service
      * if our authentication guards && profile module have an user in place
      */
-    if (this.isAuthenticated) {
-      await this.$store.dispatch("catalog/fetchFlights", {
-        date: this.date,
-        departure: this.departure,
-        arrival: this.arrival
-      });
+    try {
+      if (this.isAuthenticated) {
+        await this.$store.dispatch("catalog/fetchFlights", {
+          date: this.date,
+          departure: this.departure,
+          arrival: this.arrival
+        });
 
-      this.filteredFlights = this.sortByDeparture(this.flights);
+        this.filteredFlights = this.sortByDeparture(this.flights);
+      }
+    } catch (error) {
+      console.error(error);
+      this.$q.notify(
+        `Error while fetching Flight results - Check browser console messages`
+      );
     }
   },
   methods: {

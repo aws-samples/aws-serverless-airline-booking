@@ -53,8 +53,15 @@ export default {
      * this guarantees we attempt talking to Booking service
      * if our authentication guards && profile module have an user in place
      */
-    if (this.isAuthenticated) {
-      await this.$store.dispatch("bookings/fetchBooking");
+    try {
+      if (this.isAuthenticated) {
+        await this.$store.dispatch("bookings/fetchBooking");
+      }
+    } catch (error) {
+      console.error(error);
+      this.$q.notify(
+        `Error while fetching Booking - Check browser console messages`
+      );
     }
   },
   /**

@@ -287,6 +287,9 @@ export default {
         }, 3000);
       } catch (err) {
         this.$q.loading.hide();
+        this.$q.notify(
+          `Error while creating your Booking - Check browser console messages`
+        );
         console.error(err);
       }
     },

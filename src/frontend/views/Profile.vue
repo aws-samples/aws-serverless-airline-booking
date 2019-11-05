@@ -21,7 +21,7 @@
         <div class="row loyalty__progress">
           <div class="col-7 loyalty__progress--points">
             <div class="q-display-1 loyalty__points" data-test="loyalty-points">
-              {{ loyalty.points }}
+              {{ loyalty.points || 0 }}
             </div>
             <div class="q-title text-primary text-bold">Points</div>
           </div>
@@ -30,7 +30,7 @@
               class="q-display-1 loyalty__progress--next-tier"
               data-test="loyalty-next-tier"
             >
-              {{ loyalty.percentage }}%
+              {{ loyalty.percentage || 0 }}%
             </div>
             <div class="q-title text-primary text-bold">Next Tier Progress</div>
             <q-progress :percentage="loyalty.percentage" color="secondary" />
@@ -168,8 +168,15 @@ export default {
     // however, the component doesn't stop from rendering asynchronously
     // this guarantees we attempt talking to Loyalty service
     // if our authentication guards && profile module have an user in place
-    if (this.isAuthenticated) {
-      await this.$store.dispatch("loyalty/fetchLoyalty");
+    try {
+      if (this.isAuthenticated) {
+        await this.$store.dispatch("loyalty/fetchLoyalty");
+      }
+    } catch (error) {
+      console.error(error);
+      this.$q.notify(
+        `Error while fetching Loyalty - Check browser console messages`
+      );
     }
   }
 };
