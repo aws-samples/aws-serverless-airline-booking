@@ -81,7 +81,6 @@ export function fetchBooking({ commit, rootGetters }) {
  * @param {object} obj - Object containing params required to create a booking
  * @param {object} obj.paymentToken - Stripe JS Payment token object
  * @param {Flight} obj.outboundFlight - Outbound Flight
- * @param {Flight} [obj.inboundFlight] - Inbound Flight
  * @returns {promise} - Promise representing booking effectively made in the Booking service.
  * @example
  * // exerpt from src/views/FlightSelection.vue

@@ -44,7 +44,6 @@ type Booking
 {
     id: ID!
     status: BookingStatus!
-    inboundFlight: Flight @connection 
     outboundFlight: Flight! @connection
     paymentToken: String!
     checkedIn: Boolean
@@ -65,7 +64,6 @@ input CreateBookingInput {
   paymentToken: String!
   checkedIn: Boolean
   customer: String
-  bookingInboundFlightId: ID
   bookingOutboundFlightId: ID!
 }
 
