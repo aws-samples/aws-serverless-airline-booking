@@ -1,9 +1,14 @@
 version: 0.1
+env:
+  variables:
+      _LIVE_UPDATES: [{"pkg":"@aws-amplify/cli","type":"npm","version":"3.7.0"}]
+      _BUILD_TIMEOUT: 20
+      STRIPE_SECRET_KEY: UNDEFINED
 backend:
   phases:
     preBuild:
       commands:
-        - npm install -g @aws-amplify/cli@3.2.0 # pinned known working version
+#        - npm install -g @aws-amplify/cli@3.2.0 # pinned known working version
         - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
     build:
       commands:
