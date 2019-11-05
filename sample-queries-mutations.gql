@@ -1,4 +1,5 @@
 ## Add a bunch of flights for December 2nd 2019 (year-month-day)
+## auth user must be Admin
 
 mutation flight1 {
     createFlight(input:{
@@ -125,6 +126,7 @@ query {
 ###
 
 mutation {
+  # auth user must be Admin
   createBooking(input:{
      status:UNCONFIRMED,
      paymentToken: "adasdasd",

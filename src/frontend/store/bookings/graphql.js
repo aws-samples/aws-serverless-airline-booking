@@ -5,16 +5,25 @@ export const processBooking = `mutation ProcessBooking($input: CreateBookingInpu
 }
 `;
 
-export const listBookings = `query ListBookings(
+export const getBookingByStatus = `query GetBookingByStatus(
+  $customer: String
+  $statusCreatedAt: ModelBookingByStatusCompositeKeyConditionInput
+  $sortDirection: ModelSortDirection
   $filter: ModelBookingFilterInput
   $limit: Int
   $nextToken: String
 ) {
-  listBookings(filter: $filter, limit: $limit, nextToken: $nextToken) {
+  getBookingByStatus(
+    customer: $customer
+    statusCreatedAt: $statusCreatedAt
+    sortDirection: $sortDirection
+    filter: $filter
+    limit: $limit
+    nextToken: $nextToken
+  ) {
     items {
       id
       status
-      bookingReference
       outboundFlight {
         id
         departureDate
@@ -30,9 +39,14 @@ export const listBookings = `query ListBookings(
         ticketPrice
         ticketCurrency
         flightNumber
+        seatAllocation
+        seatCapacity
       }
+      paymentToken
       checkedIn
+      customer
       createdAt
+      bookingReference
     }
     nextToken
   }

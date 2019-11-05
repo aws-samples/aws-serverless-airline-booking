@@ -7,7 +7,7 @@ import axios from "axios";
 import { API, graphqlOperation } from "aws-amplify";
 import {
   processBooking as processBookingMutation,
-  listBookings
+  getBookingByStatus
 } from "./graphql";
 
 /**
@@ -34,27 +34,27 @@ import {
  *    ...mapGetters("profile", ["isAuthenticated"])
  * }
  */
-export function fetchBooking({ commit }) {
+export function fetchBooking({ commit, rootGetters }) {
   return new Promise(async (resolve, reject) => {
     Loading.show({
       message: "Loading bookings..."
     });
 
     try {
+      const customerId = rootGetters["profile/userAttributes"].sub;
       const BookingStatus = Object.freeze({ CONFIRMED: "CONFIRMED" });
       const bookingFilter = {
-        filter: {
-          status: {
-            eq: BookingStatus.CONFIRMED
-          }
-        }
+        customer: customerId,
+        status: BookingStatus.CONFIRMED
       };
       const {
         // @ts-ignore
         data: {
-          listBookings: { items: bookingData }
+          getBookingByStatus: { items: bookingData }
         }
-      } = await API.graphql(graphqlOperation(listBookings, bookingFilter));
+      } = await API.graphql(
+        graphqlOperation(getBookingByStatus, bookingFilter)
+      );
 
       let bookings = bookingData.map(booking => new Booking(booking));
 
@@ -65,6 +65,7 @@ export function fetchBooking({ commit }) {
       resolve();
       Loading.hide();
     } catch (err) {
+      Loading.hide();
       console.error(err);
       reject(err);
     }
