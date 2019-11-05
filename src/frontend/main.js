@@ -11,7 +11,7 @@ import store from "./store";
 import "./styles/quasar.styl";
 import "quasar-extras/animate";
 import "quasar-extras/material-icons";
-import Quasar, { Loading, QSpinnerPuff, uid } from "quasar";
+import Quasar, { Loading, QSpinnerPuff, uid, Notify } from "quasar";
 
 import Amplify, * as AmplifyModules from "aws-amplify";
 import { AmplifyPlugin } from "aws-amplify-vue";
@@ -29,7 +29,14 @@ Amplify.configure({
 Vue.use(AmplifyPlugin, AmplifyModules);
 
 Vue.use(Quasar, {
-  config: {}
+  config: {
+    notify: {
+      position: "top",
+      timeout: 0,
+      textColor: "white",
+      closeBtn: "Dismiss"
+    }
+  }
 });
 
 // Set default loader for views
