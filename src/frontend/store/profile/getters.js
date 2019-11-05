@@ -23,3 +23,7 @@ export const lastName = state => {
     "Last Name"
   );
 };
+
+export const userAttributes = state => {
+  return (state.user && state.user.attributes) || "no attributes";
+};

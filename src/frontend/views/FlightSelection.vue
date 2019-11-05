@@ -172,10 +172,13 @@ export default {
    * @param {boolean} loading - Loader state used to control Flight Loader when fetching flights
    */
   computed: {
-    ...mapGetters("profile", ["isAuthenticated"]),
+    ...mapGetters({
+      firstName: "profile/firstName",
+      customer: "profile/userAttributes",
+      isAuthenticated: "profile/isAuthenticated"
+    }),
     ...mapState({
-      loading: state => state.catalog.loading,
-      customer: state => state.profile.user
+      loading: state => state.catalog.loading
     })
   },
   async beforeMount() {
@@ -275,7 +278,7 @@ export default {
 
         this.$q.loading.show({
           message: `Your booking is being processed - We'll soon contact you via ${
-            this.customer.attributes.email
+            this.customer.email
           }.`
         });
         setTimeout(() => {
