@@ -38,9 +38,9 @@ type Booking
       {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
       {allow: groups, groups: ["Admin"]}
     ])
-    @key(name: "ByStatus", 
-        fields: ["customer", "status", "createdAt"],
-        queryField: "getBookingByStatus") 
+    @key(name: "ByCustomerStatus", 
+        fields: ["customer", "status"],
+        queryField: "getBookingByStatus")
 {
     id: ID!
     status: BookingStatus!

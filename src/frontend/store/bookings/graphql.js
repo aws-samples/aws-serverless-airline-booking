@@ -7,7 +7,7 @@ export const processBooking = `mutation ProcessBooking($input: CreateBookingInpu
 
 export const getBookingByStatus = `query GetBookingByStatus(
   $customer: String
-  $statusCreatedAt: ModelBookingByStatusCompositeKeyConditionInput
+  $status: ModelStringKeyConditionInput
   $sortDirection: ModelSortDirection
   $filter: ModelBookingFilterInput
   $limit: Int
@@ -15,7 +15,7 @@ export const getBookingByStatus = `query GetBookingByStatus(
 ) {
   getBookingByStatus(
     customer: $customer
-    statusCreatedAt: $statusCreatedAt
+    status: $status
     sortDirection: $sortDirection
     filter: $filter
     limit: $limit

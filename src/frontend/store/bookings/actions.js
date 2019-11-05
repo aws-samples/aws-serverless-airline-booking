@@ -42,10 +42,11 @@ export function fetchBooking({ commit, rootGetters }) {
 
     try {
       const customerId = rootGetters["profile/userAttributes"].sub;
-      const BookingStatus = Object.freeze({ CONFIRMED: "CONFIRMED" });
       const bookingFilter = {
         customer: customerId,
-        status: BookingStatus.CONFIRMED
+        status: {
+          eq: "CONFIRMED"
+        }
       };
       const {
         // @ts-ignore
