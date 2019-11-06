@@ -34,43 +34,38 @@ import {
  *    ...mapGetters("profile", ["isAuthenticated"])
  * }
  */
-export function fetchBooking({ commit, rootGetters }) {
-  return new Promise(async (resolve, reject) => {
-    Loading.show({
-      message: "Loading bookings..."
-    });
-
-    try {
-      const customerId = rootGetters["profile/userAttributes"].sub;
-      const bookingFilter = {
-        customer: customerId,
-        status: {
-          eq: "CONFIRMED"
-        }
-      };
-      const {
-        // @ts-ignore
-        data: {
-          getBookingByStatus: { items: bookingData }
-        }
-      } = await API.graphql(
-        graphqlOperation(getBookingByStatus, bookingFilter)
-      );
-
-      let bookings = bookingData.map(booking => new Booking(booking));
-
-      console.log(bookings);
-
-      commit("SET_BOOKINGS", bookings);
-
-      resolve();
-      Loading.hide();
-    } catch (err) {
-      Loading.hide();
-      console.error(err);
-      reject(err);
-    }
+export async function fetchBooking({ commit, rootGetters }) {
+  Loading.show({
+    message: "Loading bookings..."
   });
+
+  try {
+    const customerId = rootGetters["profile/userAttributes"].sub;
+    const bookingFilter = {
+      customer: customerId,
+      status: {
+        eq: "CONFIRMED"
+      }
+    };
+    const {
+      // @ts-ignore
+      data: {
+        getBookingByStatus: { items: bookingData }
+      }
+    } = await API.graphql(graphqlOperation(getBookingByStatus, bookingFilter));
+
+    let bookings = bookingData.map(booking => new Booking(booking));
+
+    console.log(bookings);
+
+    commit("SET_BOOKINGS", bookings);
+
+    Loading.hide();
+  } catch (err) {
+    Loading.hide();
+    console.error(err);
+    throw new Error(err);
+  }
 }
 
 /**
