@@ -34,10 +34,15 @@ import {
  *    ...mapGetters("profile", ["isAuthenticated"])
  * }
  */
-export async function fetchBooking({ commit, rootGetters }) {
+export async function fetchBooking(
+  { commit, rootGetters },
+  paginationToken = ""
+) {
   Loading.show({
     message: "Loading bookings..."
   });
+
+  var nextToken = paginationToken;
 
   try {
     const customerId = rootGetters["profile/userAttributes"].sub;
@@ -45,12 +50,14 @@ export async function fetchBooking({ commit, rootGetters }) {
       customer: customerId,
       status: {
         eq: "CONFIRMED"
-      }
+      },
+      limit: 3,
+      nextToken: nextToken
     };
     const {
       // @ts-ignore
       data: {
-        getBookingByStatus: { items: bookingData }
+        getBookingByStatus: { items: bookingData, nextToken: paginationToken }
       }
     } = await API.graphql(graphqlOperation(getBookingByStatus, bookingFilter));
 
@@ -59,6 +66,7 @@ export async function fetchBooking({ commit, rootGetters }) {
     console.log(bookings);
 
     commit("SET_BOOKINGS", bookings);
+    commit("SET_BOOKING_PAGINATION", paginationToken);
 
     Loading.hide();
   } catch (err) {

@@ -6,5 +6,6 @@
  * @see {@link createBooking} for more info on action
  */
 export default {
-  bookings: []
+  bookings: [],
+  paginationToken: ""
 };
