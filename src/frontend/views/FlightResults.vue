@@ -109,6 +109,17 @@
         <flight-card :details="flight" />
       </router-link>
     </div>
+    <div class="wrapper">
+      <q-btn
+        v-if="paginationToken"
+        @click="loadFlights"
+        class="cta__button"
+        color="secondary"
+        size="1rem"
+        label="Load more flights?"
+        data-test="flight-pagination"
+      />
+    </div>
   </q-page>
 </template>
 
@@ -156,30 +167,36 @@ export default {
       maxPriceFilter: 300
     };
   },
-  async mounted() {
+  mounted() {
     /** authentication guards prevent authenticated users to view Flights
      * however, the component doesn't stop from rendering asynchronously
      * this guarantees we attempt talking to Catalog service
      * if our authentication guards && profile module have an user in place
      */
-    try {
-      if (this.isAuthenticated) {
-        await this.$store.dispatch("catalog/fetchFlights", {
-          date: this.date,
-          departure: this.departure,
-          arrival: this.arrival
-        });
-
-        this.filteredFlights = this.sortByDeparture(this.flights);
-      }
-    } catch (error) {
-      console.error(error);
-      this.$q.notify(
-        `Error while fetching Flight results - Check browser console messages`
-      );
+    if (this.isAuthenticated) {
+      this.loadFlights();
     }
   },
   methods: {
+    async loadFlights() {
+      try {
+        if (this.isAuthenticated) {
+          await this.$store.dispatch("catalog/fetchFlights", {
+            date: this.date,
+            departure: this.departure,
+            arrival: this.arrival,
+            paginationToken: this.paginationToken
+          });
+
+          this.filteredFlights = this.sortByDeparture(this.flights);
+        }
+      } catch (error) {
+        console.error(error);
+        this.$q.notify(
+          `Error while fetching Flight results - Check browser console messages`
+        );
+      }
+    },
     /**
      * setPrice method updates maxPriceFilter and filter flights via filterByMaxPrice mixin
      */
@@ -217,7 +234,8 @@ export default {
   computed: {
     ...mapState({
       flights: state => state.catalog.flights,
-      loading: state => state.catalog.loading
+      loading: state => state.catalog.loading,
+      paginationToken: state => state.catalog.paginationToken
     }),
     ...mapGetters("profile", ["isAuthenticated"]),
     maximumPrice: function() {

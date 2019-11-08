@@ -31,8 +31,14 @@ import { getFlightBySchedule, getFlight } from "./graphql";
  *    this.filteredFlights = this.sortByDeparture(this.flights);
  * }
  */
-export async function fetchFlights({ commit }, { date, departure, arrival }) {
+export async function fetchFlights(
+  { commit },
+  { date, departure, arrival, paginationToken = "" }
+) {
   commit("SET_LOADER", true);
+
+  var nextToken = paginationToken;
+
   try {
     const flightOpts = {
       departureAirportCode: departure,
@@ -42,13 +48,15 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
           departureDate: date
         }
       },
-      filter: { seatCapacity: { gt: 0 } }
+      filter: { seatCapacity: { gt: 0 } },
+      limit: 5,
+      nextToken: nextToken
     };
 
     const {
       // @ts-ignore
       data: {
-        getFlightBySchedule: { items: flightData }
+        getFlightBySchedule: { items: flightData, nextToken: paginationToken }
       }
     } = await API.graphql(graphqlOperation(getFlightBySchedule, flightOpts));
 
@@ -58,11 +66,12 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
     const flights = flightData.map(flight => new Flight(flight));
 
     commit("SET_FLIGHTS", flights);
+    commit("SET_FLIGHT_PAGINATION", paginationToken);
     commit("SET_LOADER", false);
   } catch (error) {
-    console.error(error);
     commit("SET_LOADER", false);
-    throw error;
+    console.error(error);
+    throw new Error(error);
   }
 }
 
