@@ -14,6 +14,7 @@ import { getFlightBySchedule, getFlight } from "./graphql";
  * @param {Date} obj.date - Date in DD-MM-YYYY format
  * @param {string} obj.departure - Airport IATA to be filtered as departure
  * @param {string} obj.arrival - Airport IATA to be filtered as arrival
+ * @param {string} obj.paginationToken - pagination token for loading additional flights
  * @returns {promise} - Promise representing whether flights from Catalog have been updated in the store
  * @see {@link SET_FLIGHTS} for more info on mutation
  * @see {@link SET_LOADER} for more info on mutation

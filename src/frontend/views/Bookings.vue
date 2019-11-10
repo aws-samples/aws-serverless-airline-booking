@@ -69,6 +69,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * loadBookings method fetches all bookings via booking API
+     */
     async loadBookings() {
       try {
         await this.$store.dispatch(

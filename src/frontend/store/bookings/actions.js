@@ -16,6 +16,7 @@ import {
  *
  * It uses SET_BOOKINGS mutation to update Booking state with the latest bookings and flights associated with them.
  * @param {object} context - Vuex action context (context.commit, context.getters, context.state, context.dispatch)
+ * @param {string} paginationToken - pagination token for loading additional bookings
  * @returns {promise} - Promise representing whether bookings from Booking service have been updated in the store
  * @see {@link SET_BOOKINGS} for more info on mutation
  * @example

@@ -178,6 +178,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * loadFlights method fetches all flights via catalog API
+     */
     async loadFlights() {
       try {
         if (this.isAuthenticated) {
