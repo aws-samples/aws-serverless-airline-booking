@@ -326,7 +326,6 @@ Dockerfile
 packaged.yaml
 *.aws-sam/
 artifacts/
-src/frontend/.env
 datasources.json
 test_report/
 src/frontend/graphql

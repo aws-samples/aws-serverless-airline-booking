@@ -227,7 +227,7 @@ export default {
         details: "",
         error: ""
       },
-      stripeKey: "pk_test_BpxANYCOZO7waMV3TrPQHjXa", // test key,
+      stripeKey: process.env.VUE_APP_StripePublicKey || "no Stripe public key",
       form: {
         name: "",
         country: "",
