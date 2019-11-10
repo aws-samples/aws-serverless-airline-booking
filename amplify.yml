@@ -1,18 +1,13 @@
 version: 0.1
-env:
-  variables:
-      _LIVE_UPDATES: [{"pkg":"@aws-amplify/cli","type":"npm","version":"3.7.0"}]
-      _BUILD_TIMEOUT: 20
-      STRIPE_SECRET_KEY: UNDEFINED
 backend:
   phases:
     preBuild:
       commands:
-#        - npm install -g @aws-amplify/cli@3.2.0 # pinned known working version
+        - npm install -g @aws-amplify/cli@3.17.0 # pinned known working version
         - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
     build:
       commands:
-        - '# Execute Amplify CLI with the helper script'
+        - "# Execute Amplify CLI with the helper script"
         - amplifyPush --simple
         ##
         # Extract Environment data
@@ -32,9 +27,6 @@ backend:
         ##
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
         - make deploy
-    postBuild:
-      commands:
-        - make outputs
 frontend:
   phases:
     preBuild:
@@ -42,7 +34,7 @@ frontend:
         ##
         # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
         ##
-        - make outputs.vue
+        - make outputs
         - cd src/frontend
         - npm install
     build:
@@ -51,7 +43,26 @@ frontend:
   artifacts:
     baseDirectory: src/frontend/dist
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - node_modules/**/*
+customHeaders:
+  - pattern: "**/*"
+    headers: # https://infosec.mozilla.org/guidelines/web_security
+      - key: "Strict-Transport-Security"
+        value: "max-age=31536000; includeSubDomains"
+      - key: "X-Content-Type-Options"
+        value: "nosniff"
+      - key: "X-XSS-Protection"
+        value: "1; mode=block"
+      - key: "X-Frame-Options"
+        value: "DENY"
+      # CSP generated using Laboratory: https://github.com/april/laboratory
+      # Caveats
+      ## Stripe Elements adds inline JS and iFrame (unsafe-eval, frame-src)
+      ## Allows any endpoint hosted on AWS - for prod, use custom domains
+      ### REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
+      ### connect-src doesn't parse cognito-idp.*.amazonaws.com used by Amplify Auth - for prod, use region(s) endpoint
+      - key: "Content-Security-Policy"
+        value: "'default-src 'none'; connect-src https://*.amazonaws.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' https://fonts.googleapis.com/css?family=Raleway 'unsafe-inline' https://fonts.googleapis.com'"

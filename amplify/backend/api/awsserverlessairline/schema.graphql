@@ -1,5 +1,16 @@
 
-type Flight @model(subscriptions: null) {
+# Flight uses API authorization level
+# and fine-grained auth to only allow authenticated users to read flights
+# except users member of Admin group
+type Flight 
+    @model(subscriptions: null)
+    @auth(rules:[
+        {allow: private, operations: [read]}
+    ])
+    @key(name: "ByDepartureSchedule", 
+        fields: ["departureAirportCode", "arrivalAirportCode", "departureDate"],
+        queryField: "getFlightBySchedule")
+{
     id: ID!
     departureDate: String!
     departureAirportCode: String!
@@ -14,17 +25,25 @@ type Flight @model(subscriptions: null) {
     ticketPrice: Int!
     ticketCurrency: String!
     flightNumber: Int!
-    seatAllocation: Int!
+    seatAllocation: Int @deprecated(reason: "use seatCapacity instead. seatAllocation will be removed in the stable release.")
+    seatCapacity: Int!
 }
 
-
-type Booking @model(subscriptions: null) @auth(rules: [
+# Booking uses API authorization level
+# and fine-grained auth to only allow book owners to see their own bookings
+# and any authenticated user member of Admin group (e.g. could be travel agency, etc.)
+type Booking 
+    @model(subscriptions: null) 
+    @auth(rules: [
       {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
       {allow: groups, groups: ["Admin"]}
-    ]) {
+    ])
+    @key(name: "ByCustomerStatus", 
+        fields: ["customer", "status"],
+        queryField: "getBookingByStatus")
+{
     id: ID!
     status: BookingStatus!
-    inboundFlight: Flight @connection 
     outboundFlight: Flight! @connection
     paymentToken: String!
     checkedIn: Boolean
@@ -45,10 +64,12 @@ input CreateBookingInput {
   paymentToken: String!
   checkedIn: Boolean
   customer: String
-  bookingInboundFlightId: ID
   bookingOutboundFlightId: ID!
 }
 
+# Loyalty uses API authorization level
+# and loyalty owner is resolved at the resolver level using auth claims
+# to unlock admin use case, `customer/owner` field could be added
 type Loyalty {
     points: Int
     level: String

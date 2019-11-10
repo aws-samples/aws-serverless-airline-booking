@@ -28,8 +28,8 @@ def reserve_seat_on_flight(flight_id):
         #       decremented, but just to be sure.
         table.update_item(
             Key={"id": flight_id},
-            ConditionExpression="id = :idVal AND seatAllocation < maximumSeating",
-            UpdateExpression="SET seatAllocation = seatAllocation + :dec",
+            ConditionExpression="id = :idVal AND seatCapacity < maximumSeating",
+            UpdateExpression="SET seatCapacity = seatCapacity + :dec",
             ExpressionAttributeValues={
                 ":idVal": flight_id,
                 ":dec": 1

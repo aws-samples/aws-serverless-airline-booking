@@ -1,6 +1,6 @@
 import Flight from "../../shared/models/FlightClass";
 import { API, graphqlOperation } from "aws-amplify";
-import { listFlights, getFlight } from "../../graphql/queries";
+import { getFlightBySchedule, getFlight } from "./graphql";
 
 /**
  *
@@ -14,6 +14,7 @@ import { listFlights, getFlight } from "../../graphql/queries";
  * @param {Date} obj.date - Date in DD-MM-YYYY format
  * @param {string} obj.departure - Airport IATA to be filtered as departure
  * @param {string} obj.arrival - Airport IATA to be filtered as arrival
+ * @param {string} obj.paginationToken - pagination token for loading additional flights
  * @returns {promise} - Promise representing whether flights from Catalog have been updated in the store
  * @see {@link SET_FLIGHTS} for more info on mutation
  * @see {@link SET_LOADER} for more info on mutation
@@ -31,42 +32,52 @@ import { listFlights, getFlight } from "../../graphql/queries";
  *    this.filteredFlights = this.sortByDeparture(this.flights);
  * }
  */
-export async function fetchFlights({ commit }, { date, departure, arrival }) {
+export async function fetchFlights(
+  { commit },
+  { date, departure, arrival, paginationToken = "" }
+) {
+  console.group("store/catalog/actions/fetchFlights");
   commit("SET_LOADER", true);
+
+  var nextToken = paginationToken || null;
+
   try {
-    // listFlights query filter
-    const flightFilter = {
-      filter: {
-        departureDate: {
-          beginsWith: date
-        },
-        departureAirportCode: {
-          eq: departure
-        },
-        arrivalAirportCode: {
-          eq: arrival
+    const flightOpts = {
+      departureAirportCode: departure,
+      arrivalAirportCodeDepartureDate: {
+        beginsWith: {
+          arrivalAirportCode: arrival,
+          departureDate: date
         }
-      }
+      },
+      filter: { seatCapacity: { gt: 0 } },
+      limit: 5,
+      nextToken: nextToken
     };
 
+    console.log("Fetching flight data");
+    console.log(flightOpts);
     const {
       // @ts-ignore
       data: {
-        listFlights: { items: flightData }
+        getFlightBySchedule: { items: flightData, nextToken: paginationToken }
       }
-    } = await API.graphql(graphqlOperation(listFlights, flightFilter));
+    } = await API.graphql(graphqlOperation(getFlightBySchedule, flightOpts));
 
     // data mutations happen within a Flight class
     // here we convert graphQL results into an array of Flights
     // before comitting to Vuex State Management
     const flights = flightData.map(flight => new Flight(flight));
 
+    console.log(flights);
     commit("SET_FLIGHTS", flights);
+    commit("SET_FLIGHT_PAGINATION", paginationToken);
     commit("SET_LOADER", false);
+    console.groupEnd();
   } catch (error) {
-    console.error(error);
     commit("SET_LOADER", false);
-    throw error;
+    console.error(error);
+    throw new Error(error);
   }
 }
 
@@ -96,6 +107,7 @@ export async function fetchFlights({ commit }, { date, departure, arrival }) {
  */
 export async function fetchByFlightId({ commit }, { flightId }) {
   try {
+    console.group("store/catalog/actions/fetchByFlightId");
     commit("SET_LOADER", true);
     const {
       // @ts-ignore
@@ -103,7 +115,9 @@ export async function fetchByFlightId({ commit }, { flightId }) {
     } = await API.graphql(graphqlOperation(getFlight, { id: flightId }));
 
     const flight = new Flight(flightData);
+    console.log(flight);
     commit("SET_LOADER", false);
+    console.groupEnd();
     return flight;
   } catch (error) {
     console.error(error);
