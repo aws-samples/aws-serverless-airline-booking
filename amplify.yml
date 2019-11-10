@@ -27,9 +27,6 @@ backend:
         ##
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
         - make deploy
-    postBuild:
-      commands:
-        - make outputs
 frontend:
   phases:
     preBuild:
@@ -37,7 +34,7 @@ frontend:
         ##
         # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
         ##
-        - make outputs.vue
+        - make outputs
         - cd src/frontend
         - npm install
     build:
