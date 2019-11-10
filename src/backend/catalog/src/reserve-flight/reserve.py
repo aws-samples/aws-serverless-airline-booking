@@ -25,8 +25,8 @@ def reserve_seat_on_flight(flight_id):
     try:
         table.update_item(
             Key={"id": flight_id},
-            ConditionExpression="id = :idVal AND seatAllocation > zero",
-            UpdateExpression="SET seatAllocation = seatAllocation - :dec",
+            ConditionExpression="id = :idVal AND seatCapacity > zero",
+            UpdateExpression="SET seatCapacity = seatCapacity - :dec",
             ExpressionAttributeValues={
                 ":idVal": flight_id,
                 ":dec": 1,

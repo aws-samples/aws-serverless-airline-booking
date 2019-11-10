@@ -23,7 +23,7 @@ import FlightCard from "./FlightCard";
 // @ts-ignore
 import BookingCard from "./BookingCard";
 
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 export default {
   /**
@@ -52,10 +52,12 @@ export default {
     ...mapState({
       user: state => state.profile.user
     }),
+    ...mapGetters({
+      firstName: "profile/firstName",
+      lastName: "profile/lastName"
+    }),
     fullName() {
-      return `${this.user.attributes.given_name} ${
-        this.user.attributes.family_name
-      }`;
+      return `${this.firstName} ${this.lastName}`;
     }
   },
   props: {

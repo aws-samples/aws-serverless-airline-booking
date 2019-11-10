@@ -311,11 +311,13 @@ amplify/\#current-cloud-backend
 amplify/.config/local-*
 amplify/backend/amplify-meta.json
 amplify/backend/awscloudformation
+amplify/backend/api/*/resolvers
 build/
 dist/
 node_modules/
 aws-exports.js
 awsconfiguration.json
+schema.json
 
 # Custom
 TEMPORARY/
@@ -324,9 +326,9 @@ Dockerfile
 packaged.yaml
 *.aws-sam/
 artifacts/
-src/frontend/.env
 datasources.json
 test_report/
+src/frontend/graphql
 
 # Cypress videos and screenshots
 src/e2e-tests/ui/**/cypress/videos
@@ -630,3 +632,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/node,linux,macos,python,windows,visualstudiocode
+amplify/mock-data

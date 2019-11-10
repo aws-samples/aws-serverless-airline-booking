@@ -7,8 +7,10 @@ Globals:
   Function:
     Timeout: 5
     Tracing: Active
+    MemorySize: 512
   Api:
     TracingEnabled: true
+    EndpointConfiguration: REGIONAL
 
 Parameters:
   Stage:
@@ -114,7 +116,7 @@ Resources:
       #   AllowHeaders:
       #     "'Content-Type,Authorization,X-Amz-Date'"
       #   MaxAge: "'600'"
-      #TracingEnabled: True
+      TracingEnabled: True
       # AccessLogSetting:
       #   - DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group/custom_log_group_name"
       #     Format: "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId"
