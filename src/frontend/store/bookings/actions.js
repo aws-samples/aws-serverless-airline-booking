@@ -43,7 +43,7 @@ export async function fetchBooking(
     message: "Loading bookings..."
   });
 
-  var nextToken = paginationToken;
+  var nextToken = paginationToken || null;
 
   try {
     const customerId = rootGetters["profile/userAttributes"].sub;

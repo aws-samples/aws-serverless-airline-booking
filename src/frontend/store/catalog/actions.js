@@ -38,7 +38,7 @@ export async function fetchFlights(
 ) {
   commit("SET_LOADER", true);
 
-  var nextToken = paginationToken;
+  var nextToken = paginationToken || null;
 
   try {
     const flightOpts = {
