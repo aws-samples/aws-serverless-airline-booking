@@ -1,5 +1,5 @@
 import Booking from "../../shared/models/BookingClass";
-import Flight from "../../shared/models/FlightClass";
+import Flight from "../../shared/models/FlightClass"; // eslint-disable-line
 // @ts-ignore
 import { Loading } from "quasar";
 import axios from "axios";
@@ -39,6 +39,7 @@ export async function fetchBooking(
   { commit, rootGetters },
   paginationToken = ""
 ) {
+  console.group("store/bookings/actions/fetchBooking");
   Loading.show({
     message: "Loading bookings..."
   });
@@ -55,6 +56,9 @@ export async function fetchBooking(
       limit: 3,
       nextToken: nextToken
     };
+
+    console.log("Fetching booking data");
+    console.log(bookingFilter);
     const {
       // @ts-ignore
       data: {
@@ -70,6 +74,7 @@ export async function fetchBooking(
     commit("SET_BOOKING_PAGINATION", paginationToken);
 
     Loading.hide();
+    console.groupEnd();
   } catch (err) {
     Loading.hide();
     console.error(err);
@@ -115,10 +120,15 @@ export async function createBooking(
   { rootState },
   { paymentToken, outboundFlight }
 ) {
+  console.group("store/bookings/actions/createBooking");
   try {
     let paymentEndpoint =
       process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set";
     const customerEmail = rootState.profile.user.attributes.email;
+
+    console.info(
+      `Processing payment before proceeding to booking for flight ${outboundFlight}`
+    );
     let chargeToken = await processPayment({
       endpoint: paymentEndpoint,
       paymentToken,
@@ -130,11 +140,16 @@ export async function createBooking(
       message: "Payment authorized successfully..."
     });
 
+    console.info(
+      `Creating booking with token ${chargeToken} for flight ${outboundFlight}`
+    );
     let bookingProcessId = await processBooking({
       chargeToken,
       outboundFlight
     });
 
+    console.log(`Booking Id: ${bookingProcessId}`);
+    console.groupEnd();
     return bookingProcessId;
   } catch (err) {
     throw err;
@@ -167,6 +182,7 @@ async function processPayment({
   outboundFlight,
   customerEmail
 }) {
+  console.group("store/bookings/actions/processPayment");
   Loading.show({
     message: "Charging a pre-authorization..."
   });
@@ -181,6 +197,8 @@ async function processPayment({
     email: customerEmail
   };
 
+  console.log("Charge data to be processed");
+  console.log(chargeData);
   try {
     const data = await axios.post(endpoint, chargeData);
     const {
@@ -189,6 +207,7 @@ async function processPayment({
       }
     } = data;
 
+    console.groupEnd();
     return chargeId;
   } catch (err) {
     console.error(err);
@@ -215,6 +234,7 @@ async function processPayment({
  *   );
  */
 async function processBooking({ chargeToken, outboundFlight }) {
+  console.group("store/bookings/actions/processBooking");
   const processBookingInput = {
     input: {
       paymentToken: chargeToken,
@@ -227,6 +247,8 @@ async function processBooking({ chargeToken, outboundFlight }) {
       message: "Creating a new booking..."
     });
 
+    console.log("Booking data to be processed");
+    console.log(processBookingInput);
     const {
       // @ts-ignore
       data: {

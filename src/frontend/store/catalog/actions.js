@@ -36,6 +36,7 @@ export async function fetchFlights(
   { commit },
   { date, departure, arrival, paginationToken = "" }
 ) {
+  console.group("store/catalog/actions/fetchFlights");
   commit("SET_LOADER", true);
 
   var nextToken = paginationToken || null;
@@ -54,6 +55,8 @@ export async function fetchFlights(
       nextToken: nextToken
     };
 
+    console.log("Fetching flight data");
+    console.log(flightOpts);
     const {
       // @ts-ignore
       data: {
@@ -66,9 +69,11 @@ export async function fetchFlights(
     // before comitting to Vuex State Management
     const flights = flightData.map(flight => new Flight(flight));
 
+    console.log(flights);
     commit("SET_FLIGHTS", flights);
     commit("SET_FLIGHT_PAGINATION", paginationToken);
     commit("SET_LOADER", false);
+    console.groupEnd();
   } catch (error) {
     commit("SET_LOADER", false);
     console.error(error);
@@ -102,6 +107,7 @@ export async function fetchFlights(
  */
 export async function fetchByFlightId({ commit }, { flightId }) {
   try {
+    console.group("store/catalog/actions/fetchByFlightId");
     commit("SET_LOADER", true);
     const {
       // @ts-ignore
@@ -109,7 +115,9 @@ export async function fetchByFlightId({ commit }, { flightId }) {
     } = await API.graphql(graphqlOperation(getFlight, { id: flightId }));
 
     const flight = new Flight(flightData);
+    console.log(flight);
     commit("SET_LOADER", false);
+    console.groupEnd();
     return flight;
   } catch (error) {
     console.error(error);
