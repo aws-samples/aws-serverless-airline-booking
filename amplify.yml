@@ -64,6 +64,8 @@ customHeaders:
       # CSP generated using Laboratory: https://github.com/april/laboratory
       # Caveats
       ## Stripe Elements adds inline JS and iFrame (unsafe-eval, frame-src)
-      ## REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
+      ## Allows any endpoint hosted on AWS - for prod, use custom domains
+      ### REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
+      ### connect-src doesn't parse cognito-idp.*.amazonaws.com used by Amplify Auth - for prod, use region(s) endpoint
       - key: "Content-Security-Policy"
-        value: "'default-src 'none'; connect-src https://*.amazonaws.com/prod/charge https://*.amazonaws.com/graphql; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/'"
+        value: "'default-src 'none'; connect-src https://*.amazonaws.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' https://fonts.googleapis.com/css?family=Raleway 'unsafe-inline' https://fonts.googleapis.com'"
