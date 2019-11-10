@@ -4,9 +4,11 @@
 # except users member of Admin group
 type Flight 
     @model(subscriptions: null)
-    @auth(rules:[
-        {allow: private, operations: [read]}
-    ])
+    # TODO: Commenting this out until we have clear instructions on adding an user as `Admin`
+    ## OR alternatively creating a flight as part of CI while ETL isn't done yet
+    # @auth(rules:[
+    #     {allow: private, operations: [read]}
+    # ])
     @key(name: "ByDepartureSchedule", 
         fields: ["departureAirportCode", "arrivalAirportCode", "departureDate"],
         queryField: "getFlightBySchedule")
