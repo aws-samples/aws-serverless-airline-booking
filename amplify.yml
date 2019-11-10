@@ -50,3 +50,21 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
+customHeaders:
+        - pattern: '**/*'
+          headers: # https://infosec.mozilla.org/guidelines/web_security
+                - key: 'Strict-Transport-Security'
+                        value: 'max-age=31536000; includeSubDomains'
+                - key: 'X-Content-Type-Options'
+                        value: 'nosniff'
+                - key: 'X-XSS-Protection'
+                        value: '1; mode=block'
+                - key: 'X-Frame-Options' 
+                        value: 'DENY'
+                # CSP generated using Laboratory: https://github.com/april/laboratory
+                # Caveats
+                ## Stripe Elements adds inline JS and iFrame (unsafe-eval, frame-src)
+                ## REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
+                - key: 'Content-Security-Policy'
+                        value: 'default-src 'none'; connect-src https://*.amazonaws.com/prod/charge https://*.amazonaws.com/graphql; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com/'
+
