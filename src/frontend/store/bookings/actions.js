@@ -116,7 +116,8 @@ export async function createBooking(
   { paymentToken, outboundFlight }
 ) {
   try {
-    let paymentEndpoint = process.env.VUE_APP_PaymentChargeUrl;
+    let paymentEndpoint =
+      process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set";
     const customerEmail = rootState.profile.user.attributes.email;
     let chargeToken = await processPayment({
       endpoint: paymentEndpoint,
