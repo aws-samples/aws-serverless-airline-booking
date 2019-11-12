@@ -7,16 +7,16 @@ COPY setup-users.py load-flight-data.py cleanup.py requirements.txt user.csv ./
 
 RUN pip3 install -r requirements.txt
 
-ENV COGNITO_CLIENT_ID q45qk8hjt0gbi0fm2ep29invc
+ENV COGNITO_CLIENT_ID 6362mvgogvdlgnjmji12kuk1vk
 ENV COGNITO_URL https://cognito-idp.eu-west-1.amazonaws.com/ 
 ENV USER_CSV user.csv
-ENV GRAPHQL_URL https://kvifwfsonrbovkwqtkadkfrlfe.appsync-api.eu-west-1.amazonaws.com/graphql
-ENV API_URL https://jgqf4edwli.execute-api.eu-west-1.amazonaws.com/prod/charge
+ENV GRAPHQL_URL https://il4s7djyzncthliv6w5xdls6zy.appsync-api.eu-west-1.amazonaws.com/graphql
+ENV API_URL https://evb1pcrqug.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV PATH ./
 ENV AWS_REGION eu-west-1
-ENV USER_POOL_ID eu-west-1_PIv41OQcx
-ENV APPSYNC_API_KEY wmlz4yivuzfo5jjhiqqbzjerxu
+ENV USER_POOL_ID eu-west-1_cq0R2Ar0A
+ENV APPSYNC_API_KEY kypu7icybvb5jcksptxxmsptj4
 ENV S3_BUCKET pputhran-load-test
 
 ENTRYPOINT [ "/usr/local/bin/python3" ]
