@@ -1,8 +1,8 @@
 {
-  "name": "perf_test_stack",
+  "name": "perftest-stack-airline",
   "version": "0.1.0",
   "bin": {
-    "perf_test_stack": "bin/perf_test_stack.js"
+    "perftest-stack-airline": "bin/perftest-stack-airline.js"
   },
   "scripts": {
     "build": "tsc",
@@ -21,11 +21,6 @@
     "typescript": "~3.7.2"
   },
   "dependencies": {
-    "@aws-cdk/aws-ec2": "^1.16.2",
-    "@aws-cdk/aws-ecr": "^1.16.2",
-    "@aws-cdk/aws-ecs": "^1.16.2",
-    "@aws-cdk/aws-stepfunctions": "^1.16.2",
-    "@aws-cdk/aws-stepfunctions-tasks": "^1.16.2",
     "@aws-cdk/core": "^1.16.2"
   }
 }

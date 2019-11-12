@@ -118,7 +118,7 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 
 deploy.perftest: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
-	cd src/perf-tests/PerfTestStack && \
+	cd src/perf-tests/perftest-stack-airline && \
 		npm install && \
 		npm run build && \
 		cdk list && \
