@@ -12,3 +12,4 @@ docker run -it gatling:local -s setupUsers
     docker push <ECR_URI>
 ```
 
+1. Get Cognito arn and pass that as input to CDK.

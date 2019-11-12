@@ -119,7 +119,7 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 deploy.perftest: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
 	cd src/perf-tests/PerfTestStack && \
-		npm install && \
+		npm update && \
 		npm run build && \
 		cdk list && \
 		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never

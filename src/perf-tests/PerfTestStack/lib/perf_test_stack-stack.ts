@@ -2,7 +2,7 @@ import cdk = require('@aws-cdk/core');
 import ec2 = require('@aws-cdk/aws-ec2')
 import ecs = require('@aws-cdk/aws-ecs')
 import ecr = require('@aws-cdk/aws-ecr')
-import { Role, ServicePrincipal, ManagedPolicy, PolicyStatement } from '@aws-cdk/aws-iam';
+import { Role, ServicePrincipal, PolicyStatement } from '@aws-cdk/aws-iam';
 import sfn = require('@aws-cdk/aws-stepfunctions');
 import tasks = require('@aws-cdk/aws-stepfunctions-tasks');
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
@@ -55,7 +55,7 @@ export class PerfTestStack extends cdk.Stack {
 
     role.addToPolicy(new PolicyStatement({
       resources : [
-        `arn:aws:cognito-idp:eu-west-1:963887453151:userpool/eu-west-1_PIv41OQcx` // need to find out a way to get this from ENV
+        `arn:aws:cognito-idp:eu-west-1:963887453151:userpool/eu-west-1_OFmeMXE8D` // need to find out a way to get this from ENV
       ],
       actions: [
         'cognito-idp:AdminInitiateAuth',
@@ -138,14 +138,14 @@ export class PerfTestStack extends cdk.Stack {
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands'),
-          environment: [
-            {
-              name: 'setup-users',
-              value: Context.taskToken
-            }
-          ]
+          // environment: [
+          //   {
+          //     name: 'setup-users',
+          //     value: Context.taskToken
+          //   }
+          // ]
         }],
-        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+        integrationPattern: ServiceIntegrationPattern.SYNC
       })
     })
 
@@ -157,14 +157,14 @@ export class PerfTestStack extends cdk.Stack {
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands'),
-          environment: [
-            {
-              name: 'load-flights',
-              value: Context.taskToken
-            }
-          ]
+          // environment: [
+          //   {
+          //     name: 'load-flights',
+          //     value: Context.taskToken
+          //   }
+          // ]
         }],
-        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+        integrationPattern: ServiceIntegrationPattern.SYNC
       })
     })
 
@@ -176,14 +176,14 @@ export class PerfTestStack extends cdk.Stack {
         containerOverrides: [{
           containerName: gatlingAppContainer.containerName,
           command: Data.listAt('$.commands'),
-          environment: [
-            {
-              name: 'run-gatling',
-              value: Context.taskToken
-            }
-          ]
+          // environment: [
+          //   {
+          //     name: 'run-gatling',
+          //     value: Context.taskToken
+          //   }
+          // ]
         }],
-        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+        integrationPattern: ServiceIntegrationPattern.SYNC
       })
     })
     
@@ -195,7 +195,8 @@ export class PerfTestStack extends cdk.Stack {
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands')
-        }]
+        }],
+        integrationPattern: ServiceIntegrationPattern.SYNC
       })
     })
 
