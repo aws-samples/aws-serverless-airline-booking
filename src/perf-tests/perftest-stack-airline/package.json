@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "STACK_NAME=airline-stack jest",
+    "test": "PERF_TEST_STACK_NAME=airline-stack jest",
     "cdk": "cdk"
   },
   "devDependencies": {
