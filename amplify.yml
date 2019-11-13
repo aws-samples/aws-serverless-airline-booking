@@ -22,7 +22,7 @@ backend:
         ##
         # List all data sources and capture DynamoDB table created from @model
         ##
-        - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${USER_POOL_ID} --query 'UserPool.Arn')
+        - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${USER_POOL_ID} --query 'UserPool.Arn' --output text)
 
         - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
         - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)

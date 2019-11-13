@@ -11,7 +11,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     const pool = this.node.tryGetContext('id')
 
     new cdk.CfnOutput(this, 'cognito-arn', {
-      value: pool.toString()
+      value: pool
     });
 
   }
