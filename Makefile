@@ -3,7 +3,7 @@
 # Bootstrapping variables
 ##########################
 
-AWS_BRANCH ?= "dev"
+AWS_BRANCH ?= "develop"
 FLIGHT_TABLE_NAME ?= "UNDEFINED"
 STACK_NAME ?= "UNDEFINED"
 DEPLOYMENT_BUCKET_NAME ?= "UNDEFINED"
@@ -23,7 +23,9 @@ outputs: ##=> Fetch SAM stack outputs
 
 outputs.payment: ##=> Converts Payments output stack to Vue env variables
 	 aws cloudformation describe-stacks --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --query 'Stacks[0].Outputs[?OutputKey==`PaymentChargeUrl`].OutputValue' | jq -r '.[] | "VUE_APP_PaymentChargeUrl" + "=\"" + (.|tostring) + "\""' >> src/frontend/.env
+	 @echo "VUE_APP_StripePublicKey=\"$$STRIPE_PUBLIC_KEY\"" >> src/frontend/.env
 	 cat src/frontend/.env
+	 
 
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
@@ -115,7 +117,6 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 
 _install_os_packages:
 	$(info [*] Installing jq...)
-	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to the latest version...)
 	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
 
