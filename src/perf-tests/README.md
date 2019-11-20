@@ -56,8 +56,7 @@ Execute the `start-load-test` Step function using the following input
 ```
 {
   "commands": [
-    "--simulation",
-    "setupUsers"
+    "./setup-users.py"
   ]
 }
 ```

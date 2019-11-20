@@ -50,7 +50,8 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         's3:GetObjectAcl',
         's3:GetObject',
         's3:ListBucket',
-        's3:PutObjectAcl'
+        's3:PutObjectAcl',
+        's3:DeleteObject'
       ]
     }))
 
@@ -234,7 +235,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       definition: stepfuncDefinition
     })
 
-    new cdk.CfnOutput(this, '-s3-bucket', {
+    new cdk.CfnOutput(this, 's3-bucket', {
       value: bucket.bucketName
     })
 
