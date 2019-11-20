@@ -8,6 +8,11 @@ import tasks = require('@aws-cdk/aws-stepfunctions-tasks');
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { Data, ServiceIntegrationPattern, Context } from '@aws-cdk/aws-stepfunctions';
 import s3 = require('@aws-cdk/aws-s3');
+import rule = require('@aws-cdk/aws-events')
+import { Rule } from '@aws-cdk/aws-events';
+import lambda = require('@aws-cdk/aws-lambda')
+import { Arn } from '@aws-cdk/core';
+
 
 const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN;
 const STACK_NAME = process.env.STACK_NAME;
@@ -37,11 +42,11 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     })
 
     const bucket = new s3.Bucket(this, "s3bucket", {
-      bucketName: S3_BUCKET_NAME       
+      bucketName: S3_BUCKET_NAME
     })
 
     role.addToPolicy(new PolicyStatement({
-      resources : [
+      resources: [
         `${bucket.bucketArn}`,
         `${bucket.bucketArn}/*`
       ],
@@ -56,7 +61,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     }))
 
     role.addToPolicy(new PolicyStatement({
-      resources : [`${COGNITO_USER_POOL_ARN}`],
+      resources: [`${COGNITO_USER_POOL_ARN}`],
       actions: [
         'cognito-idp:AdminInitiateAuth',
         'cognito-idp:AdminCreateUser',
@@ -204,7 +209,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
-    
+
     const cleanUp = new sfn.Task(this, "Clean Up", {
       task: new tasks.RunEcsFargateTask({
         cluster,
@@ -225,15 +230,39 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     })
 
     const stepfuncDefinition = setupUsers
-                                  .next(loadFlights)
-                                  .next(runGatling)
-                                  .next(consolidateReport)
-                                  .next(cleanUp)
+      .next(loadFlights)
+      .next(runGatling)
+      .next(consolidateReport)
+      .next(cleanUp)
 
     new sfn.StateMachine(this, STATE_MACHINE_NAME, {
       stateMachineName: STATE_MACHINE_NAME,
       definition: stepfuncDefinition
     })
+
+    const lambdaFunc = new lambda.Function(this, "ecstasklambda", {
+      runtime: lambda.Runtime.NODEJS_10_X,
+      handler: "index.handler",
+      code: new lambda.AssetCode("lambda")
+    })
+
+    const cwRule = new Rule(this, "cw-rule", {
+      description: "Rule that looks at ECS Task change state and triggers Lambda function",
+      enabled: true,
+      ruleName: "ECS-task-change-cdk",
+      targets: [
+      ]
+    })
+
+    cwRule.addEventPattern({
+      source: ['aws.ecs'],
+      detailType: ["ECS Task State Change"],
+      detail: {
+        clusterArn: [cluster.clusterArn]
+      }
+    })
+
+
 
     new cdk.CfnOutput(this, 's3-bucket', {
       value: bucket.bucketName
