@@ -7,7 +7,6 @@ exports.handler = async function (event, context) {
     console.log(JSON.stringify(event));
 
     const detail = event.detail;
-
     const token = detail.overrides.containerOverrides[0].environment[0].value;
     const taskType = detail.overrides.containerOverrides[0].environment[0].name;
 
