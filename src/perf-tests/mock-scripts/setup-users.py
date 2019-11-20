@@ -4,8 +4,8 @@ import os
 import json
 
 AWS_REGION = os.environ['AWS_REGION']
-TOKEN_CSV = os.environ['PATH'] + os.environ['TOKEN_CSV']
-USER_CSV = os.environ['PATH'] + os.environ['USER_CSV']
+TOKEN_CSV = os.environ['FOLDERPATH'] + os.environ['TOKEN_CSV']
+USER_CSV = os.environ['FOLDERPATH'] + os.environ['USER_CSV']
 S3_BUCKET = os.environ['S3_BUCKET']
 USER_POOL_ID = os.environ['USER_POOL_ID']
 CLIENT_ID = os.environ['COGNITO_CLIENT_ID']

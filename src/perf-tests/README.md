@@ -1,15 +1,65 @@
-Things to do:
-- [ ] Have all the parameters as Environment variables
-- [ ] Fake usernames for load testing
-- [ ] Allow load test to run from one's laptop (Docker)
+# Tasks:
+- [x] Fake usernames for load testing
+- [x] Allow load test to run from one's laptop (Docker)
+- [ ] Automate parameters as Environment variables
+- 
 
-docker run -it gatling:local -s setupUsers
+
+# Steps
+
+1. ecr login
+```
+aws ecr get-login --no-include-email --region eu-west-1
+```
+
+2. docker login
+```
+docker login -u AWS -p <> https://<_account_id_>.dkr.ecr.eu-west-1.amazonaws.com
+```
+
+3. docker builds
 
 ```
-    aws ecr get-login --no-include-email --region <region> --profile <profile>
-    docker build -t gatling:latest .
-    docker tag gatling:latest <ECR_URI>
-    docker push <ECR_URI>
+cd gatling-scripts
+
+docker build -t gatling:latest . 
+
+docker tag gatling:latest <replace_with_YOUR_gatling_ECR_repo_URI>:latest
+
+docker push <replace_with_YOUR_gatling_ECR_repo_URI>:latest
 ```
 
-1. Get Cognito arn and pass that as input to CDK.
+repeat this for the mock-scripts
+
+```
+cd mock-scripts
+
+docker build -t mockdata:latest . 
+
+docker tag mockdata:latest <replace_with_YOUR_mockdata_ECR_repo_URI>:latest
+
+docker push <replace_with_YOUR_mockdata_ECR_repo_URI>:latest
+```
+
+## Run load test locally using docker:
+
+1. docker run -it -v ~/.aws:/root/.aws mockdata:latest setup-users.py 
+2. docker run -it -v ~/.aws:/root/.aws mockdata:latest load-flight-data.py
+3. docker run -it -v ~/.aws:/root/.aws gatling:latest -s Airline -nr -rf /opt/gatling/results/airline
+4. docker run -it -v ~/.aws:/root/.aws gatling:latest -ro airline
+5. docker run -it -v ~/.aws:/root/.aws mockdata:latest cleanup.py
+
+## Run load test on AWS:
+
+Execute the `start-load-test` Step function using the following input
+
+```
+{
+  "commands": [
+    "--simulation",
+    "setupUsers"
+  ]
+}
+```
+
+This will setup users, load mock flight data, start gatling, consolidate the report to S3 bucket

@@ -6,8 +6,8 @@ import boto3
 from datetime import datetime
 from datetime import timedelta  
 
-TOKEN_CSV = os.environ['PATH'] + os.environ['TOKEN_CSV']
-USER_CSV = os.environ['PATH'] + os.environ['USER_CSV']
+TOKEN_CSV = os.environ['FOLDERPATH'] + os.environ['TOKEN_CSV']
+USER_CSV = os.environ['FOLDERPATH'] + os.environ['USER_CSV']
 APPSYNC_API_KEY = os.environ['APPSYNC_API_KEY']
 APPSYNC_API_ENDPOINT_URL = os.environ['GRAPHQL_URL']
 S3_BUCKET = os.environ['S3_BUCKET']

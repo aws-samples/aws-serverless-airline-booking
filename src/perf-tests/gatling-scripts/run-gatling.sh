@@ -8,3 +8,4 @@ JAVA_OPTS="-Dsun.net.inetaddr.ttl=10" /opt/gatling/bin/gatling.sh -bf /opt/gatli
 
 # Sync report and logs to S3
 aws s3 sync /opt/gatling/results/ s3://${S3_BUCKET}/results
+

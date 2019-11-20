@@ -136,14 +136,14 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands'),
-          // environment: [
-          //   {
-          //     name: 'setup-users',
-          //     value: Context.taskToken
-          //   }
-          // ]
+          environment: [
+            {
+              name: 'setup-users',
+              value: Context.taskToken
+            }
+          ]
         }],
-        integrationPattern: ServiceIntegrationPattern.SYNC
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
 
@@ -155,14 +155,14 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
           command: Data.listAt('$.commands'),
-          // environment: [
-          //   {
-          //     name: 'load-flights',
-          //     value: Context.taskToken
-          //   }
-          // ]
+          environment: [
+            {
+              name: 'load-flights',
+              value: Context.taskToken
+            }
+          ]
         }],
-        integrationPattern: ServiceIntegrationPattern.SYNC
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
 
@@ -174,14 +174,33 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         containerOverrides: [{
           containerName: gatlingAppContainer.containerName,
           command: Data.listAt('$.commands'),
-          // environment: [
-          //   {
-          //     name: 'run-gatling',
-          //     value: Context.taskToken
-          //   }
-          // ]
+          environment: [
+            {
+              name: 'run-gatling',
+              value: Context.taskToken
+            }
+          ]
         }],
-        integrationPattern: ServiceIntegrationPattern.SYNC
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
+      })
+    })
+
+    const consolidateReport = new sfn.Task(this, "Consolidate Report", {
+      task: new tasks.RunEcsFargateTask({
+        cluster,
+        taskDefinition: gatlingTaskDefinition,
+        assignPublicIp: true,
+        containerOverrides: [{
+          containerName: gatlingAppContainer.containerName,
+          command: Data.listAt('$.commands'),
+          environment: [
+            {
+              name: 'consolidate-report',
+              value: Context.taskToken
+            }
+          ]
+        }],
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
     
@@ -192,20 +211,31 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         assignPublicIp: true,
         containerOverrides: [{
           containerName: mockDataAppContainer.containerName,
-          command: Data.listAt('$.commands')
+          command: Data.listAt('$.commands'),
+          environment: [
+            {
+              name: 'clean-up',
+              value: Context.taskToken
+            }
+          ]
         }],
-        integrationPattern: ServiceIntegrationPattern.SYNC
+        integrationPattern: ServiceIntegrationPattern.WAIT_FOR_TASK_TOKEN
       })
     })
 
     const stepfuncDefinition = setupUsers
                                   .next(loadFlights)
                                   .next(runGatling)
+                                  .next(consolidateReport)
                                   .next(cleanUp)
 
     new sfn.StateMachine(this, STATE_MACHINE_NAME, {
       stateMachineName: STATE_MACHINE_NAME,
       definition: stepfuncDefinition
+    })
+
+    new cdk.CfnOutput(this, '-s3-bucket', {
+      value: bucket.bucketName
     })
 
   }
