@@ -35,7 +35,7 @@ type Flight
 # and fine-grained auth to only allow book owners to see their own bookings
 # and any authenticated user member of Admin group (e.g. could be travel agency, etc.)
 type Booking 
-    @model(subscriptions: null) 
+    @model 
     @auth(rules: [
       {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
       {allow: groups, groups: ["Admin"]}
