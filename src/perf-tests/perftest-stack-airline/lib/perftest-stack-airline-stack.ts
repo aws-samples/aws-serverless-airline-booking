@@ -262,7 +262,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       detailType: ["ECS Task State Change"],
       detail: {
         clusterArn: [cluster.clusterArn],
-        lastStatus: "STOPPED"
+        lastStatus: ["STOPPED"]
       }
     })
 
