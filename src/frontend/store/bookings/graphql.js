@@ -52,3 +52,34 @@ export const getBookingByStatus = `query GetBookingByStatus(
   }
 }
 `;
+
+export const onUpdateBooking = `subscription OnUpdateBooking($customer: String) {
+  onUpdateBooking(customer: $customer) {
+    id
+    status
+    outboundFlight {
+      id
+      departureDate
+      departureAirportCode
+      departureAirportName
+      departureCity
+      departureLocale
+      arrivalDate
+      arrivalAirportCode
+      arrivalAirportName
+      arrivalCity
+      arrivalLocale
+      ticketPrice
+      ticketCurrency
+      flightNumber
+      seatAllocation
+      seatCapacity
+    }
+    paymentToken
+    checkedIn
+    customer
+    createdAt
+    bookingReference
+  }
+}
+`;

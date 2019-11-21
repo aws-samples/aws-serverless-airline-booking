@@ -7,8 +7,11 @@ import axios from "axios";
 import { API, graphqlOperation } from "aws-amplify";
 import {
   processBooking as processBookingMutation,
-  getBookingByStatus
+  getBookingByStatus,
+  onUpdateBooking
 } from "./graphql";
+
+
 
 /**
  *
@@ -50,10 +53,7 @@ export async function fetchBooking(
     const customerId = rootGetters["profile/userAttributes"].sub;
     const bookingFilter = {
       customer: customerId,
-      status: {
-        eq: "CONFIRMED"
-      },
-      limit: 3,
+      limit: 10,
       nextToken: nextToken
     };
 
@@ -125,6 +125,7 @@ export async function createBooking(
     let paymentEndpoint =
       process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set";
     const customerEmail = rootState.profile.user.attributes.email;
+    const customerId = rootState.profile.user.attributes.sub;
 
     console.info(
       `Processing payment before proceeding to booking for flight ${outboundFlight}`
@@ -147,6 +148,19 @@ export async function createBooking(
       chargeToken,
       outboundFlight
     });
+
+    try {
+      API.graphql(graphqlOperation(onUpdateBooking, customerId))
+      .subscribe({
+        next: (eventData) => {
+          console.log(`eventData: ${JSON.stringify(eventData)}`);
+        }
+      })
+    }
+    catch (error) {
+      console.error(`Failed subscription ${error}`);
+    }
+
 
     console.log(`Booking Id: ${bookingProcessId}`);
     console.groupEnd();

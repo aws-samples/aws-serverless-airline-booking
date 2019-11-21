@@ -10,7 +10,7 @@
     "docs": "esdoc"
   },
   "dependencies": {
-    "aws-amplify": "^1.2.3",
+    "aws-amplify": "^2.1.0",
     "aws-amplify-vue": "^0.2.17",
     "axios": "^0.18.1",
     "esdoc": "^1.1.0",

@@ -11,6 +11,7 @@ export default class Booking {
    * @param {string} Booking.createdAt - Effective booking was created
    * @param {string} Booking.bookingReference - Booking reference
    * @param {Flight} Booking.outboundFlight - Outbound flight
+   * @param {string} Booking.status - Booking status
    *
    * @todo Move to TS and create a Flight Interface
    * @example
@@ -38,11 +39,12 @@ export default class Booking {
    *    bookingReference: "Flkuc6"
    * });
    */
-  constructor({ id, createdAt, outboundFlight, bookingReference }) {
+  constructor({ id, createdAt, outboundFlight, bookingReference, status }) {
     this.id = id;
     this.createdAt = new Date(createdAt);
     this.outboundFlight = new Flight(outboundFlight);
     this.bookingReference = bookingReference;
+    this.status = status;
   }
   /**
    * Get the effective booking date

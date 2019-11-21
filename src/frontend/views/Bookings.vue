@@ -18,6 +18,7 @@
           >
             <h5 slot="subtitle" class="q-timeline-subtitle">
               <span data-test="booking-city-date">
+                {{ booking.status }} &mdash;
                 {{ booking.outboundFlight.departureCity }} &mdash;
                 {{ booking.bookingDate }}
               </span>
