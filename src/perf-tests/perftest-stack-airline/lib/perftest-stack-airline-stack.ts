@@ -12,6 +12,8 @@ import rule = require('@aws-cdk/aws-events')
 import { Rule } from '@aws-cdk/aws-events';
 import lambda = require('@aws-cdk/aws-lambda')
 import { Arn } from '@aws-cdk/core';
+import fs = require('fs');
+import targets = require('@aws-cdk/aws-events-targets')
 
 
 const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN;
@@ -243,7 +245,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     const ecsLambda = new lambda.Function(this, "ecstasklambda", {
       runtime: lambda.Runtime.NODEJS_10_X,
       handler: "index.handler",
-      code: new lambda.AssetCode("lambda"),
+      code: new lambda.InlineCode(fs.readFileSync('./index.js', { encoding: 'utf-8' })),
       functionName: `${STACK_NAME}-ecs-task-change`
     })
 
@@ -251,7 +253,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       description: "Rule that looks at ECS Task change state and triggers Lambda function",
       enabled: true,
       ruleName: "ECS-task-change-cdk",
-      targets: [
+      targets: [ 
       ]
     })
 
@@ -259,18 +261,15 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       source: ['aws.ecs'],
       detailType: ["ECS Task State Change"],
       detail: {
-        clusterArn: [cluster.clusterArn]
+        clusterArn: [cluster.clusterArn],
+        lastStatus: "STOPPED"
       }
     })
 
-
+    cwRule.addTarget(new targets.LambdaFunction(ecsLambda))
 
     new cdk.CfnOutput(this, 's3-bucket', {
       value: bucket.bucketName
-    })
-
-    new cdk.CfnOutput(this, 'lambda-ecs-function', {
-      value: ecsLambda.functionName
     })
 
   }

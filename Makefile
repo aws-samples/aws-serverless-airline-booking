@@ -122,8 +122,8 @@ deploy.perftest: ##=> Deploying Gatling components for performance testing
 		npm install && \
 		npm run build && \
 		cdk list && \
-		cdk bootstrap --toolkit-stack-name $${PERF_TEST_STACK_NAME}
-
+		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
+		
 #############
 #  Helpers  #
 #############

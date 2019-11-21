@@ -25,6 +25,7 @@
     "@aws-cdk/aws-ecr": "^1.17.1",
     "@aws-cdk/aws-ecs": "^1.17.1",
     "@aws-cdk/aws-events": "^1.17.1",
+    "@aws-cdk/aws-events-targets": "^1.17.1",
     "@aws-cdk/aws-lambda": "^1.17.1",
     "@aws-cdk/aws-sam": "^1.17.1",
     "@aws-cdk/aws-stepfunctions": "^1.17.1",
