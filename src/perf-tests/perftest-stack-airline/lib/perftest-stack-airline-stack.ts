@@ -245,7 +245,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     const ecsLambda = new lambda.Function(this, "ecstasklambda", {
       runtime: lambda.Runtime.NODEJS_10_X,
       handler: "index.handler",
-      code: new lambda.InlineCode(fs.readFileSync('./index.js', { encoding: 'utf-8' })),
+      code: new lambda.AssetCode("lambda"),
       functionName: `${STACK_NAME}-ecs-task-change`
     })
 
