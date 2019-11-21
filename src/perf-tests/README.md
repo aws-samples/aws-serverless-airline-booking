@@ -2,10 +2,27 @@
 - [x] Fake usernames for load testing
 - [x] Allow load test to run from one's laptop (Docker)
 - [ ] Automate parameters as Environment variables
-- 
 
 
 # Steps
+
+Update the following parameters in the Dockerfile (both under `gatling-scripts` and `mock-scripts`)
+
+```
+ENV COGNITO_CLIENT_ID <client_id>
+ENV COGNITO_URL https://cognito-idp.<region>.amazonaws.com/ 
+ENV GRAPHQL_URL <appsync_url>
+ENV API_URL <payment_api_url>
+ENV TOKEN_CSV user-with-token.csv
+ENV AWS_REGION <region>
+ENV S3_BUCKET <load-test-bucketname>
+ENV USER_COUNT 2
+ENV DURING_TIME 60
+ENV USER_CSV user.csv
+ENV FOLDERPATH ./
+ENV USER_POOL_ID <cognito_pool_id>
+ENV APPSYNC_API_KEY <appsync_api_key>
+```
 
 1. ecr login
 ```

@@ -243,7 +243,8 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     const lambdaFunc = new lambda.Function(this, "ecstasklambda", {
       runtime: lambda.Runtime.NODEJS_10_X,
       handler: "index.handler",
-      code: new lambda.AssetCode("lambda")
+      code: new lambda.AssetCode("lambda"),
+      functionName: `${STACK_NAME}-ecs-task-change`
     })
 
     const cwRule = new Rule(this, "cw-rule", {
