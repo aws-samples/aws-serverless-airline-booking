@@ -149,19 +149,6 @@ export async function createBooking(
       outboundFlight
     });
 
-    try {
-      API.graphql(graphqlOperation(onUpdateBooking, customerId))
-      .subscribe({
-        next: (eventData) => {
-          console.log(`eventData: ${JSON.stringify(eventData)}`);
-        }
-      })
-    }
-    catch (error) {
-      console.error(`Failed subscription ${error}`);
-    }
-
-
     console.log(`Booking Id: ${bookingProcessId}`);
     console.groupEnd();
     return bookingProcessId;
