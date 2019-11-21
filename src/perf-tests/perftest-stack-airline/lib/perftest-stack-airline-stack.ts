@@ -242,35 +242,35 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       definition: stepfuncDefinition
     })
 
-    const ecsLambda = new lambda.Function(this, "ecstasklambda", {
-      runtime: lambda.Runtime.NODEJS_10_X,
-      handler: "index.handler",
-      code: new lambda.AssetCode("lambda"),
-      functionName: `${STACK_NAME}-ecs-task-change`
-    })
+    // const ecsLambda = new lambda.Function(this, "ecstasklambda", {
+    //   runtime: lambda.Runtime.NODEJS_10_X,
+    //   handler: "index.handler",
+    //   code: new lambda.AssetCode("lambda"),
+    //   functionName: `${STACK_NAME}-ecs-task-change`
+    // })
 
-    const cwRule = new Rule(this, "cw-rule", {
-      description: "Rule that looks at ECS Task change state and triggers Lambda function",
-      enabled: true,
-      ruleName: "ECS-task-change-cdk",
-      targets: [ 
-      ]
-    })
+    // const cwRule = new Rule(this, "cw-rule", {
+    //   description: "Rule that looks at ECS Task change state and triggers Lambda function",
+    //   enabled: true,
+    //   ruleName: "ECS-task-change-cdk",
+    //   targets: [ 
+    //   ]
+    // })
 
-    cwRule.addEventPattern({
-      source: ['aws.ecs'],
-      detailType: ["ECS Task State Change"],
-      detail: {
-        clusterArn: [cluster.clusterArn],
-        lastStatus: "STOPPED"
-      }
-    })
+    // cwRule.addEventPattern({
+    //   source: ['aws.ecs'],
+    //   detailType: ["ECS Task State Change"],
+    //   detail: {
+    //     clusterArn: [cluster.clusterArn],
+    //     lastStatus: "STOPPED"
+    //   }
+    // })
 
-    cwRule.addTarget(new targets.LambdaFunction(ecsLambda))
+    // cwRule.addTarget(new targets.LambdaFunction(ecsLambda))
 
-    new cdk.CfnOutput(this, 's3-bucket', {
-      value: bucket.bucketName
-    })
+    // new cdk.CfnOutput(this, 's3-bucket', {
+    //   value: bucket.bucketName
+    // })
 
   }
 }
