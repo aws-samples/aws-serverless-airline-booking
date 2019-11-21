@@ -79,3 +79,34 @@ Execute the `start-load-test` Step function using the following input
 ```
 
 This will setup users, load mock flight data, start gatling, consolidate the report to S3 bucket
+
+In case you want to run the individual steps manually:
+
+## setup users
+
+aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
+--network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
+--overrides="containerOverrides=[{name=CONTAINER_NAME,command=./setup-users.py}]"
+
+# load flights
+
+aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
+--network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
+--overrides="containerOverrides=[{name=CONTAINER_NAME,command=./load-flight-data.py}]"
+
+## start airline test
+
+aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
+--network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
+--overrides="containerOverrides=[{name=CONTAINER_NAME,command=-s Airline -nr -rf /opt/gatling/results/airline}]" --count 1
+
+## consolidate report
+
+aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
+--network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
+--overrides="containerOverrides=[{name=CONTAINER_NAME,command=-ro airline}]"
+
+## cleanup
+aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
+--network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
+--overrides="containerOverrides=[{name=CONTAINER_NAME,command=./cleanup.py}]"
