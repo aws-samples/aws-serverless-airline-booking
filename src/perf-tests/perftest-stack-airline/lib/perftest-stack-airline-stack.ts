@@ -240,7 +240,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       definition: stepfuncDefinition
     })
 
-    const lambdaFunc = new lambda.Function(this, "ecstasklambda", {
+    const ecsLambda = new lambda.Function(this, "ecstasklambda", {
       runtime: lambda.Runtime.NODEJS_10_X,
       handler: "index.handler",
       code: new lambda.AssetCode("lambda"),
@@ -267,6 +267,10 @@ export class PerftestStackAirlineStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 's3-bucket', {
       value: bucket.bucketName
+    })
+
+    new cdk.CfnOutput(this, 'lambda-ecs-function', {
+      value: ecsLambda.functionName
     })
 
   }
