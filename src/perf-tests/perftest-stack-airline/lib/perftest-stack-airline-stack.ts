@@ -118,7 +118,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
 
     const mockDatalogging = new ecs.AwsLogDriver({
       logGroup: new LogGroup(this, MOCKDATA_CONTAINER_NAME, {
-        logGroupName: `/aws//ecs/${MOCKDATA_CONTAINER_NAME}`,
+        logGroupName: `/aws/ecs/${MOCKDATA_CONTAINER_NAME}`,
         retention: RetentionDays.ONE_WEEK
       }),
       streamPrefix: "mockdata"
