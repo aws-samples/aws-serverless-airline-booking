@@ -172,10 +172,13 @@ export default {
    * @param {boolean} loading - Loader state used to control Flight Loader when fetching flights
    */
   computed: {
-    ...mapGetters("profile", ["isAuthenticated"]),
+    ...mapGetters({
+      firstName: "profile/firstName",
+      customer: "profile/userAttributes",
+      isAuthenticated: "profile/isAuthenticated"
+    }),
     ...mapState({
-      loading: state => state.catalog.loading,
-      customer: state => state.profile.user
+      loading: state => state.catalog.loading
     })
   },
   async beforeMount() {
@@ -224,7 +227,7 @@ export default {
         details: "",
         error: ""
       },
-      stripeKey: "pk_test_BpxANYCOZO7waMV3TrPQHjXa", // test key,
+      stripeKey: process.env.VUE_APP_StripePublicKey || "no Stripe public key",
       form: {
         name: "",
         country: "",
@@ -275,7 +278,7 @@ export default {
 
         this.$q.loading.show({
           message: `Your booking is being processed - We'll soon contact you via ${
-            this.customer.attributes.email
+            this.customer.email
           }.`
         });
         setTimeout(() => {
@@ -284,6 +287,9 @@ export default {
         }, 3000);
       } catch (err) {
         this.$q.loading.hide();
+        this.$q.notify(
+          `Error while creating your Booking - Check browser console messages`
+        );
         console.error(err);
       }
     },

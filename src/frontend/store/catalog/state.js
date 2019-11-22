@@ -7,5 +7,6 @@
  */
 export default {
   flights: [],
-  loading: false
+  loading: false,
+  paginationToken: ""
 };
