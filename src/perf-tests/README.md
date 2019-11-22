@@ -5,7 +5,10 @@
 
 # Steps
 
-Update the following parameters in the Dockerfile (both under `gatling-scripts` and `mock-scripts`)
+Update the following parameters in the Dockerfile (both under `gatling-scripts` and `mock-scripts`) using the outputs from perf-test stack
+
+![ENV](./images/cdk-output.png)
+
 
 ```
 ENV COGNITO_CLIENT_ID <client_id>

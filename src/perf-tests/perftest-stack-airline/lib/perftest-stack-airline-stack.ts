@@ -303,8 +303,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     })
 
     new cdk.CfnOutput(this, "APPSYNC_API_KEY", {
-      exportName: "GRAPHQL_API_ID",
-      value: GRAPHQL_API_ID
+      value: GRAPHQL_API_ID,
     })
 
 
