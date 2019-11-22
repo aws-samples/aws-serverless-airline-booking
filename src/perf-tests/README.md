@@ -1,63 +1,70 @@
-# Tasks:
-- [x] Create fake usernames for load testing
-- [x] Allow load test to run from one's laptop (Docker)
-- [ ] Automate parameters as Environment variables
+# Overview
+
+This perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Fargate Cluster to run the setup and Gatling scripts. 
+
+The setup scripts found under [mock-scripts](./mock-scripts) folder
+- creates fakes users in Amazon Cognito userpool
+- load mock flight data into Flights table
+- zips Gatling reports and upload to S3 bucket
+
+The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds` OR `5 minutes`. These can be updated in the Docker file. 
 
 # Steps
+After the perf-test stack has been deployed successfully, 
 
-Update the following parameters in the Dockerfile (both under `gatling-scripts` and `mock-scripts`) using the outputs from perf-test stack
+1. Update the following ENV variables in the Dockerfile (both under `gatling-scripts` and `mock-scripts` folders) using the outputs from perf-test stack
 
-```
-ENV COGNITO_CLIENT_ID <client_id>
-ENV COGNITO_URL https://cognito-idp.<region>.amazonaws.com/ 
-ENV GRAPHQL_URL <appsync_url>
-ENV API_URL <payment_api_url>
-ENV TOKEN_CSV user-with-token.csv
-ENV AWS_REGION <region>
-ENV S3_BUCKET <load-test-bucketname>
-ENV USER_COUNT 2
-ENV DURING_TIME 60
-ENV USER_CSV user.csv
-ENV FOLDERPATH ./
-ENV USER_POOL_ID <cognito_pool_id>
-ENV APPSYNC_API_KEY <appsync_api_key>
-```
+    ```
+    ENV COGNITO_CLIENT_ID <client_id>
+    ENV COGNITO_URL https://cognito-idp.<region>.amazonaws.com/ 
+    ENV GRAPHQL_URL <appsync_url>
+    ENV API_URL <payment_api_url>
+    ENV TOKEN_CSV user-with-token.csv
+    ENV AWS_REGION <region>
+    ENV S3_BUCKET <load-test-bucketname>
+    ENV USER_COUNT 2
+    ENV DURING_TIME 60
+    ENV USER_CSV user.csv
+    ENV FOLDERPATH ./
+    ENV USER_POOL_ID <cognito_pool_id>
+    ENV APPSYNC_API_KEY <appsync_api_key>
+    ```
 
-![ENV](./images/cdk-output.png)
+    ![ENV](./images/cdk-output.png)
 
-1. ecr login
-```
-aws ecr get-login --no-include-email --region eu-west-1
-```
+2. After the environment variables in the DockerFile is updated, we need to push them to Amazon ECR. First login to an Amazon ECR registry
+    ```
+    aws ecr get-login --no-include-email --region <AWS_REGION>
+    ```
 
-2. docker login
-```
-docker login -u AWS -p <> https://<_account_id_>.dkr.ecr.<region>.amazonaws.com
-```
+3. Copy paste the docker login command and enter.
+    ```
+    docker login -u AWS -p <> https://<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com
+    ```
 
-3. docker builds
+4. Build docker
 
-```
-cd gatling-scripts
+    ```
+    cd gatling-scripts
 
-docker build -t gatling:latest . 
+    docker build -t gatling:latest . 
 
-docker tag gatling:latest <replace_with_YOUR_gatling_ECR_repo_URI>:latest
+    docker tag gatling:latest <replace_with_YOUR_gatling_ECR_repo_URI>:latest
 
-docker push <replace_with_YOUR_gatling_ECR_repo_URI>:latest
-```
+    docker push <replace_with_YOUR_gatling_ECR_repo_URI>:latest
+    ```
 
 repeat this for the mock-scripts
 
-```
-cd mock-scripts
+    ```
+    cd mock-scripts
 
-docker build -t mockdata:latest . 
+    docker build -t mockdata:latest . 
 
-docker tag mockdata:latest <replace_with_YOUR_mockdata_ECR_repo_URI>:latest
+    docker tag mockdata:latest <replace_with_YOUR_mockdata_ECR_repo_URI>:latest
 
-docker push <replace_with_YOUR_mockdata_ECR_repo_URI>:latest
-```
+    docker push <replace_with_YOUR_mockdata_ECR_repo_URI>:latest
+    ```
 
 ## Run load test locally using docker:
 
@@ -89,7 +96,7 @@ aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --laun
 --network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
 --overrides="containerOverrides=[{name=CONTAINER_NAME,command=./setup-users.py}]"
 
-# load flights
+## load flights
 
 aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
 --network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \

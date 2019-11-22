@@ -16,8 +16,8 @@ ENV API_URL https://5mxbat8wgj.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV AWS_REGION eu-west-1
 ENV S3_BUCKET awsserverlessairline-twitchbase-20191121221048-loadtest
-ENV USER_COUNT 2
-ENV DURING_TIME 60
+ENV USER_COUNT 5
+ENV DURING_TIME 300
 ENV USER_CSV user.csv
 ENV FOLDERPATH ./
 ENV USER_POOL_ID eu-west-1_O9uxFACs4
