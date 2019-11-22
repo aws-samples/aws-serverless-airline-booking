@@ -14,6 +14,7 @@ import lambda = require('@aws-cdk/aws-lambda')
 import { Arn } from '@aws-cdk/core';
 import fs = require('fs');
 import targets = require('@aws-cdk/aws-events-targets')
+import { ImagePullPrincipalType } from '@aws-cdk/aws-codebuild';
 
 
 const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN;
@@ -237,7 +238,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       .next(consolidateReport)
       .next(cleanUp)
 
-    new sfn.StateMachine(this, STATE_MACHINE_NAME, {
+    const loadtestsfn = new sfn.StateMachine(this, STATE_MACHINE_NAME, {
       stateMachineName: STATE_MACHINE_NAME,
       definition: stepfuncDefinition
     })
@@ -248,6 +249,11 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       code: new lambda.AssetCode("lambda"),
       functionName: `${STACK_NAME}-ecs-task-change`
     })
+
+    ecsLambda.addToRolePolicy(new PolicyStatement({
+      actions: ["states:SendTaskSuccess"],
+      resources: [loadtestsfn.stateMachineArn]
+    }))
 
     const cwRule = new Rule(this, "cw-rule", {
       description: "Rule that looks at ECS Task change state and triggers Lambda function",
