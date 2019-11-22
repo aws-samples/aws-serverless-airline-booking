@@ -7,9 +7,6 @@
 
 Update the following parameters in the Dockerfile (both under `gatling-scripts` and `mock-scripts`) using the outputs from perf-test stack
 
-![ENV](./images/cdk-output.png)
-
-
 ```
 ENV COGNITO_CLIENT_ID <client_id>
 ENV COGNITO_URL https://cognito-idp.<region>.amazonaws.com/ 
@@ -25,6 +22,8 @@ ENV FOLDERPATH ./
 ENV USER_POOL_ID <cognito_pool_id>
 ENV APPSYNC_API_KEY <appsync_api_key>
 ```
+
+![ENV](./images/cdk-output.png)
 
 1. ecr login
 ```
