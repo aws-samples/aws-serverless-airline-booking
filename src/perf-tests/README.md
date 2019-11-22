@@ -118,3 +118,10 @@ aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --laun
 aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
 --network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
 --overrides="containerOverrides=[{name=CONTAINER_NAME,command=./cleanup.py}]"
+
+## Results:
+
+- Download the results.zip folder from the S3 bucket (refer to the perf-test stack output)
+- Open the index.html and you should see a report similar to the below
+
+  ![Report](./images/gatling-report.png)
