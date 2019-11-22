@@ -1,0 +1,20 @@
+{
+    "authcognitoa7d29d9dUserPoolId": {
+        "Fn::GetAtt": [
+            "authcognitoa7d29d9d",
+            "Outputs.UserPoolId"
+        ]
+    },
+    "apiawsserverlessairlineGraphQLAPIIdOutput": {
+        "Fn::GetAtt": [
+            "apiawsserverlessairline",
+            "Outputs.GraphQLAPIIdOutput"
+        ]
+    },
+    "apiawsserverlessairlineGraphQLAPIEndpointOutput": {
+        "Fn::GetAtt": [
+            "apiawsserverlessairline",
+            "Outputs.GraphQLAPIEndpointOutput"
+        ]
+    }
+}
