@@ -3,7 +3,7 @@
 This perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Fargate Cluster to run the setup and Gatling scripts. 
 
 The setup scripts found under [mock-scripts](./mock-scripts) folder
-- creates fakes users in Amazon Cognito userpool
+- creates test users in Amazon Cognito userpool
 - load mock flight data into Flights table
 - zips Gatling reports and upload to S3 bucket
 
