@@ -12,7 +12,6 @@ import { Rule } from '@aws-cdk/aws-events';
 import lambda = require('@aws-cdk/aws-lambda')
 import targets = require('@aws-cdk/aws-events-targets')
 
-const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN;
 const STACK_NAME = process.env.STACK_NAME;
 const ROLE_NAME = `${STACK_NAME}-fargate-role`;
 const VPC_NAME = `${STACK_NAME}-vpc`;
@@ -35,8 +34,14 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     super(scope, id, props);
 
     // retrieving all environment variables
+    const AWS_DEFAULT_REGION = process.env.AWS_DEFAULT_REGION
+    const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN || "not_defined"
     const USER_POOL_ID = process.env.USER_POOL_ID || "not_defined"
-
+    const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || "not_defined"
+    const COGNITO_URL= `https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com`
+    const GRAPHQL_URL = process.env.GRAPHQL_URL || "not_defined"
+    const API_URL = process.env.API_URL || "not_defined"
+    const GRAPHQL_API_ID = process.env.GRAPHQL_API_ID || "not_defined"
 
     const role = new Role(this, ROLE_NAME, {
       roleName: ROLE_NAME,
@@ -273,6 +278,22 @@ export class PerftestStackAirlineStack extends cdk.Stack {
 
     cwRule.addTarget(new targets.LambdaFunction(ecsLambda))
 
+    new cdk.CfnOutput(this, "COGNITO_CLIENT_ID", {
+      value: COGNITO_CLIENT_ID
+    })
+
+    new cdk.CfnOutput(this, "COGNITO_URL", {
+      value: COGNITO_URL
+    })
+
+    new cdk.CfnOutput(this, "GRAPHQL_URL", {
+      value: GRAPHQL_URL
+    })
+
+    new cdk.CfnOutput(this, "API_URL", {
+      value: API_URL
+    })
+
     new cdk.CfnOutput(this, 'S3_BUCKET', {
       value: bucket.bucketName
     })
@@ -280,6 +301,11 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     new cdk.CfnOutput(this, "USER_POOL_ID", {
       value: USER_POOL_ID
     })
+
+    new cdk.CfnOutput(this, "APPSYNC_API_KEY", {
+      value: GRAPHQL_API_ID
+    })
+
 
   }
 }
