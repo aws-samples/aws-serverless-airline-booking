@@ -8,14 +8,9 @@ import tasks = require('@aws-cdk/aws-stepfunctions-tasks');
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
 import { Data, ServiceIntegrationPattern, Context } from '@aws-cdk/aws-stepfunctions';
 import s3 = require('@aws-cdk/aws-s3');
-import rule = require('@aws-cdk/aws-events')
 import { Rule } from '@aws-cdk/aws-events';
 import lambda = require('@aws-cdk/aws-lambda')
-import { Arn } from '@aws-cdk/core';
-import fs = require('fs');
 import targets = require('@aws-cdk/aws-events-targets')
-import { ImagePullPrincipalType } from '@aws-cdk/aws-codebuild';
-
 
 const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN;
 const STACK_NAME = process.env.STACK_NAME;
@@ -38,6 +33,10 @@ const S3_BUCKET_NAME = `${STACK_NAME}-loadtest`
 export class PerftestStackAirlineStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // retrieving all environment variables
+    const USER_POOL_ID = process.env.USER_POOL_ID || "not_defined"
+
 
     const role = new Role(this, ROLE_NAME, {
       roleName: ROLE_NAME,
@@ -68,7 +67,6 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       actions: [
         'cognito-idp:AdminInitiateAuth',
         'cognito-idp:AdminCreateUser',
-        'cognito-idp:AdminCreateUser',
         'cognito-idp:AdminSetUserPassword',
         'cognito-idp:UpdateUserPoolClient',
         'cognito-idp:AdminDeleteUser'
@@ -79,6 +77,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       cidr: CIDR_BLOCK,
       maxAzs: MAX_AZs
     })
+
 
     const gatlingRepository = new ecr.Repository(this, ECR_GATLING_REPO_NAME, {
       repositoryName: ECR_GATLING_REPO_NAME
@@ -274,8 +273,12 @@ export class PerftestStackAirlineStack extends cdk.Stack {
 
     cwRule.addTarget(new targets.LambdaFunction(ecsLambda))
 
-    new cdk.CfnOutput(this, 's3-bucket', {
+    new cdk.CfnOutput(this, 'S3_BUCKET', {
       value: bucket.bucketName
+    })
+
+    new cdk.CfnOutput(this, "USER_POOL_ID", {
+      value: USER_POOL_ID
     })
 
   }

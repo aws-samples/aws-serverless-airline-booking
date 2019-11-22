@@ -1,8 +1,7 @@
 # Tasks:
-- [x] Fake usernames for load testing
+- [x] Create fake usernames for load testing
 - [x] Allow load test to run from one's laptop (Docker)
 - [ ] Automate parameters as Environment variables
-
 
 # Steps
 
@@ -31,7 +30,7 @@ aws ecr get-login --no-include-email --region eu-west-1
 
 2. docker login
 ```
-docker login -u AWS -p <> https://<_account_id_>.dkr.ecr.eu-west-1.amazonaws.com
+docker login -u AWS -p <> https://<_account_id_>.dkr.ecr.<region>.amazonaws.com
 ```
 
 3. docker builds

@@ -5,19 +5,19 @@ RUN apk update
 RUN apk add python3
 RUN pip3 install awscli
 
-ENV COGNITO_CLIENT_ID 1speauvb3jmk9u6r6cab5g6r2c
+ENV COGNITO_CLIENT_ID 67pd6l637inlv78l7vigappvt2
 ENV COGNITO_URL https://cognito-idp.eu-west-1.amazonaws.com/ 
-ENV GRAPHQL_URL https://7yn4qp3ixvb3dbk5mniyw7z7dq.appsync-api.eu-west-1.amazonaws.com/graphql
-ENV API_URL https://131gwlntqj.execute-api.eu-west-1.amazonaws.com/prod/charge
+ENV GRAPHQL_URL https://uvq6oxlzb5gjdpu6nspj4qpj5y.appsync-api.eu-west-1.amazonaws.com/graphql
+ENV API_URL https://5mxbat8wgj.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV AWS_REGION eu-west-1
-ENV S3_BUCKET awsserverlessairline-twitchbase-20191114092725-loadtest
+ENV S3_BUCKET awsserverlessairline-twitchbase-20191121221048-loadtest
 ENV USER_COUNT 2
 ENV DURING_TIME 60
 ENV USER_CSV user.csv
 ENV FOLDERPATH ./
-ENV USER_POOL_ID eu-west-1_PAUBwGJzW
-ENV APPSYNC_API_KEY 2rkrryxqqfb5zcvvbrnprbx6y4
+ENV USER_POOL_ID eu-west-1_O9uxFACs4
+ENV APPSYNC_API_KEY sxpvwmdo6zdnfpih2arbs5runi
 ENV PATH=/root/.local/bin:$PATH
 
 ADD ./Airline.scala /opt/gatling/user-files/simulations/
