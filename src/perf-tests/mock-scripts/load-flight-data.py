@@ -46,7 +46,7 @@ try:
             depart_date = datetime.strftime(START_DATE, DATE_TIME_STRING_FORMAT)
             arrival_date = datetime.strftime(START_DATE + timedelta(days=2), DATE_TIME_STRING_FORMAT)
             
-            query = f'mutation {{createFlight(input:{{departureDate: "{depart_date}", departureAirportCode: \"LGW\",departureAirportName: \"London Gatwick\",departureCity: \"London\", departureLocale: \"Europe/London\", arrivalDate: "{arrival_date}", arrivalAirportCode: \"MAD\", arrivalAirportName: \"Madrid Barajas\", arrivalCity: \"Madrid\", arrivalLocale: \"Europe/Madrid\", ticketPrice: 100, ticketCurrency: \"EUR\",flightNumber: 1830, seatAllocation: 2000}}) {{id}}}}'
+            query = f'mutation {{createFlight(input:{{departureDate: "{depart_date}", departureAirportCode: \"LGW\",departureAirportName: \"London Gatwick\",departureCity: \"London\", departureLocale: \"Europe/London\", arrivalDate: "{arrival_date}", arrivalAirportCode: \"MAD\", arrivalAirportName: \"Madrid Barajas\", arrivalCity: \"Madrid\", arrivalLocale: \"Europe/Madrid\", ticketPrice: 100, ticketCurrency: \"EUR\",flightNumber: 1830, seatCapacity: 2000}}) {{id}}}}'
             print(execute_gql(query)) 
 
 except Exception as error:

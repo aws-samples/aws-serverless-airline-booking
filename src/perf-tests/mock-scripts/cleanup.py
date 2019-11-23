@@ -15,7 +15,7 @@ S3_BUCKET = os.environ['S3_BUCKET']
 zipFileName = f'results-{int(time.time())}.zip' 
 
 client = boto3.client('cognito-idp', region_name=AWS_REGION)
-s3 = boto3.client('s3') 
+s3 = boto3.resource('s3')
 
 def delete_cognito_users():
 
@@ -61,7 +61,7 @@ def download_reports(filePath):
 
     zip_files(filePath)
 
-def upload_results_s3(): 
+def upload_results_s3():
     print(zipFileName)  
     sync_command = f"aws s3 cp {zipFileName} s3://{S3_BUCKET}/"
     os.system(sync_command)

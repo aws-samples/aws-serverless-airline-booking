@@ -1,6 +1,6 @@
 # Overview
 
-This perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Fargate Cluster to run the setup and Gatling scripts. 
+This perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Fargate Cluster to run the setup and Gatling scripts.
 
 The setup scripts found under [mock-scripts](./mock-scripts) folder
 - creates test users in Amazon Cognito userpool
@@ -8,6 +8,8 @@ The setup scripts found under [mock-scripts](./mock-scripts) folder
 - zips Gatling reports and upload to S3 bucket
 
 The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds` OR `5 minutes`. These can be updated in the Docker file. 
+
+All these steps are co-ordinated using AWS Step functions.
 
 # Steps
 After the perf-test stack has been deployed successfully, 
