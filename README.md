@@ -41,7 +41,7 @@ These are the deployment steps until the full implementation is complete.:
 7) Click on `Connect app`, select `GitHub`, choose your Fork repo and select the branch **`develop`**
 8) Under "Existing Amplify backend detected", **select your new environment** created in Step 2
 9) Choose an existing Amplify Console or create a new one
-10) Lastly, expand **Environment Variables**, and add **`STRIPE_SECRET_KEY`** and its value, then conclude the installation
+10) Lastly, expand **Environment Variables**, and add **`STRIPE_SECRET_KEY`** and **`STRIPE_PUBLIC_KEY`** and its value, then conclude the installation
 
 #### Adding your first flight
 
