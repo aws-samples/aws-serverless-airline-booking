@@ -2,13 +2,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-    Stage:
-        Type: String
-        Description: Environment stage or git branch
-
-    StripeKey:
-        Type: String
-        Description: Stripe Secret Key for SAR App
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
 
 Globals:
   Function:
@@ -16,13 +12,12 @@ Globals:
     Tracing: Active
     MemorySize: 512
     Environment:
-        Variables:
-            POWERTOOLS_SERVICE_NAME: payment
-            LOG_LEVEL: INFO
+      Variables:
+        POWERTOOLS_SERVICE_NAME: payment
+        LOG_LEVEL: INFO
 
 Resources:
   StripePaymentApplication:
-    DependsOn: StripePaymentApplicationKeyParameter
     Type: AWS::Serverless::Application
     Properties:
       Location:
@@ -30,7 +25,7 @@ Resources:
         SemanticVersion: 4.4.0
       Parameters:
         EnableInstantCapture: "false"
-        SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
+        SSMParameterPath: !Sub ${Stage}/service/payment/stripe/secretKey
 
   CollectPayment:
     Type: AWS::Serverless::Function
@@ -61,26 +56,18 @@ Resources:
   CollectPaymentParameter:
     Type: "AWS::SSM::Parameter"
     Properties:
-        Name: !Sub /service/payment/collect-function/${Stage}
-        Description: Collect Payment Lambda ARN
-        Type: String
-        Value: !Sub ${CollectPayment.Arn}
+      Name: !Sub /${Stage}/service/payment/function/collect
+      Description: Collect Payment Lambda ARN
+      Type: String
+      Value: !Sub ${CollectPayment.Arn}
 
   RefundPaymentParameter:
     Type: "AWS::SSM::Parameter"
     Properties:
-        Name: !Sub /service/payment/refund-function/${Stage}
-        Description: Refund Payment Lambda ARN
-        Type: String
-        Value: !Sub ${RefundPayment.Arn}
-
-  StripePaymentApplicationKeyParameter:
-    Type: "AWS::SSM::Parameter"
-    Properties:
-        Name: !Sub /service/payment/stripe-secret-key/${Stage}
-        Description: Stripe Key for SAR App
-        Type: String
-        Value: !Ref StripeKey
+      Name: !Sub /${Stage}/service/payment/function/refund
+      Description: Refund Payment Lambda ARN
+      Type: String
+      Value: !Sub ${RefundPayment.Arn}
 
 Outputs:
   CollectPaymentFunction:
@@ -102,4 +89,3 @@ Outputs:
   RefundApiUrl:
     Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
     Description: Payment Endpoint for refunding payments
-
