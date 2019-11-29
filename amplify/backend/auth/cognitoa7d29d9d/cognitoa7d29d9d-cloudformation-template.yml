@@ -508,6 +508,20 @@ Resources:
     DependsOn: IdentityPool
   
 
+  StripePaymentApplicationAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: StripePaymentApplicationAccessPolicy
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'execute-api:*'
+            Resource: "*" #  StripePaymentApplication SAR does not export API Gateway ARN ...
+      Roles:
+        - !Select [1, !Split ['/', !Ref authRoleArn]]
+
 Outputs :
   
   IdentityPoolId:
