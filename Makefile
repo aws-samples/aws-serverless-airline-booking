@@ -64,8 +64,8 @@ deploy.booking: ##=> Deploy booking service using SAM
 			--parameter-overrides \
 				BookingTable=$${BOOKING_TABLE_NAME} \
 				FlightTable=$${FLIGHT_TABLE_NAME} \
-				CollectPaymentFunction=/service/payment/collect-function/$${AWS_BRANCH} \
-				RefundPaymentFunction=/service/payment/refund-function/$${AWS_BRANCH} \
+				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/collectFunction \
+				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/refundFunction \
 				AppsyncApiId=$${GRAPHQL_API_ID} \
 				Stage=$${AWS_BRANCH}
 
@@ -97,7 +97,7 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 			--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM \
 			--parameter-overrides \
-				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
+				BookingSNSTopic=/$${AWS_BRANCH}/service/booking/topic \
 				Stage=$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID}
 

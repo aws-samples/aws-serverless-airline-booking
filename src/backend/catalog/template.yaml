@@ -2,16 +2,15 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-    Stage:
-        Type: String
-        Description: Environment stage or git branch
-      
-    FlightTable:
-      Type: String
-      Description: Flight Table
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+  FlightTable:
+    Type: String
+    Description: Flight Table
 
 Resources:
-
   ReserveFlight:
     Type: AWS::Serverless::Function
     Properties:
@@ -22,7 +21,7 @@ Resources:
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
-  
+
   ReleaseFlight:
     Type: AWS::Serverless::Function
     Properties:
@@ -36,27 +35,25 @@ Resources:
 
   ReserveFlightParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
-        Name: !Sub /service/catalog/reserve-function/${Stage}
-        Description: Reserve Flight Lambda ARN
-        Type: String
-        Value: !Sub ${ReserveFlight.Arn}
-  
+    Properties:
+      Name: !Sub /${Stage}/service/catalog/reserveFunction
+      Description: Reserve Flight Lambda ARN
+      Type: String
+      Value: !Sub ${ReserveFlight.Arn}
+
   ReleaseFlightParameter:
     Type: "AWS::SSM::Parameter"
-    Properties: 
-        Name: !Sub /service/catalog/release-function/${Stage}
-        Description: Release Flight Lambda ARN
-        Type: String
-        Value: !Sub ${ReleaseFlight.Arn}
-
+    Properties:
+      Name: !Sub /${Stage}/service/catalog/releaseFunction
+      Description: Release Flight Lambda ARN
+      Type: String
+      Value: !Sub ${ReleaseFlight.Arn}
 
 Outputs:
   ReserveFlightFunction:
     Value: !Sub ${ReserveFlight.Arn}
     Description: Collect Payment Lambda Function
-  
+
   ReleaseFlightFunction:
     Value: !Sub ${ReserveFlight.Arn}
     Description: Collect Payment Lambda Function
-  
