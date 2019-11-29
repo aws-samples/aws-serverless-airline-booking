@@ -109,6 +109,14 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
+export.parameter:
+	$(info [+] Adding new parameter named "${NAME}")
+	aws ssm put-parameter \
+		--name "$${NAME}" \
+		--type "String" \
+		--value "$${VALUE}" \
+		--overwrite
+
 #############
 #  Helpers  #
 #############
@@ -151,4 +159,7 @@ define HELP_MESSAGE
 
 	...::: Delete all SAM based services :::...
 	$ make delete
+
+	...::: Export parameter and its value to System Manager Parameter Store :::...
+	$ make export.parameter NAME="/env/service/amplify/api/id" VALUE="xzklsdio234"
 endef
