@@ -23,27 +23,5 @@
 			}
 		}
 	},
-	"function": {},
-	"exports": {
-		"parameterStore": {
-			"providerPlugin": "awscloudformation"
-		},
-		"dependsOn": [
-			{
-				"category": "auth",
-				"resourceName": "cognitoa7d29d9d",
-				"attributes": [
-					"UserPoolId"
-				]
-			},
-			{
-				"category": "api",
-				"resourceName": "awsserverlessairline",
-				"attributes": [
-					"GraphQLAPIIdOutput",
-					"GraphQLAPIEndpointOutput"
-				]
-			}
-		]
-	}
+	"function": {}
 }
