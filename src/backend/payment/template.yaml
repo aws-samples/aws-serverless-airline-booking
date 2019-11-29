@@ -32,6 +32,20 @@ Resources:
         EnableInstantCapture: "false"
         SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
 
+  StripePaymentApplicationAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'execute-api:*'
+        Resource: "*" #  StripePaymentApplication SAR does not output API Gateway ARN ...
+      PolicyName: StripePaymentApplicationAccessPolicy
+      Roles: 
+        - !Ref AuthRoleArn
+
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:

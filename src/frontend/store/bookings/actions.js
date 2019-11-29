@@ -2,14 +2,26 @@ import Booking from "../../shared/models/BookingClass";
 import Flight from "../../shared/models/FlightClass"; // eslint-disable-line
 // @ts-ignore
 import { Loading } from "quasar";
-import axios from "axios";
 
-import { API, graphqlOperation } from "aws-amplify";
+import Amplify, { API, graphqlOperation } from "aws-amplify";
 import {
   processBooking as processBookingMutation,
   getBookingByStatus
 } from "./graphql";
 
+const StripeChargeEndpointName = "StripeChargeEndpoint";
+const endpoints = {
+  API: {
+    endpoints: [
+      {
+        name: StripeChargeEndpointName,
+        endpoint: process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set"
+      }
+    ]
+  }
+};
+
+Amplify.configure({...endpoints});
 /**
  *
  * Booking [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchBooking retrieves all bookings for current authenticated customer.
@@ -122,15 +134,12 @@ export async function createBooking(
 ) {
   console.group("store/bookings/actions/createBooking");
   try {
-    let paymentEndpoint =
-      process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set";
     const customerEmail = rootState.profile.user.attributes.email;
 
     console.info(
       `Processing payment before proceeding to booking for flight ${outboundFlight}`
     );
     let chargeToken = await processPayment({
-      endpoint: paymentEndpoint,
       paymentToken,
       outboundFlight,
       customerEmail
@@ -161,7 +170,6 @@ export async function createBooking(
  * Process Payment function - processPayment calls Payment endpoint to pre-authorize charge upon tokenized payment details
  *
  * @param {object} obj - Object containing params to process payment
- * @param {string} obj.endpoint - Payment endpoint
  * @param {object} obj.paymentToken - Tokenized payment info
  * @param {object} obj.paymentToken.details - Tokenized payment details including last4, id, etc.
  * @param {object} obj.paymentToken.id - Payment token
@@ -177,7 +185,6 @@ export async function createBooking(
  *   });
  */
 async function processPayment({
-  endpoint,
   paymentToken,
   outboundFlight,
   customerEmail
@@ -197,10 +204,11 @@ async function processPayment({
     email: customerEmail
   };
 
+
   console.log("Charge data to be processed");
   console.log(chargeData);
   try {
-    const data = await axios.post(endpoint, chargeData);
+    const data = await await API.post(StripeChargeEndpointName, "", {body: chargeData});
     const {
       data: {
         createdCharge: { id: chargeId }
