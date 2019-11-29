@@ -8,7 +8,7 @@ Serverless Airline Booking is a complete web application that provides Flight Se
 
 ## Stack
 
-![Core stack](./media/core-stack.png)
+Summary of what the stack looks like now including a picture with the core tech:
 
 * **Front-end** - Vue.js as the core framework, Quasar for UI, Amplify for Auth UI component and AWS integration, and Stripe JS with Stripe Elements for card tokenization, validation, etc.
 * **Data** - All data is modeled after GraphQL types and stored in DynamoDB. Python being the core language for all services except Loyalty that's written in Typescript, and JavaScript for front-end.
@@ -16,7 +16,13 @@ Serverless Airline Booking is a complete web application that provides Flight Se
 * **Auth** - Cognito provides JSON Web Tokens (JWT) and along with AppSync fine-grained authorization on what data types users can access.
 * **Messaging** - Booking workflow is managed by Step Functions while SNS provides service-to-service communication through messaging between Booking and Loyalty.
 
-These are the current back-end services that makes up the Serverless Airline functionalities:
+
+![Core stack](./media/core-stack.png)
+
+
+### Back-end
+
+Back-end services that makes up the Serverless Airline functionalities as of now:
 
 Service | Language | Description
 ------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------
