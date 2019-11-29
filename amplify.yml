@@ -24,11 +24,7 @@ backend:
         - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
         - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
         - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
-        ##
-        # Deploy SAM based back-end
-        ##
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
-        - make deploy
         ##
         # Export key deployed resources to System Manager Parameter Store
         ##
@@ -42,6 +38,10 @@ backend:
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
+        ##
+        # Deploy SAM based back-end
+        ##
+        - make deploy
 frontend:
   phases:
     preBuild:

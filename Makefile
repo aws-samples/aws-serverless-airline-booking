@@ -66,7 +66,7 @@ deploy.booking: ##=> Deploy booking service using SAM
 				FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
 				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
 				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
-				AppsyncApiId=$${AWS_BRANCH}/service/amplify/api/id \
+				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
 				Stage=$${AWS_BRANCH}
 
 deploy.payment: ##=> Deploy payment service using SAM
