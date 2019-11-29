@@ -57,3 +57,28 @@ Provided you have followed deployment instructions and signed up your first user
 4. Within `ClientId` use the value you took note in `Step 1`, and use the credentials of your newly created Cognito user
 5. Within your fork, copy any of the `createFlight` mutations provided in **`sample-queries-mutations.gql`**
 6. Open up the front-end, and search for a flight from **`LGW`** to **`MAD`** for **December 2nd, 2019**
+
+## Cleaning up
+
+To delete the Serverless Airline from your AWS Account, you need: 
+
+* **Git branch name** - Branch you connected in Amplify Console (e.g. twitch)
+* **Root Stack name** - Root CloudFormation Stack name, available in System Manager Parameter Store (e.g. /twitch/stackName)
+
+By running the commands below within the project source code, you will
+
+1. Fetch the root stack name into STACK_NAME environment variable
+2. Export the `git branch name` used in Amplify Console - **you need to replace with the correct value**
+3. Delete all back-ends managed by Serverless Application Model (SAM) in the correct order
+4. Delete all resources managed by Amplify (API, DynamoDB Table, Cognito)
+
+```bash
+# export AWS_BRANCH="twitch"
+export AWS_BRANCH="<<Git Branch Name you used>>"
+export STACK_NAME=$(aws ssm get-parameter --name /${AWS_BRANCH}/stackName --query 'Parameter.Value' --output text)
+
+make delete
+amplify delete
+```
+
+Lastly, deployment S3 buckets may remain untouched. You can safely delete buckets starting with **`awsserverlessairline-<<<timestamp>>>-deployment`**, use either [via Console, CLI or SDK](https://docs.aws.amazon.com/AmazonS3/latest/dev/delete-or-empty-bucket.html#delete-bucket)
