@@ -59,22 +59,26 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-customHeaders:
-  - pattern: "**/*"
-    headers: # https://infosec.mozilla.org/guidelines/web_security
-      - key: "Strict-Transport-Security"
-        value: "max-age=31536000; includeSubDomains"
-      - key: "X-Content-Type-Options"
-        value: "nosniff"
-      - key: "X-XSS-Protection"
-        value: "1; mode=block"
-      - key: "X-Frame-Options"
-        value: "DENY"
-      # CSP generated using Laboratory: https://github.com/april/laboratory
-      # Caveats
-      ## Stripe Elements adds inline JS and iFrame (unsafe-eval, frame-src)
-      ## Allows any endpoint hosted on AWS - for prod, use custom domains
-      ### REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
-      ### connect-src doesn't parse cognito-idp.*.amazonaws.com used by Amplify Auth - for prod, use region(s) endpoint
-      - key: "Content-Security-Policy"
-        value: "'default-src 'none'; connect-src https://*.amazonaws.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' https://fonts.googleapis.com/css?family=Raleway 'unsafe-inline' https://fonts.googleapis.com'"
+  customHeaders:
+    - pattern: "**/*"
+      headers: # https://infosec.mozilla.org/guidelines/web_security
+        - key: "Strict-Transport-Security"
+          value: "max-age=31536000; includeSubDomains"
+        - key: "X-Content-Type-Options"
+          value: "nosniff"
+        - key: "X-XSS-Protection"
+          value: "1; mode=block"
+        - key: "X-Frame-Options"
+          value: "DENY"
+        - key: "Referrer-Policy"
+          value: "same-origin"
+        - key: "Feature-Policy"
+          value: "microphone 'none'; camera 'none'; notifications 'self'"
+        # CSP generated using Laboratory: https://github.com/april/laboratory
+        # Caveats
+        ## Stripe Elements adds inline JS and iFrame (unsafe-eval, frame-src)
+        ## Allows any endpoint hosted on AWS - NOTE: Use custom domains for production
+        ### REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
+        ### connect-src doesn't parse cognito-idp.*.amazonaws.com used by Amplify Auth - for prod, use region(s) endpoint
+        - key: "Content-Security-Policy"
+          value: "'default-src 'none'; connect-src https://*.amazonaws.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' https://fonts.googleapis.com/css?family=Raleway 'unsafe-inline' https://fonts.googleapis.com'"
