@@ -6,8 +6,9 @@ Serverless Airline Booking is a complete web application that provides Flight Se
 
 ![Serverless Airline Booking sample](./media/prototype-web.png)
 
+## Deployment instructions
 
-## Requirements
+### Requirements
 
 Before you deploy, you must have the following in place:
 
@@ -20,7 +21,7 @@ Before you deploy, you must have the following in place:
 * [Stripe Account](https://dashboard.stripe.com/register)
     - Take note of your testing `Secret Key` and `Public Key` [located in the Stripe Dashboard](https://support.stripe.com/questions/locate-api-keys)
 
-## Deployment instructions
+### Howto
 
 **NOTICE**: AWS AppSync is not part of [Free tier](https://aws.amazon.com/free) and some AWS services used may not be covered by the [Free tier](https://aws.amazon.com/free) after 12 months.
 
