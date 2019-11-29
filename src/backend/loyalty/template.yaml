@@ -1,0 +1,266 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  loyalty service
+
+Globals:
+  Function:
+    Timeout: 5
+    Tracing: Active
+    MemorySize: 512
+  Api:
+    TracingEnabled: true
+    EndpointConfiguration: REGIONAL
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Stage Name
+
+  BookingSNSTopic:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Booking SVC SNS Topic
+
+  AppsyncApiId:
+    Type: String
+    Description: AWS AppSync API ID
+
+Resources:
+  LoyaltyDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub Airline-LoyaltyData-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: customerId
+          AttributeType: S
+        - AttributeName: flag
+          AttributeType: S
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: customer-flag
+          KeySchema:
+            - AttributeName: customerId
+              KeyType: HASH
+            - AttributeName: flag
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      SSESpecification:
+        SSEEnabled: yes
+
+  IngestFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub Airline-IngestLoyalty-${Stage}
+      CodeUri: build/ingest
+      Handler: index.handler
+      Runtime: nodejs8.10
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyDataTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
+      Events:
+        Listener:
+          Type: SNS
+          Properties:
+            Topic: !Ref BookingSNSTopic
+            FilterPolicy:
+              Booking.Status:
+                - confirmed
+
+  GetFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub Airline-GetLoyalty-${Stage}
+      CodeUri: build/get
+      Handler: index.handler
+      Runtime: nodejs8.10
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref LoyaltyDataTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /loyalty/{customerId}
+            RestApiId: !Ref LoyaltyApi
+
+  LoyaltyEndpointParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${Stage}/service/loyalty/api/url"
+      Type: String
+      Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+
+  LoyaltyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub Airline-Loyalty-${Stage}
+      StageName: Prod
+      # Cors:
+      #   AllowOrigin: "'*'"
+      #   AllowHeaders:
+      #     "'Content-Type,Authorization,X-Amz-Date'"
+      #   MaxAge: "'600'"
+      TracingEnabled: True
+      # AccessLogSetting:
+      #   - DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group/custom_log_group_name"
+      #     Format: "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId"
+      MethodSettings:
+        - MetricsEnabled: True
+          ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingRateLimit: 100
+          ThrottlingBurstLimit: 50
+      Auth:
+        DefaultAuthorizer: AWS_IAM
+      DefinitionBody:
+        swagger: "2.0"
+        x-amazon-apigateway-request-validator: all
+        x-amazon-apigateway-request-validators:
+          all:
+            validateRequestBody: true
+            validateRequestParameters: true
+        produces:
+          - application/json
+        paths:
+          "/loyalty/{customerId}":
+            get:
+              summary: "Fetch customer loyalty points"
+              parameters:
+                - name: "customerId"
+                  in: "path"
+                  required: true
+                  type: "string"
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFunc.Arn}/invocations
+
+  # Resources for API Gateway integration with AppSync
+
+  AppsyncLoyaltyRestApiIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LoyaltyApiInvoke
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                # arn:aws:execute-api:region:account-id:api-id/stage/METHOD_HTTP_VERB/Resource-path
+                Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${LoyaltyApi}/*/*/*
+
+  AppsyncLoyaltyApiDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !Ref AppsyncApiId
+      Name: LoyaltyRestApi
+      Description: Loyalty REST API Gateway
+      Type: HTTP
+      ServiceRoleArn: !GetAtt AppsyncLoyaltyRestApiIamRole.Arn
+      HttpConfig:
+        Endpoint: !Sub https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com
+        AuthorizationConfig:
+          AuthorizationType: AWS_IAM
+          AwsIamConfig:
+            SigningRegion: !Ref AWS::Region
+            SigningServiceName: execute-api
+
+  GetLoyaltyQueryResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !Ref AppsyncApiId
+      TypeName: Query
+      FieldName: getLoyalty
+      DataSourceName: !Sub ${AppsyncLoyaltyApiDataSource.Name}
+      RequestMappingTemplate: !Sub |
+        ## Retrieve customer ID from query args; Injects current authenticated session if null
+        #set( $customer = $util.defaultIfNull($ctx.args.customer, $ctx.identity.claims.get("sub")) )
+
+        ## [Start] ** Static Group Authorization Checks **
+        ## Authorization rule: Allow groups to fetch loyalty (e.g. Admins, Travel agency, etc.) **
+        #set( $userGroups = $util.defaultIfNull($ctx.identity.claims.get("cognito:groups"), []) )
+        #set( $allowedGroups = ["Admin"] )
+        #set($isStaticGroupAuthorized = $util.defaultIfNull($isStaticGroupAuthorized, false))
+        #foreach( $userGroup in $userGroups )
+            #foreach( $allowedGroup in $allowedGroups )
+            #if( $allowedGroup == $userGroup )
+                #set( $isStaticGroupAuthorized = true )
+            #end
+            #end
+        #end
+        ## [End] ** Static Group Authorization Checks **
+
+        ## [Start] ** Owner Authorization Checks **
+        #set( $isOwnerAuthorized = $util.defaultIfNull($isOwnerAuthorized, false) )
+        ## Authorization rule: Allows customers to fetch their own Loyalty data
+        ## retrieve customer ID from authenticated session
+        #set( $identityValue = $util.defaultIfNull($ctx.identity.claims.get("sub"), "___xamznone____") )
+        #if( $customer == $identityValue )
+            #set( $isOwnerAuthorized = true )
+        #end
+        ## [End] ** Owner Authorization Checks **
+
+        ## [Start] ** Throw if unauthorized **
+        #if( !($isStaticGroupAuthorized == true || $isOwnerAuthorized == true) )
+            $util.unauthorized()
+        #end
+        ## [End] Throw if unauthorized **
+        {
+            "version": "2018-05-29",
+            "method": "GET",
+            "resourcePath": "/Prod/loyalty/$customer",
+            "params":{
+            "headers": {
+                "Content-Type" : "application/json"
+            }
+            }
+        }
+      ResponseMappingTemplate: |
+        #if($ctx.error)
+          $util.error($ctx.error.message, $ctx.error.type)
+        #end
+        ## If the response is not 200 then return an error. Else return the body
+        #if($ctx.result.statusCode == 200)
+            $ctx.result.body
+        #else
+            $util.error($ctx.result.body)
+        #end
+
+Outputs:
+  LoyaltyDataTable:
+    Value: !GetAtt LoyaltyDataTable.Arn
+    Description: Loyalty Data Table ARN
+
+  BaseUrl:
+    Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Description: Base URL for the API Gateway
+
+  LoyaltyGetUrl:
+    Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/loyalty"
+    Description: Loyalty Endpoint for retrieving loyalty points for a given customerId

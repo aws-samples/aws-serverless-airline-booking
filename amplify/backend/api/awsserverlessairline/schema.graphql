@@ -1,0 +1,87 @@
+
+# Flight uses API authorization level
+# and fine-grained auth to only allow authenticated users to read flights
+# except users member of Admin group
+type Flight 
+    @model(subscriptions: null)
+    # TODO: Commenting this out until we have clear instructions on adding an user as `Admin`
+    ## OR alternatively creating a flight as part of CI while ETL isn't done yet
+    # @auth(rules:[
+    #     {allow: private, operations: [read]}
+    # ])
+    @key(name: "ByDepartureSchedule", 
+        fields: ["departureAirportCode", "arrivalAirportCode", "departureDate"],
+        queryField: "getFlightBySchedule")
+{
+    id: ID!
+    departureDate: String!
+    departureAirportCode: String!
+    departureAirportName: String!
+    departureCity: String!
+    departureLocale: String!
+    arrivalDate: String!
+    arrivalAirportCode: String!
+    arrivalAirportName: String!
+    arrivalCity: String!
+    arrivalLocale: String!
+    ticketPrice: Int!
+    ticketCurrency: String!
+    flightNumber: Int!
+    seatAllocation: Int @deprecated(reason: "use seatCapacity instead. seatAllocation will be removed in the stable release.")
+    seatCapacity: Int!
+}
+
+# Booking uses API authorization level
+# and fine-grained auth to only allow book owners to see their own bookings
+# and any authenticated user member of Admin group (e.g. could be travel agency, etc.)
+type Booking 
+    @model(subscriptions: null) 
+    @auth(rules: [
+      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
+      {allow: groups, groups: ["Admin"]}
+    ])
+    @key(name: "ByCustomerStatus", 
+        fields: ["customer", "status"],
+        queryField: "getBookingByStatus")
+{
+    id: ID!
+    status: BookingStatus!
+    outboundFlight: Flight! @connection
+    paymentToken: String!
+    checkedIn: Boolean
+    customer: String
+    createdAt: String
+    bookingReference: String
+}
+
+enum BookingStatus {
+    UNCONFIRMED
+    CONFIRMED
+    CANCELLED
+}
+
+input CreateBookingInput {
+  id: ID
+  status: BookingStatus
+  paymentToken: String!
+  checkedIn: Boolean
+  customer: String
+  bookingOutboundFlightId: ID!
+}
+
+# Loyalty uses API authorization level
+# and loyalty owner is resolved at the resolver level using auth claims
+# to unlock admin use case, `customer/owner` field could be added
+type Loyalty {
+    points: Int
+    level: String
+    remainingPoints: Int
+}
+
+type Mutation {
+    processBooking(input: CreateBookingInput!): Booking
+}
+
+type Query {
+    getLoyalty(customer: String): Loyalty
+}

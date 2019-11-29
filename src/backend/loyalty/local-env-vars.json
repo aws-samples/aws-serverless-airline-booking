@@ -1,0 +1,8 @@
+{
+    "IngestFunc": {
+        "TABLE_NAME": "LoyaltyData-awsserverlessairline-20190506121509-loyalty-twitch"
+    },
+    "GetFunc": {
+        "TABLE_NAME": "LoyaltyData-awsserverlessairline-20190506121509-loyalty-twitch"
+    }
+}

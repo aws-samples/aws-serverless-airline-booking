@@ -1,0 +1,538 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    Booking service
+
+Globals:
+    Function:
+        Timeout: 5
+        Tracing: Active
+        MemorySize: 512
+        Environment:
+            Variables:
+                POWERTOOLS_SERVICE_NAME: booking
+                LOG_LEVEL: INFO
+
+Parameters:
+    BookingTable:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Booking Table
+
+    FlightTable:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Flight Table
+
+    Stage:
+        Type: String
+        Description: Environment stage or git branch
+
+    CollectPaymentFunction:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Collect Payment Function ARN
+
+    RefundPaymentFunction:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Refund Payment Function ARN
+
+    AppsyncApiId:
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for AWS AppSync API ID
+
+Resources:
+    ConfirmBooking:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub Airline-ConfirmBooking-${Stage}
+            Handler: confirm.lambda_handler
+            CodeUri: src/confirm-booking
+            Runtime: python3.7
+            Environment:
+                Variables:
+                    BOOKING_TABLE_NAME: !Ref BookingTable
+                    STAGE: !Ref Stage
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref BookingTable
+
+    CancelBooking:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub Airline-CancelBooking-${Stage}
+            Handler: cancel.lambda_handler
+            CodeUri: src/cancel-booking
+            Runtime: python3.7
+            Environment:
+                Variables:
+                    BOOKING_TABLE_NAME: !Ref BookingTable
+                    STAGE: !Ref Stage
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref BookingTable
+
+    ReserveBooking:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub Airline-ReserveBooking-${Stage}
+            Handler: reserve.lambda_handler
+            CodeUri: src/reserve-booking
+            Runtime: python3.7
+            Environment:
+                Variables:
+                    BOOKING_TABLE_NAME: !Ref BookingTable
+                    STAGE: !Ref Stage
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref BookingTable
+
+    BookingTopic:
+        Type: AWS::SNS::Topic
+
+    NotifyBooking:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: !Sub Airline-NotifyBooking-${Stage}
+            Handler: notify.lambda_handler
+            CodeUri: src/notify-booking
+            Runtime: python3.7
+            MemorySize: 256
+            Environment:
+                Variables:
+                    BOOKING_TOPIC: !Ref BookingTopic
+                    STAGE: !Ref Stage
+            Policies:
+                - SNSPublishMessagePolicy:
+                      TopicName: !Sub ${BookingTopic.TopicName}
+
+    StatesExecutionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: states.amazonaws.com
+                      Action: sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: StatesExecutionPolicy
+                  PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - lambda:InvokeFunction
+                            Resource:
+                                - !Sub ${ReserveBooking.Arn}
+                                - !Sub ${CancelBooking.Arn}
+                                - !Sub ${ConfirmBooking.Arn}
+                                - !Sub ${NotifyBooking.Arn}
+                                - !Ref CollectPaymentFunction
+                                - !Ref RefundPaymentFunction
+                - PolicyName: DynamoDBCRUD
+                  PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - dynamodb:*
+                            Resource:
+                                - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
+                - PolicyName: Send2DLQ
+                  PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - sqs:SendMessage
+                            Resource:
+                                - !Sub ${BookingsDLQ.Arn}
+
+    BookingsDLQ:
+        Type: AWS::SQS::Queue
+        Properties:
+            MessageRetentionPeriod: 1209600
+
+    ProcessBooking:
+        Type: AWS::StepFunctions::StateMachine
+        Properties:
+            StateMachineName: !Sub Airline-ProcessBooking-${Stage}
+            DefinitionString: !Sub |
+                {
+                    "StartAt": "Reserve Flight",
+                    "States": {
+                        "Reserve Flight": {
+                            "Type": "Task",
+                            "Resource": "arn:aws:states:::dynamodb:updateItem",
+                            "Parameters": {
+                                "TableName.$": "$.flightTable",
+                                "Key": {
+                                    "id": {
+                                        "S.$": "$.outboundFlightId"
+                                    }
+                                },
+                                "UpdateExpression": "SET seatCapacity = seatCapacity - :dec",
+                                "ExpressionAttributeValues": {
+                                    ":dec": {
+                                        "N": "1"
+                                    },
+                                    ":noSeat": {
+                                        "N": "0"
+                                    }
+                                },
+                                "ConditionExpression": "seatCapacity > :noSeat"
+                            },
+                            "TimeoutSeconds": 5,
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "ProvisionedThroughputExceededException",
+                                        "RequestLimitExceeded",
+                                        "ServiceUnavailable",
+                                        "ThrottlingException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                },
+                                {
+                                    "ErrorEquals": [
+                                        "ConditionalCheckFailedException"
+                                    ],
+                                    "IntervalSeconds": 0,
+                                    "MaxAttempts": 0
+                                }
+                            ],
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.flightError",
+                                    "Next": "Notify Booking Failed"
+                                }
+                            ],
+                            "ResultPath": null,
+                            "Next": "Reserve Booking"
+                        },
+                        "Reserve Booking": {
+                            "Type": "Task",
+                            "Resource": "${ReserveBooking.Arn}",
+                            "TimeoutSeconds": 5,
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "BookingReservationException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                }
+                            ],
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.bookingError",
+                                    "Next": "Cancel Booking"
+                                }
+                            ],
+                            "ResultPath": "$.bookingId",
+                            "Next": "Collect Payment"
+                        },
+                        "Release Flight Seat": {
+                            "Type": "Task",
+                            "Resource": "arn:aws:states:::dynamodb:updateItem",
+                            "Parameters": {
+                                "TableName.$": "$.flightTable",
+                                "Key": {
+                                    "id": {
+                                        "S.$": "$.outboundFlightId"
+                                    }
+                                },
+                                "UpdateExpression": "SET seatCapacity = seatCapacity +:inc",
+                                "ExpressionAttributeValues": {
+                                    ":inc": {
+                                        "N": "1"
+                                    }
+                                }
+                            },
+                            "TimeoutSeconds": 5,
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "ProvisionedThroughputExceededException",
+                                        "RequestLimitExceeded",
+                                        "ServiceUnavailable",
+                                        "ThrottlingException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                }
+                            ],
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.flightError",
+                                    "Next": "Notify Booking Failed"
+                                }
+                            ],
+                            "ResultPath": null,
+                            "Next": "Notify Booking Failed"
+                        },
+                        "Collect Payment": {
+                            "Type": "Task",
+                            "Resource": "${CollectPaymentFunction}",
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.paymentError",
+                                    "Next": "Cancel Booking"
+                                }
+                            ],
+                            "ResultPath": "$.payment",
+                            "Next": "Confirm Booking"
+                        },
+                        "Cancel Booking": {
+                            "Type": "Task",
+                            "Resource": "${CancelBooking.Arn}",
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "BookingCancellationException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                }
+                            ],
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.bookingError",
+                                    "Next": "Release Flight Seat"
+                                }
+                            ],
+                            "ResultPath": null,
+                            "Next": "Release Flight Seat"
+                        },
+                        "Confirm Booking": {
+                            "Type": "Task",
+                            "Resource": "${ConfirmBooking.Arn}",
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "BookingConfirmationException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                }
+                            ],
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.bookingError",
+                                    "Next": "Refund Payment"
+                                }
+                            ],
+                            "ResultPath": "$.bookingReference",
+                            "Next": "Notify Booking Confirmed"
+                        },
+                        "Refund Payment": {
+                            "Type": "Task",
+                            "Resource": "${RefundPaymentFunction}",
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.paymentError",
+                                    "Next": "Cancel Booking"
+                                }
+                            ],
+                            "ResultPath": null,
+                            "Next": "Cancel Booking"
+                        },
+                        "Notify Booking Failed": {
+                            "Type": "Task",
+                            "Resource": "${NotifyBooking.Arn}",
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "BookingNotificationException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                }
+                            ],
+                            "Catch": [
+                                {
+                                    "ErrorEquals": [
+                                        "States.ALL"
+                                    ],
+                                    "ResultPath": "$.notificationgError",
+                                    "Next": "Booking DLQ"
+                                }
+                            ],
+                            "ResultPath": "$.notificationId",
+                            "Next": "Booking DLQ"
+                        },
+                        "Notify Booking Confirmed": {
+                            "Type": "Task",
+                            "Resource": "${NotifyBooking.Arn}",
+                            "Retry": [
+                                {
+                                    "ErrorEquals": [
+                                        "BookingNotificationException"
+                                    ],
+                                    "IntervalSeconds": 1,
+                                    "BackoffRate": 2,
+                                    "MaxAttempts": 2
+                                }
+                            ],
+                            "ResultPath": "$.notificationId",
+                            "Next": "Booking Confirmed"
+                        },
+                        "Booking DLQ": {
+                            "Type": "Task",
+                            "Resource": "arn:aws:states:::sqs:sendMessage",
+                            "Parameters": {
+                                "QueueUrl": "${BookingsDLQ}",
+                                "MessageBody.$": "$"
+                            },
+                            "ResultPath": "$.deadLetterQueue",
+                            "Next": "Booking Failed"
+                        },
+                        "Booking Failed": {
+                            "Type": "Fail"
+                        },
+                        "Booking Confirmed": {
+                            "Type": "Pass",
+                            "End": true
+                        }
+                    }
+                }
+            RoleArn: !Sub ${StatesExecutionRole.Arn}
+
+    ProcessBookingParameter:
+        Type: "AWS::SSM::Parameter"
+        Properties:
+            Name: !Sub /${Stage}/service/booking/stateMachine
+            Description: Step Functions State Machine ARN
+            Type: String
+            Value: !Ref ProcessBooking
+
+    BookingTopicParameter:
+        Type: "AWS::SSM::Parameter"
+        Properties:
+            Name: !Sub /${Stage}/service/booking/topic
+            Description: Booking SNS Topic ARN
+            Type: String
+            Value: !Ref BookingTopic
+
+    # Resources for Step Functions integration with AppSync
+
+    AppsyncStepFunctionsIamRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: appsync.amazonaws.com
+                      Action: sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: StatesExecutionPolicy
+                  PolicyDocument:
+                      Version: 2012-10-17
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - states:StartExecution
+                            Resource: !Ref ProcessBooking
+
+    AppsyncStepFunctionsDataSource:
+        Type: AWS::AppSync::DataSource
+        Properties:
+            ApiId: !Ref AppsyncApiId
+            Name: ProcessBookingSFN
+            Description: Step Functions State Machine for Booking
+            Type: HTTP
+            # IAM role defined elsewhere in AWS CloudFormation template
+            ServiceRoleArn: !GetAtt AppsyncStepFunctionsIamRole.Arn
+            HttpConfig:
+                Endpoint: !Sub https://states.${AWS::Region}.amazonaws.com/
+                AuthorizationConfig:
+                    AuthorizationType: AWS_IAM
+                    AwsIamConfig:
+                        SigningRegion: !Ref AWS::Region
+                        SigningServiceName: states
+
+    ProcessBookingMutationResolver:
+        Type: AWS::AppSync::Resolver
+        Properties:
+            ApiId: !Ref AppsyncApiId
+            TypeName: Mutation
+            FieldName: processBooking
+            DataSourceName: !Sub ${AppsyncStepFunctionsDataSource.Name}
+            RequestMappingTemplate: !Sub |
+                $util.qr($ctx.stash.put("outboundFlightId", $ctx.args.input.bookingOutboundFlightId))
+                $util.qr($ctx.stash.put("paymentToken", $ctx.args.input.paymentToken))
+                $util.qr($ctx.stash.put("customer", $ctx.identity.sub))
+                $util.qr($ctx.stash.put("executionId", $util.autoId()))
+                $util.qr($ctx.stash.put("createdAt", $util.time.nowISO8601()))
+
+                #set( $payload = {
+                    "outboundFlightId": $ctx.stash.outboundFlightId,
+                    "customerId": $context.identity.sub,
+                    "chargeId": $ctx.stash.paymentToken,
+                    "bookingTable": "${BookingTable}",
+                    "flightTable": "${FlightTable}",
+                    "name": $ctx.stash.executionId,
+                    "createdAt": $ctx.stash.createdAt
+                })
+
+                {
+                    "version": "2018-05-29",
+                    "method": "POST",
+                    "resourcePath": "/",
+                    "params": {
+                        "headers": {
+                            "content-type": "application/x-amz-json-1.0",
+                            "x-amz-target":"AWSStepFunctions.StartExecution"
+                        },
+                        "body": {
+                            "stateMachineArn": "${ProcessBooking}",
+                            "input": "$util.escapeJavaScript($util.toJson($payload))",
+                            "name": $util.toJson($ctx.stash.executionId)
+                        }
+                    }
+                }
+            ResponseMappingTemplate: |
+                {
+                    "id": "$ctx.stash.executionId",
+                    "status": "PENDING"
+                }
+
+Outputs:
+    ProcessBookingStateMachine:
+        Value: !Ref ProcessBooking
+        Description: The ARN of the Process Booking StateMachine
+
+    BookingTopic:
+        Value: !Ref BookingTopic
+        Description: Booking SNS Topic ARN

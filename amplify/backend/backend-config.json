@@ -1,0 +1,27 @@
+{
+	"auth": {
+		"cognitoa7d29d9d": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"dependsOn": []
+		}
+	},
+	"api": {
+		"awsserverlessairline": {
+			"service": "AppSync",
+			"providerPlugin": "awscloudformation",
+			"output": {
+				"authConfig": {
+					"additionalAuthenticationProviders": [],
+					"defaultAuthentication": {
+						"authenticationType": "AMAZON_COGNITO_USER_POOLS",
+						"userPoolConfig": {
+							"userPoolId": "authcognitoa7d29d9d"
+						}
+					}
+				}
+			}
+		}
+	},
+	"function": {}
+}

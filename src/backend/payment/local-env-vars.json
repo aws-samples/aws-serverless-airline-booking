@@ -1,0 +1,8 @@
+{
+    "CollectPayment": {
+        "PAYMENT_API_URL": "https://469dq8zx0m.execute-api.eu-west-1.amazonaws.com/prod/capture"
+    },
+    "RefundPayment": {
+        "PAYMENT_API_URL": "https://469dq8zx0m.execute-api.eu-west-1.amazonaws.com/prod/refund"
+    }
+}

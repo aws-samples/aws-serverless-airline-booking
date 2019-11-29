@@ -1,0 +1,151 @@
+## Add a bunch of flights for December 2nd 2019 (year-month-day)
+## auth user must be Admin
+
+mutation flight1 {
+    createFlight(input:{
+        departureDate: "2019-12-02T08:00+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-12-02T10:15+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 100,
+        ticketCurrency: "EUR",
+        flightNumber: 1830,
+	      seatCapacity: 10
+    }) {
+        id
+    }
+} 
+
+mutation flight2 {
+    createFlight(input:{
+        departureDate: "2019-12-02T10:30+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-12-02T12:45+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 200,
+        ticketCurrency: "EUR",
+        flightNumber: 1813,
+        seatCapacity: 2
+    }) {
+        id
+    }
+}
+
+mutation flight3 {
+    createFlight(input:{
+        departureDate: "2019-12-02T12:00+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-12-02T14:15+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 1000,
+        ticketCurrency: "EUR",
+        flightNumber: 1814,
+        seatCapacity: 2
+    }) {
+        id
+    }
+}
+
+mutation flight4 {
+    createFlight(input:{
+        departureDate: "2019-12-02T17:00+0000",
+        departureAirportCode: "LGW",
+        departureAirportName: "London Gatwick",
+        departureCity: "London",
+        departureLocale: "Europe/London",
+        arrivalDate: "2019-12-02T19:15+0000",
+        arrivalAirportCode: "MAD",
+        arrivalAirportName: "Madrid Barajas",
+        arrivalCity: "Madrid",
+        arrivalLocale: "Europe/Madrid",
+        ticketPrice: 500,
+        ticketCurrency: "EUR",
+        flightNumber: 1815,
+        seatCapacity: 2
+    }) {
+        id
+    }
+}
+
+## Fetch all flights leaving at 10am - That uses a SCAN operation behind the scenes
+
+query {
+  listFlights(limit:2, filter: {
+    departureDate: {
+      beginsWith: "2019-12-02T10"
+    }
+  }){
+    items {
+      id,
+      departureDate
+    }
+  }
+}
+
+## Fetch all flights to Madrid from London Gatwick - That uses a QUERY operation behind the scenes
+
+query {
+  getFlightBySchedule(
+    arrivalAirportCodeDepartureDate: {
+      beginsWith: {
+        arrivalAirportCode: "MAD", 
+        departureDate: "2019-11-03"
+      }
+    }, 
+    departureAirportCode: "LGW"
+  )
+    {
+      nextToken
+      items {
+        id
+        departureDate
+      }
+    }
+}
+
+
+## Make a booking
+###
+
+mutation {
+  # auth user must be Admin
+  createBooking(input:{
+     status:UNCONFIRMED,
+     paymentToken: "adasdasd",
+     bookingOutboundFlightId: "flight-UUID-here"
+  }) {
+    id
+  }
+}
+
+## Fetch a booking
+query {
+  getBooking(id:"b46baf62-f9fe-4b0b-b2e3-741f5e11589d") 
+  # selection set
+  {
+    id
+	  outboundFlight {
+	    id
+      departureDate
+    }
+  }
+}
+

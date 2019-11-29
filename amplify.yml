@@ -1,0 +1,87 @@
+version: 0.1
+backend:
+  phases:
+    preBuild:
+      commands:
+        - npm install -g @aws-amplify/cli@4.2.0 # pinned known working version
+        - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
+        - aws configure set cli_follow_urlparam false # fix for parameter store when storing URLs: https://github.com/aws/aws-cli/issues/2507
+    build:
+      commands:
+        - "# Execute Amplify CLI with the helper script"
+        - amplifyPush --simple
+        ##
+        # Extract Environment data
+        ##
+        - export STACK_NAME=$(jq -r '.providers.awscloudformation.StackName' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export AWS_DEFAULT_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
+        - export GRAPHQL_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export GRAPHQL_URL=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export COGNITO_USER_POOL_ID=$(jq -r '.auth[(.auth | keys)[0]].output.UserPoolId' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${COGNITO_USER_POOL_ID} --query 'UserPool.Arn' --output text)
+        - export COGNITO_USER_POOL_CLIENT_ID=$(jq -r '.auth[(.auth | keys)[0]].output.AppClientIDWeb' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
+        - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
+        - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
+        - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
+        ##
+        # Export key deployed resources to System Manager Parameter Store
+        ##
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/stackName" VALUE=${STACK_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/deploymentBucket" VALUE=${DEPLOYMENT_BUCKET_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/id" VALUE=${COGNITO_USER_POOL_ID}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/arn" VALUE=${COGNITO_USER_POOL_ARN}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/clientId" VALUE=${COGNITO_USER_POOL_CLIENT_ID}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/id" VALUE=${GRAPHQL_API_ID}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/url" VALUE=${GRAPHQL_URL}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
+        ##
+        # Deploy SAM based back-end
+        ##
+        - make deploy
+frontend:
+  phases:
+    preBuild:
+      commands:
+        ##
+        # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
+        ##
+        - make outputs
+        - cd src/frontend
+        - npm install
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: src/frontend/dist
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
+  customHeaders:
+    - pattern: "**/*"
+      headers: # https://infosec.mozilla.org/guidelines/web_security
+        - key: "Strict-Transport-Security"
+          value: "max-age=31536000; includeSubDomains"
+        - key: "X-Content-Type-Options"
+          value: "nosniff"
+        - key: "X-XSS-Protection"
+          value: "1; mode=block"
+        - key: "X-Frame-Options"
+          value: "DENY"
+        - key: "Referrer-Policy"
+          value: "same-origin"
+        - key: "Feature-Policy"
+          value: "microphone 'none'; camera 'none'; notifications 'self'"
+        # CSP generated using Laboratory: https://github.com/april/laboratory
+        # Caveats
+        ## Stripe Elements adds inline JS and iFrame (unsafe-eval, frame-src)
+        ## Allows any endpoint hosted on AWS - NOTE: Use custom domains for production
+        ### REST and GraphQL have random identifiers so we allow the sub-domain (connect-src)
+        ### connect-src doesn't parse cognito-idp.*.amazonaws.com used by Amplify Auth - for prod, use region(s) endpoint
+        - key: "Content-Security-Policy"
+          value: "'default-src 'none'; connect-src https://*.amazonaws.com; font-src 'self' https://fonts.gstatic.com; frame-src https://js.stripe.com; img-src 'self'; script-src 'self' 'unsafe-eval' https://js.stripe.com/v3/; style-src 'self' https://fonts.googleapis.com/css?family=Raleway 'unsafe-inline' https://fonts.googleapis.com'"

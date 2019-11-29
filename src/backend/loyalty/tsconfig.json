@@ -1,0 +1,21 @@
+{
+  "include": [
+    "./src/**/*.ts"
+  ],
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "strict": true,
+    "baseUrl": "./",
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "resolveJsonModule": true
+  }
+}

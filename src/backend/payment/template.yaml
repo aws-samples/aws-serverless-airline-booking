@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+Globals:
+  Function:
+    Timeout: 5
+    Tracing: Active
+    MemorySize: 512
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: payment
+        LOG_LEVEL: INFO
+
+Resources:
+  StripePaymentApplication:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge
+        SemanticVersion: 4.4.0
+      Parameters:
+        EnableInstantCapture: "false"
+        SSMParameterPath: !Sub ${Stage}/service/payment/stripe/secretKey
+
+  CollectPayment:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub Airline-CollectPayment-${Stage}
+      Handler: collect.lambda_handler
+      Runtime: python3.7
+      CodeUri: src/collect-payment
+      Timeout: 10
+      Environment:
+        Variables:
+          PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.CaptureApiUrl
+          STAGE: !Ref Stage
+
+  RefundPayment:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub Airline-RefundPayment-${Stage}
+      Handler: refund.lambda_handler
+      CodeUri: src/refund-payment
+      Runtime: python3.7
+      Timeout: 10
+      Environment:
+        Variables:
+          PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
+          STAGE: !Ref Stage
+
+  CollectPaymentParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Sub /${Stage}/service/payment/function/collect
+      Description: Collect Payment Lambda ARN
+      Type: String
+      Value: !Sub ${CollectPayment.Arn}
+
+  RefundPaymentParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Name: !Sub /${Stage}/service/payment/function/refund
+      Description: Refund Payment Lambda ARN
+      Type: String
+      Value: !Sub ${RefundPayment.Arn}
+
+Outputs:
+  CollectPaymentFunction:
+    Value: !Sub ${CollectPayment.Arn}
+    Description: Collect Payment Lambda Function
+
+  RefundPaymentFunction:
+    Value: !Sub ${RefundPayment.Arn}
+    Description: Refund Payment Lambda Function
+
+  PaymentCaptureUrl:
+    Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
+    Description: Payment Endpoint for capturing payments
+
+  PaymentChargeUrl:
+    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+    Description: Payment Endpoint for collecting payments
+
+  RefundApiUrl:
+    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+    Description: Payment Endpoint for refunding payments
