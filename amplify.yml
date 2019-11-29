@@ -32,14 +32,16 @@ backend:
         ##
         # Export key deployed resources to System Manager Parameter Store
         ##
-        - make export.parameter NAME="/${AWS_BRANCH}/stackName" VALUE=${STACK_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/stackName" VALUE=${STACK_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/deploymentBucket" VALUE=${DEPLOYMENT_BUCKET_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/id" VALUE=${COGNITO_USER_POOL_ID}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/arn" VALUE=${COGNITO_USER_POOL_ARN}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/clientId" VALUE=${COGNITO_USER_POOL_CLIENT_ID}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/id" VALUE=${GRAPHQL_API_ID}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/url" VALUE=${GRAPHQL_URL}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/flightTable" VALUE=${FLIGHT_TABLE_NAME}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/bookingTable" VALUE=${BOOKING_TABLE_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
 frontend:
   phases:
     preBuild:

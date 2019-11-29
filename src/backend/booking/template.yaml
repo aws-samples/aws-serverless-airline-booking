@@ -15,12 +15,12 @@ Globals:
 
 Parameters:
     BookingTable:
-        Type: String
-        Description: Booking Table
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Booking Table
 
     FlightTable:
-        Type: String
-        Description: Flight Table
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for Flight Table
 
     Stage:
         Type: String
@@ -35,8 +35,8 @@ Parameters:
         Description: Parameter Name for Refund Payment Function ARN
 
     AppsyncApiId:
-        Type: String
-        Description: AWS AppSync API ID
+        Type: AWS::SSM::Parameter::Value<String>
+        Description: Parameter Name for AWS AppSync API ID
 
 Resources:
     ConfirmBooking:

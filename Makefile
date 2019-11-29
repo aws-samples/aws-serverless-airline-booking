@@ -62,11 +62,11 @@ deploy.booking: ##=> Deploy booking service using SAM
 			--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM \
 			--parameter-overrides \
-				BookingTable=$${BOOKING_TABLE_NAME} \
-				FlightTable=$${FLIGHT_TABLE_NAME} \
-				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/collectFunction \
-				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/refundFunction \
-				AppsyncApiId=$${GRAPHQL_API_ID} \
+				BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
+				FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
+				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
+				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
+				AppsyncApiId=$${AWS_BRANCH}/service/amplify/api/id \
 				Stage=$${AWS_BRANCH}
 
 deploy.payment: ##=> Deploy payment service using SAM
@@ -80,9 +80,7 @@ deploy.payment: ##=> Deploy payment service using SAM
 			--template-file packaged.yaml \
 			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides \
-				Stage=$${AWS_BRANCH} \
-				StripeKey=$${STRIPE_SECRET_KEY}
+			--parameter-overrides Stage=$${AWS_BRANCH}
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)

@@ -6,10 +6,6 @@ Parameters:
     Type: String
     Description: Environment stage or git branch
 
-  StripeKey:
-    Type: String
-    Description: Stripe Secret Key for SAR App
-
 Globals:
   Function:
     Timeout: 5
@@ -22,7 +18,6 @@ Globals:
 
 Resources:
   StripePaymentApplication:
-    DependsOn: StripePaymentApplicationKeyParameter
     Type: AWS::Serverless::Application
     Properties:
       Location:
@@ -30,7 +25,7 @@ Resources:
         SemanticVersion: 4.4.0
       Parameters:
         EnableInstantCapture: "false"
-        SSMParameterPath: !Sub service/payment/stripe-secret-key/${Stage}
+        SSMParameterPath: !Sub ${Stage}/service/payment/stripe/secretKey
 
   CollectPayment:
     Type: AWS::Serverless::Function
@@ -61,7 +56,7 @@ Resources:
   CollectPaymentParameter:
     Type: "AWS::SSM::Parameter"
     Properties:
-      Name: !Sub /${Stage}/service/payment/collectFunction
+      Name: !Sub /${Stage}/service/payment/function/collect
       Description: Collect Payment Lambda ARN
       Type: String
       Value: !Sub ${CollectPayment.Arn}
@@ -69,18 +64,10 @@ Resources:
   RefundPaymentParameter:
     Type: "AWS::SSM::Parameter"
     Properties:
-      Name: !Sub /${Stage}/service/payment/refundFunction
+      Name: !Sub /${Stage}/service/payment/function/refund
       Description: Refund Payment Lambda ARN
       Type: String
       Value: !Sub ${RefundPayment.Arn}
-
-  StripePaymentApplicationKeyParameter:
-    Type: "AWS::SSM::Parameter"
-    Properties:
-      Name: !Sub /${Stage}/service/payment/stripe/secretKey
-      Description: Stripe Key for SAR App
-      Type: String
-      Value: !Ref StripeKey
 
 Outputs:
   CollectPaymentFunction:

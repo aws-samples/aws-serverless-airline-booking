@@ -75,7 +75,7 @@ By running the commands below within the project source code, you will
 ```bash
 # export AWS_BRANCH="twitch"
 export AWS_BRANCH="<<Git Branch Name you used>>"
-export STACK_NAME=$(aws ssm get-parameter --name /${AWS_BRANCH}/stackName --query 'Parameter.Value' --output text)
+export STACK_NAME=$(aws ssm get-parameter --name /${AWS_BRANCH}/service/amplify/deployment/stackName --query 'Parameter.Value' --output text)
 
 make delete
 amplify delete
