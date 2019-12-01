@@ -3,6 +3,8 @@ Payment service integrates with Stripe and provides a REST API for pre-authoriza
 
 ## Implementation
 
+![Payment Infrastructure Architecture](../../../media/payment-infra-architecture.png)
+
 Payment is comprised of a [Serverless Application Repository App named API Lambda Stripe Charge](arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge) and Python Lambda functions. 
 
 * **API Lambda Stripe Charge** - The SAR App provides a public regional API Gateway endpoint coupled with Lambda functions that integrates with Stripe.
@@ -22,7 +24,6 @@ Parameter | Description
 /{env}/service/payment/function/refund | Refund-function ARN
 /{env}/service/payment/stripe/secretKey | Stripe Secret Key, created and managed by [Amplify Console Custom workflow](../../../amplify.yml)
 
-![Payment Infrastructure Architecture](../../../media/payment-infra-architecture.png)
 
 ## Integrations
 
