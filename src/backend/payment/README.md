@@ -7,23 +7,47 @@ Payment service integrates with Stripe and provides a REST API for pre-authoriza
 
 Payment is comprised of a [Serverless Application Repository App named API Lambda Stripe Charge](arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge) and Python Lambda functions. 
 
-* **API Lambda Stripe Charge** - The SAR App provides a public regional API Gateway endpoint coupled with Lambda functions that integrates with Stripe.
-    - **Configuration**: SAR App functions require `/{env}/service/payment/stripe/secretKey` parameter in Parameter Store for Stripe operations
-    - **Operations**: X-Ray is enabled in `Prod` stage
-    - **Metrics**: None
-* **Collect and Refund functions** - These functions call our SAR App API as part of the [Booking](../booking/README.md) business workflow to collect previous pre-authorizations and refund should a booking isn't successful.
-    - **Configuration**: Only `PAYMENT_API_URL` environment variable used to call SAR App API.
-    - **Operations**: X-Ray, structured logging and custom metrics are implemented via Lambda powertools.
-    - **Metrics**: `InvalidPaymentRequest`, `SuccessfulPayment`, `FailedPayment`
+### SAR Lambda Stripe Charge
 
-Parameters in Parameter Store, where `{env}` is a git branch from where deployment originates:
+The SAR App provides a public regional API Gateway endpoint coupled with Lambda functions that integrates with Stripe.
+
+#### Configuration
+
+Lambda Stripe Charge requires a Stripe Secret key to be stored in Parameter Store. We read the environment variable `STRIPE_SECRET_KEY` set in Amplify Console, and as part of the [custom workflow](../../../amplify.yml) we store the value in a parameter named `/{env}/service/payment/stripe/secretKey`.
+
+API currently provides the following resources:
+
+Resource | Method | Description
+------------------------------------------------- | ---------------------- | --------------------------------------------------------------------
+/charge | POST | Pre-authorize payment by invoking [CreateStripeCharge Lambda function](https://github.com/simalexan/api-lambda-stripe-charge/blob/master/capture.js). It expects a simple JSON blob with `amount`, `currency`, `stripeToken`, `description`, `email` as keys -  See [Stripe specification](https://stripe.com/docs/api/charges/create) for values and response.
+/capture | POST | Capture pre-authorized payment by invoking [CaptureStripeCharge Lambda function](https://github.com/simalexan/api-lambda-stripe-charge/blob/master/capture.js). It expects `chargeId` with the previously captured payment token - See [Stripe specification](https://stripe.com/docs/api/charges/capture) for response values.
+/refund | POST | Refund existing payment by invoking [CreateRefund Lambda function](https://github.com/simalexan/api-lambda-stripe-charge/blob/master/refund.js). It expects `chargeId` with the previously captured payment token - See [Stripe specification](https://stripe.com/docs/api/refunds/create) for response values.
+
+#### Operations
+
+Lambda Stripe Charge has X-Ray tracing enabled by default in the `Prod` stage of the API Gateway. It doesn't create additional metrics for payment operations hence the need for our Lambda functions.
+
+### Collect and Refund functions
+
+Both functions call our Lambda Stripe Charge API as part of the [Booking](../booking/README.md) business workflow to collect previous pre-authorizations and refund should a booking isn't successful.
+
+#### Configuration
+
+Both functions use `PAYMENT_API_URL` environment variable  to call SAR App API. 
+
+#### Operations
+
+X-Ray, structured logging and custom metrics are implemented via Lambda powertools. Custom metrics created are `InvalidPaymentRequest`, `SuccessfulPayment` and `FailedPayment`
+
+### Parameter store
+
+`{env}` being a git branch from where deployment originates (e.g. twitch):
 
 Parameter | Description
 ------------------------------------------------- | ---------------------------------------------------------------------------------
 /{env}/service/payment/function/collect | Collect-function ARN
 /{env}/service/payment/function/refund | Refund-function ARN
 /{env}/service/payment/stripe/secretKey | Stripe Secret Key, created and managed by [Amplify Console Custom workflow](../../../amplify.yml)
-
 
 ## Integrations
 

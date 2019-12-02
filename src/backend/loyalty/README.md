@@ -3,20 +3,39 @@ Loyalty service provides a REST API for fetching loyalty points and calculates t
 
 ## Implementation
 
+![Loyalty Infrastructure Architecture](../../../media/loyalty-infra-architecture.png)
+
 Loyalty is comprised of a REST API implemented using API Gateway, SNS Topic, Typescript Lambda functions and DynamoDB as a database.
 
-* **Loyalty API** - Provides a single GET resource `/loyalty/{customerId}` and integrates with `Get` function. It enforces `IAM` authorization - See integration for more details on why.
-    - **Configuration**: `IAM` as Authorization and inline OpenAPI spec.
-    - **Operations**: X-Ray and Throttling are enabled in `Prod` stage.
-    - **Metrics**: Detailed metrics enabled.
-* **Get function** - Fetches loyalty data from DynamoDB and calculates tier progress.
-    - **Configuration**: `TABLE_NAME` as environment variable and Loyalty API as its event source
-    - **Operations**: Basic X-Ray instrumentation
-    - **Metrics**: None yet
-* **Ingest function** - Calculates and ingests loyalty points into DynamoDB
-    - **Configuration**: `TABLE_NAME` as environment variable and SNS as its event source
-    - **Operations**: Basic X-Ray instrumentation
-    - **Metrics**: None yet
+### Loyalty API
+
+Loyalty API provides a read-only API to fetch loyalty points to a given customer. 
+
+#### Configuration
+
+API currently provides the following resources:
+
+Resource | Method | Description
+------------------------------------------------- | ---------------------- | --------------------------------------------------------------------
+/loyalty/{customerId} | GET | Fetches Loyalty points and next tier progress by invoking `Get` Lambda function.
+
+It enforces `IAM` authorization - See integration for more details on why.
+
+#### Operations
+
+Throttling and X-Ray are enabled in `Prod` stage. Detailed metrics are also enabled.
+
+### Get and Ingest functions
+
+`Get` function fetches loyalty data from DynamoDB and calculates tier progress. `Ingest` calculates loyalty points from a confirmed booking.
+
+#### Configuration
+
+Both functions use `TABLE_NAME` as environment variable. `Get` function is invoked via API Gateway. `Ingest` function is invoked via SNS topic.
+
+#### Operations
+
+Both functions have X-Ray enabled and basic instrumentation, no custom subsegments or annotations yet. No custom metrics or structured logging at this point too.
 
 ## Integrations
 
