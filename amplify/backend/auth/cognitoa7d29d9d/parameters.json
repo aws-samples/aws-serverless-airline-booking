@@ -1,7 +1,7 @@
 {
-    "identityPoolName": "cognitoa7d29d9d_identitypool_c2c9ee7e",
+    "identityPoolName": "cognitoa7d29d9d_identitypool_5b837e17",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "cognitc2c9ee7e",
+    "resourceNameTruncated": "cognitbb5f6f54",
     "userPoolName": "awsserverlessairlinea7d29d9d_userpool_a7d29d9d",
     "autoVerifiedAttributes": [
         "email"
@@ -17,7 +17,12 @@
     "emailVerificationMessage": "Your verification code is {####}",
     "defaultPasswordPolicy": false,
     "passwordPolicyMinLength": 8,
-    "passwordPolicyCharacters": [],
+    "passwordPolicyCharacters": [
+        "Requires Lowercase",
+        "Requires Uppercase",
+        "Requires Numbers",
+        "Requires Symbols"
+    ],
     "requiredAttributes": [
         "family_name",
         "given_name",
@@ -61,5 +66,11 @@
             "Arn"
         ]
     },
-    "dependsOn": []
+    "dependsOn": [],
+    "triggers": "{}",
+    "hostedUI": false,
+    "parentStack": {
+        "Ref": "AWS::StackId"
+    },
+    "permissions": []
 }

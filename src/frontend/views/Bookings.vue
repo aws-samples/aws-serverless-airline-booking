@@ -29,6 +29,17 @@
           </q-timeline-entry>
         </div>
       </q-timeline>
+      <div class="wrapper">
+        <q-btn
+          v-if="paginationToken"
+          @click="loadBookings"
+          class="cta__button"
+          color="secondary"
+          size="1rem"
+          label="Load more bookings?"
+          data-test="booking-pagination"
+        />
+      </div>
     </div>
   </q-page>
 </template>
@@ -47,14 +58,32 @@ export default {
   components: {
     BookingFlight
   },
-  async mounted() {
+  mounted() {
     /** authentication guards prevent authenticated users to view Bookings
      * however, the component doesn't stop from rendering asynchronously
      * this guarantees we attempt talking to Booking service
      * if our authentication guards && profile module have an user in place
      */
     if (this.isAuthenticated) {
-      await this.$store.dispatch("bookings/fetchBooking");
+      this.loadBookings();
+    }
+  },
+  methods: {
+    /**
+     * loadBookings method fetches all bookings via booking API
+     */
+    async loadBookings() {
+      try {
+        await this.$store.dispatch(
+          "bookings/fetchBooking",
+          this.paginationToken
+        );
+      } catch (error) {
+        console.error(error);
+        this.$q.notify(
+          `Error while fetching Booking - Check browser console messages`
+        );
+      }
     }
   },
   /**
@@ -63,7 +92,8 @@ export default {
    */
   computed: {
     ...mapState({
-      bookings: state => state.bookings.bookings
+      bookings: state => state.bookings.bookings,
+      paginationToken: state => state.bookings.paginationToken
     }),
     ...mapGetters("profile", ["isAuthenticated"])
   }

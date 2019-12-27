@@ -78,6 +78,7 @@
             color="primary"
             label="Check-in"
             data-test="booking-check-in"
+            @click="checkIn"
           />
         </div>
         <div class="col-6">
@@ -87,6 +88,7 @@
             color="secondary"
             label="Cancel booking"
             data-test="booking-cancel"
+            @click="cancelBooking"
           />
         </div>
       </div>
@@ -171,6 +173,12 @@ export default {
     hideCard: function() {
       // @ts-ignore
       this.$refs["modal"].hide();
+    },
+    checkIn() {
+      this.$q.notify("Not implemented");
+    },
+    cancelBooking() {
+      this.$q.notify("Not implemented");
     }
   },
   /**

@@ -23,26 +23,27 @@ import { getLoyalty } from "./graphql";
  *    }
  * }
  */
-export function fetchLoyalty({ commit }) {
-  return new Promise(async (resolve, reject) => {
-    Loading.show({
-      message: "Loading profile..."
-    });
-
-    try {
-      const {
-        // @ts-ignore
-        data: { getLoyalty: loyaltyData }
-      } = await API.graphql(graphqlOperation(getLoyalty));
-      const loyalty = new Loyalty(loyaltyData);
-
-      commit("SET_LOYALTY", loyalty);
-
-      Loading.hide();
-      resolve();
-    } catch (err) {
-      Loading.hide();
-      reject(err);
-    }
+export async function fetchLoyalty({ commit }) {
+  Loading.show({
+    message: "Loading profile..."
   });
+
+  console.group("store/loyalty/actions/fetchLoyalty");
+  try {
+    console.log("Fetching loyalty data");
+    const {
+      // @ts-ignore
+      data: { getLoyalty: loyaltyData }
+    } = await API.graphql(graphqlOperation(getLoyalty));
+    const loyalty = new Loyalty(loyaltyData);
+
+    console.log(loyalty);
+    commit("SET_LOYALTY", loyalty);
+
+    Loading.hide();
+    console.groupEnd();
+  } catch (err) {
+    Loading.hide();
+    throw new Error(err);
+  }
 }

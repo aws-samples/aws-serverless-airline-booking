@@ -59,7 +59,6 @@
           type="date"
           format="ddd, DD MMM YYYY"
           stack-label="Pick a date"
-          :min="new Date()"
         />
       </q-field>
     </div>

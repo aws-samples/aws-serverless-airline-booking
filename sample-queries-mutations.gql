@@ -1,14 +1,14 @@
-## Add a bunch of flights
-### Aviation-edge Open API could come handy in here as an ETL process
+## Add a bunch of flights for December 2nd 2019 (year-month-day)
+## auth user must be Admin
 
 mutation flight1 {
     createFlight(input:{
-        departureDate: "2019-05-08T08:00+0000",
+        departureDate: "2019-12-02T08:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-05-08T10:15+0000",
+        arrivalDate: "2019-12-02T10:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -16,7 +16,7 @@ mutation flight1 {
         ticketPrice: 100,
         ticketCurrency: "EUR",
         flightNumber: 1830,
-	seatAllocation: 10
+	      seatCapacity: 10
     }) {
         id
     }
@@ -24,12 +24,12 @@ mutation flight1 {
 
 mutation flight2 {
     createFlight(input:{
-        departureDate: "2019-01-16T10:30+0000",
+        departureDate: "2019-12-02T10:30+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-01-16T12:45+0000",
+        arrivalDate: "2019-12-02T12:45+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -37,7 +37,7 @@ mutation flight2 {
         ticketPrice: 200,
         ticketCurrency: "EUR",
         flightNumber: 1813,
-        seatAllocation: 2
+        seatCapacity: 2
     }) {
         id
     }
@@ -45,12 +45,12 @@ mutation flight2 {
 
 mutation flight3 {
     createFlight(input:{
-        departureDate: "2019-01-16T12:00+0000",
+        departureDate: "2019-12-02T12:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-01-16T14:15+0000",
+        arrivalDate: "2019-12-02T14:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -58,7 +58,7 @@ mutation flight3 {
         ticketPrice: 1000,
         ticketCurrency: "EUR",
         flightNumber: 1814,
-        seatAllocation: 2
+        seatCapacity: 2
     }) {
         id
     }
@@ -66,12 +66,12 @@ mutation flight3 {
 
 mutation flight4 {
     createFlight(input:{
-        departureDate: "2019-01-16T17:00+0000",
+        departureDate: "2019-12-02T17:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2019-01-16T19:15+0000",
+        arrivalDate: "2019-12-02T19:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -79,18 +79,18 @@ mutation flight4 {
         ticketPrice: 500,
         ticketCurrency: "EUR",
         flightNumber: 1815,
-        seatAllocation: 2
+        seatCapacity: 2
     }) {
         id
     }
 }
 
-## Fetch all flights leaving at 10am
+## Fetch all flights leaving at 10am - That uses a SCAN operation behind the scenes
 
 query {
   listFlights(limit:2, filter: {
     departureDate: {
-      beginsWith: "2019-01-16T10"
+      beginsWith: "2019-12-02T10"
     }
   }){
     items {
@@ -100,10 +100,33 @@ query {
   }
 }
 
+## Fetch all flights to Madrid from London Gatwick - That uses a QUERY operation behind the scenes
+
+query {
+  getFlightBySchedule(
+    arrivalAirportCodeDepartureDate: {
+      beginsWith: {
+        arrivalAirportCode: "MAD", 
+        departureDate: "2019-11-03"
+      }
+    }, 
+    departureAirportCode: "LGW"
+  )
+    {
+      nextToken
+      items {
+        id
+        departureDate
+      }
+    }
+}
+
+
 ## Make a booking
 ###
 
 mutation {
+  # auth user must be Admin
   createBooking(input:{
      status:UNCONFIRMED,
      paymentToken: "adasdasd",
@@ -114,8 +137,6 @@ mutation {
 }
 
 ## Fetch a booking
-### TODO: departureCity in mock will no longer be needed
-
 query {
   getBooking(id:"b46baf62-f9fe-4b0b-b2e3-741f5e11589d") 
   # selection set

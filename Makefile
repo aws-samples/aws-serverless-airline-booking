@@ -18,31 +18,42 @@ init: ##=> Install OS deps and dev tools
 	$(info [*] Bootstrapping CI system...)
 	@$(MAKE) _install_os_packages
 
-outputs: ##=> Fetch SAM stack outputs and save under /tmp
+outputs: ##=> Fetch SAM stack outputs
 	$(MAKE) outputs.payment
 
-outputs.payment: ##=> Fetch SAM stack outputs
-	 aws cloudformation describe-stacks --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --query 'Stacks[0].Outputs' > /tmp/payment-stack.json
-
-outputs.vue: ##=> Converts Payments output stack to Vue env variables
-	cat /tmp/payment-stack.json | jq -r '.[] | "VUE_APP_" + .OutputKey + "=\"" + (.OutputValue|tostring) + "\""'  > src/frontend/.env
+outputs.payment: ##=> Converts Payments output stack to Vue env variables
+	 aws cloudformation describe-stacks --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --query 'Stacks[0].Outputs[?OutputKey==`PaymentChargeUrl`].OutputValue' | jq -r '.[] | "VUE_APP_PaymentChargeUrl" + "=\"" + (.|tostring) + "\""' >> src/frontend/.env
+	 cat src/frontend/.env
 
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
+	$(MAKE) deploy.log-processing
+	$(MAKE) deploy.etl
 
 delete: ##=> Delete services
-	$(MAKE) deploy.booking
-	$(MAKE) deploy.payment
-	$(MAKE) deploy.loyalty
+	$(MAKE) delete.booking
+	$(MAKE) delete.payment
+	$(MAKE) delete.loyalty
+	$(MAKE) delete.log-processing
+	$(MAKE) delete.etl
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
 
 delete.payment: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
+
+delete.loyalty: ##=> Delete booking service
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
+
+delete.log-processing:
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
+
+delete.etl:
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-etl-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -56,11 +67,11 @@ deploy.booking: ##=> Deploy booking service using SAM
 			--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM \
 			--parameter-overrides \
-				BookingTable=$${BOOKING_TABLE_NAME} \
-				FlightTable=$${FLIGHT_TABLE_NAME} \
-				CollectPaymentFunction=/service/payment/collect-function/$${AWS_BRANCH} \
-				RefundPaymentFunction=/service/payment/refund-function/$${AWS_BRANCH} \
-				AppsyncApiId=$${GRAPHQL_API_ID} \
+				BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
+				FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
+				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
+				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
+				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
 				Stage=$${AWS_BRANCH}
 
 deploy.payment: ##=> Deploy payment service using SAM
@@ -74,9 +85,7 @@ deploy.payment: ##=> Deploy payment service using SAM
 			--template-file packaged.yaml \
 			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides \
-				Stage=$${AWS_BRANCH} \
-				StripeKey=$${STRIPE_SECRET_KEY}
+			--parameter-overrides Stage=$${AWS_BRANCH}
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)
@@ -91,9 +100,17 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 			--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM \
 			--parameter-overrides \
-				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
+				BookingSNSTopic=/$${AWS_BRANCH}/service/booking/topic \
 				Stage=$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID}
+
+deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
+	$(info [*] Packaging and deploying Loyalty service...)
+	cd src/backend/log-processing && \
+		sam deploy \
+			--template-file template.yaml \
+			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
+			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
 deploy.etl: ##=> Deploy etl service using SAM
 	$(info [*] Packaging and deploying ETL service...)
@@ -111,6 +128,14 @@ deploy.etl: ##=> Deploy etl service using SAM
 				FlightTable=$${FLIGHT_TABLE_NAME} \
 				Stage=$${AWS_BRANCH}
 
+export.parameter:
+	$(info [+] Adding new parameter named "${NAME}")
+	aws ssm put-parameter \
+		--name "$${NAME}" \
+		--type "String" \
+		--value "$${VALUE}" \
+		--overwrite
+
 #############
 #  Helpers  #
 #############
@@ -118,15 +143,42 @@ deploy.etl: ##=> Deploy etl service using SAM
 _install_os_packages:
 	$(info [*] Installing jq...)
 	yum install jq -y
-	$(info [*] Upgrading Python PIP, SAM CLI and CloudFormation linter...)
-	python3 -m pip install --upgrade pip cfn-lint aws-sam-cli
+	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to the latest version...)
+	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
 
 define HELP_MESSAGE
+
+	Environment variables:
+
+	These variables are automatically filled at CI time except STRIPE_SECRET_KEY
+	If doing a dirty/individual/non-ci deployment locally you'd need them to be set
+
+	AWS_BRANCH: "dev"
+		Description: Feature branch name used as part of stacks name; added by Amplify Console by default
+	FLIGHT_TABLE_NAME: "Flight-hnxochcn4vfdbgp6zaopgcxk2a-xray"
+		Description: Flight Table name created by Amplify for Catalog service
+	STACK_NAME: "awsserverlessairline-twitch-20190705130553"
+		Description: Stack Name already deployed; used for dirty/individual deployment
+	DEPLOYMENT_BUCKET_NAME: "a_valid_bucket_name"
+		Description: S3 Bucket name used for deployment artifacts
+	GRAPHQL_API_ID: "hnxochcn4vfdbgp6zaopgcxk2a"
+		Description: AppSync GraphQL ID already deployed
+	BOOKING_TABLE_NAME: "Booking-hnxochcn4vfdbgp6zaopgcxk2a-xray"
+		Description: Flight Table name created by Amplify for Booking service
+	STRIPE_SECRET_KEY: "sk-test-asdf..."
+		Description: Stripe Private Secret Key generated in Stripe; manually added in Amplify Console Env Variables per App
+
 	Common usage:
 
-	...::: Bootstraps environment with necessary tools like SAM and Pipenv :::...
+	...::: Bootstraps environment with necessary tools like SAM CLI, cfn-lint, etc. :::...
 	$ make init
 
 	...::: Deploy all SAM based services :::...
 	$ make deploy
+
+	...::: Delete all SAM based services :::...
+	$ make delete
+
+	...::: Export parameter and its value to System Manager Parameter Store :::...
+	$ make export.parameter NAME="/env/service/amplify/api/id" VALUE="xzklsdio234"
 endef

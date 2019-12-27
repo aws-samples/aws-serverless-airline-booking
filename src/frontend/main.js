@@ -11,17 +11,32 @@ import store from "./store";
 import "./styles/quasar.styl";
 import "quasar-extras/animate";
 import "quasar-extras/material-icons";
-import Quasar, { Loading, QSpinnerPuff } from "quasar";
+import Quasar, { Loading, QSpinnerPuff, uid, Notify } from "quasar";
 
 import Amplify, * as AmplifyModules from "aws-amplify";
 import { AmplifyPlugin } from "aws-amplify-vue";
 import aws_exports from "./aws-exports";
 Amplify.configure(aws_exports);
 
+Amplify.configure({
+  API: {
+    graphql_headers: async () => ({
+      "x-correlation-id": uid() // experiment with X-AMZN-Trace-Id
+    })
+  }
+});
+
 Vue.use(AmplifyPlugin, AmplifyModules);
 
 Vue.use(Quasar, {
-  config: {}
+  config: {
+    notify: {
+      position: "top",
+      timeout: 0,
+      textColor: "white",
+      closeBtn: "Dismiss"
+    }
+  }
 });
 
 // Set default loader for views

@@ -1,11 +1,16 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   loyalty service
-  
+
 Globals:
   Function:
     Timeout: 5
+    Tracing: Active
+    MemorySize: 512
+  Api:
+    TracingEnabled: true
+    EndpointConfiguration: REGIONAL
 
 Parameters:
   Stage:
@@ -17,15 +22,14 @@ Parameters:
     Description: Booking SVC SNS Topic
 
   AppsyncApiId:
-      Type: String
-      Description: AWS AppSync API ID
-
+    Type: String
+    Description: AWS AppSync API ID
 
 Resources:
   LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub LoyaltyData-${AWS::StackName}
+      TableName: !Sub Airline-LoyaltyData-${Stage}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: customerId
@@ -45,13 +49,14 @@ Resources:
             - AttributeName: flag
               KeyType: RANGE
           Projection:
-              ProjectionType: ALL
+            ProjectionType: ALL
       SSESpecification:
-        SSEEnabled:  yes
+        SSEEnabled: yes
 
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
       Runtime: nodejs8.10
@@ -61,6 +66,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
       Events:
         Listener:
           Type: SNS
@@ -73,6 +79,7 @@ Resources:
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub Airline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
       Runtime: nodejs8.10
@@ -82,6 +89,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
       Events:
         Api:
           Type: Api
@@ -89,32 +97,32 @@ Resources:
             Method: GET
             Path: /loyalty/{customerId}
             RestApiId: !Ref LoyaltyApi
-  
+
   LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Sub "/service/loyalty/api-endpoint/${Stage}"
+      Name: !Sub "/${Stage}/service/loyalty/api/url"
       Type: String
       Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
   LoyaltyApi:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub 'LoyaltyApi-${Stage}'
+      Name: !Sub Airline-Loyalty-${Stage}
       StageName: Prod
       # Cors:
       #   AllowOrigin: "'*'"
       #   AllowHeaders:
       #     "'Content-Type,Authorization,X-Amz-Date'"
       #   MaxAge: "'600'"
-      #TracingEnabled: True
+      TracingEnabled: True
       # AccessLogSetting:
       #   - DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group/custom_log_group_name"
       #     Format: "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId"
       MethodSettings:
         - MetricsEnabled: True
-          ResourcePath: '/*'
-          HttpMethod: '*'
+          ResourcePath: "/*"
+          HttpMethod: "*"
           ThrottlingRateLimit: 100
           ThrottlingBurstLimit: 50
       Auth:
@@ -131,57 +139,57 @@ Resources:
         paths:
           "/loyalty/{customerId}":
             get:
-              summary: 'Fetch customer loyalty points'
+              summary: "Fetch customer loyalty points"
               parameters:
-              - name: "customerId"
-                in: "path"
-                required: true
-                type: "string"
+                - name: "customerId"
+                  in: "path"
+                  required: true
+                  type: "string"
               x-amazon-apigateway-integration:
                 httpMethod: POST
                 type: aws_proxy
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFunc.Arn}/invocations
 
- # Resources for API Gateway integration with AppSync
+  # Resources for API Gateway integration with AppSync
 
   AppsyncLoyaltyRestApiIamRole:
-      Type: AWS::IAM::Role
-      Properties:
-        AssumeRolePolicyDocument:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LoyaltyApiInvoke
+          PolicyDocument:
             Version: 2012-10-17
             Statement:
-                - Effect: Allow
-                  Principal:
-                      Service: appsync.amazonaws.com
-                  Action: sts:AssumeRole
-        Path: /
-        Policies:
-            - PolicyName: LoyaltyApiInvoke
-              PolicyDocument:
-                  Version: 2012-10-17
-                  Statement:
-                  - Effect: Allow
-                    Action:
-                      - execute-api:Invoke
-                    # arn:aws:execute-api:region:account-id:api-id/stage/METHOD_HTTP_VERB/Resource-path
-                    Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${LoyaltyApi}/*/*/*
+              - Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                # arn:aws:execute-api:region:account-id:api-id/stage/METHOD_HTTP_VERB/Resource-path
+                Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${LoyaltyApi}/*/*/*
 
   AppsyncLoyaltyApiDataSource:
-      Type: AWS::AppSync::DataSource
-      Properties:
-        ApiId: !Ref AppsyncApiId
-        Name: LoyaltyRestApi
-        Description: Loyalty REST API Gateway
-        Type: HTTP
-        ServiceRoleArn: !GetAtt AppsyncLoyaltyRestApiIamRole.Arn
-        HttpConfig:
-            Endpoint: !Sub https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com
-            AuthorizationConfig:
-                AuthorizationType: AWS_IAM
-                AwsIamConfig:
-                    SigningRegion: !Ref AWS::Region
-                    SigningServiceName: execute-api
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !Ref AppsyncApiId
+      Name: LoyaltyRestApi
+      Description: Loyalty REST API Gateway
+      Type: HTTP
+      ServiceRoleArn: !GetAtt AppsyncLoyaltyRestApiIamRole.Arn
+      HttpConfig:
+        Endpoint: !Sub https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com
+        AuthorizationConfig:
+          AuthorizationType: AWS_IAM
+          AwsIamConfig:
+            SigningRegion: !Ref AWS::Region
+            SigningServiceName: execute-api
 
   GetLoyaltyQueryResolver:
     Type: AWS::AppSync::Resolver
