@@ -1,8 +1,9 @@
 const etlBucketName = process.env.ETL_BUCKET_NAME;
+const flightsPerDay = process.env.FLIGHTS_PER_DAY;
 const AWS = require('aws-sdk');
 const Combinatorics = require('js-combinatorics');
 const s3 = new AWS.S3();
-const chunks = 10;
+const chunks = Math.ceil(flightsPerDay/2/10);
 
 exports.create = async (event, context) => {
 
@@ -23,8 +24,14 @@ exports.create = async (event, context) => {
   console.log("Number of airports: ", airports.length);
 
   //Generate flight routes by getting all possible combinations of airport pairs
-  const flightRoutes = Combinatorics.bigCombination(airports,2).toArray();
-  console.log("number of combinations: ", flightRoutes.length);
+  const allFlightRoutes = Combinatorics.bigCombination(airports,2).toArray();
+  console.log("number of combinations: ", allFlightRoutes.length);
+
+  //Reduce flight routes based on config
+  const flightRoutes = allFlightRoutes.splice(0, flightsPerDay/2);
+  console.log("number of flights per day: ", flightsPerDay);
+  console.log("number of flight routes to upload: ", flightRoutes.length);
+  console.log("Number of chunks", chunks);
   const routeChunks = chunkArray(flightRoutes, chunks);
 
   console.log("Uploading %i chunks to S3", routeChunks.length);

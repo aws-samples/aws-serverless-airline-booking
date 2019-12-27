@@ -13,6 +13,12 @@ Parameters:
     Type: String
     Description: Flight Table
 
+  FlightsPerDay:
+    Type: Number
+    Description: Number of Flights to be created per day (multiples of 2)
+    Default: 10
+    MaxValue: 240
+
   Stage:
     Type: String
     Description: Environment stage or git branch
@@ -33,7 +39,7 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: airport.add
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Policies:
         - S3CrudPolicy:
             BucketName: !Ref ETLBucket
@@ -46,7 +52,7 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: flightRoutes.create
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 300
       MemorySize: 512
       Policies:
@@ -55,13 +61,14 @@ Resources:
       Environment:
         Variables:
           ETL_BUCKET_NAME: !Ref ETLBucket
+          FLIGHTS_PER_DAY: !Ref FlightsPerDay
 
   GenerateFlightsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
       Handler: flights.generate
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 900
       Policies:
         - S3CrudPolicy:
@@ -75,7 +82,7 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: flightsdb.addToDatabase
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       Timeout: 900
       Policies:
         - S3CrudPolicy:
