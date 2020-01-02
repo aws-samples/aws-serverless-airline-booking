@@ -28,7 +28,7 @@ Resources:
   ETLBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub etl-bucket-${AWS::StackName}
+      # BucketName: !Sub etl-bucket-${AWS::StackName}
       LifecycleConfiguration:
         Rules:
           - ExpirationInDays: 30
