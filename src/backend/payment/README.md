@@ -23,10 +23,6 @@ Resource | Method | Description
 /capture | POST | Capture pre-authorized payment by invoking [CaptureStripeCharge Lambda function](https://github.com/simalexan/api-lambda-stripe-charge/blob/master/capture.js). It expects `chargeId` with the previously captured payment token - See [Stripe specification](https://stripe.com/docs/api/charges/capture) for response values.
 /refund | POST | Refund existing payment by invoking [CreateRefund Lambda function](https://github.com/simalexan/api-lambda-stripe-charge/blob/master/refund.js). It expects `chargeId` with the previously captured payment token - See [Stripe specification](https://stripe.com/docs/api/refunds/create) for response values.
 
-#### Operations
-
-Lambda Stripe Charge has X-Ray tracing enabled by default in the `Prod` stage of the API Gateway. It doesn't create additional metrics for payment operations hence the need for our Lambda functions.
-
 ### Collect and Refund functions
 
 Both functions call our Lambda Stripe Charge API as part of the [Booking](../booking/README.md) business workflow to collect previous pre-authorizations and refund should a booking isn't successful.

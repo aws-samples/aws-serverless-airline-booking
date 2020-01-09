@@ -21,10 +21,6 @@ Resource | Method | Description
 
 It enforces `IAM` authorization - See integration for more details on why.
 
-#### Operations
-
-Throttling and X-Ray are enabled in `Prod` stage. Detailed metrics are also enabled.
-
 ### Get and Ingest functions
 
 `Get` function fetches loyalty data from DynamoDB and calculates tier progress. `Ingest` calculates loyalty points from a confirmed booking.
@@ -32,10 +28,6 @@ Throttling and X-Ray are enabled in `Prod` stage. Detailed metrics are also enab
 #### Configuration
 
 Both functions use `TABLE_NAME` as environment variable. `Get` function is invoked via API Gateway. `Ingest` function is invoked via SNS topic.
-
-#### Operations
-
-Both functions have X-Ray enabled and basic instrumentation, no custom subsegments or annotations yet. No custom metrics or structured logging at this point too.
 
 ## Integrations
 

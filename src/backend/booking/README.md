@@ -13,7 +13,7 @@ Booking API provides create, update, read and list (CRUD) operations on Bookings
 
 #### Configuration
 
-CRUD operations are auto-generated using Amplify off our [API schema](../../../amplify/backend/api/awsserverlessairline/schema.graphql). 
+CRUD operations are auto-generated using Amplify off our [API schema](../../../amplify/backend/api/awsserverlessairline/schema.graphql).
 
 Operation | Name | Description
 ------------------------------------------------- | ---------------------- | --------------------------------------------------------------------
@@ -45,21 +45,25 @@ type Booking
 }
 ```
 
-#### Operations
-
-Access Logs and Server-side caching are not currently being used to prevent additional charges. When Access Logs is enabled, [you can use CloudWatch Log Insights to search across fully structured logs on all GraphQL API operations](https://aws.amazon.com/blogs/mobile/getting-more-visibility-into-graphql-performance-with-aws-appsync-logs/), including resolver and data statistics. 
-
 ### Booking state machine
 
-TBW
+Booking state machine handles all operations necessary to create bookings including payment. We use Saga pattern to demonstrate how to implement coordinated transactions, fallback transactions, and dead-letter-queue as part of a state machine.
+
+![Process Booking State Machine](../../../media/booking-state-machine.png)
 
 #### Configuration
 
-TBW
+Access Logs and Server-side caching are not currently being used to prevent additional charges. When Access Logs is enabled, [you can use CloudWatch Log Insights to search across fully structured logs on all GraphQL API operations](https://aws.amazon.com/blogs/mobile/getting-more-visibility-into-graphql-performance-with-aws-appsync-logs/), including resolver and data statistics. 
 
-#### Operations
+The state machine uses a combination of service integration with DynamoDB and SQS and Lambda functions. 
 
-Both functions have X-Ray enabled and basic instrumentation, no custom subsegments or annotations yet. No custom metrics or structured logging at this point too.
+Task | Resource | Description
+------------------------------------------------- | ---------------------- | --------------------------------------------------------------------
+Reserve Flight | DynamoDB integration | Updates Flight table to conditionally decrease `seatCapacity` field for a given flight
+Reserve Booking | Reserve Booking function | Creates a booking as `UNCONFIRMED` in the Booking table
+Collect Payment | Collect Payment function | Collects payment from a pre-authorized charge token
+Confirm Booking | Confirm Booking function | Confirms booking and set status to `CONFIRMED` in the Booking table
+Notify Booking Confirmed | Notify Booking function | Publishes a message to Booking SNS topic
 
 ## Integrations
 
