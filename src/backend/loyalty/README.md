@@ -23,11 +23,9 @@ It enforces `IAM` authorization - See integration for more details on why.
 
 ### Get and Ingest functions
 
-`Get` function fetches loyalty data from DynamoDB and calculates tier progress. `Ingest` calculates loyalty points from a confirmed booking.
+`Get` function fetches loyalty data from DynamoDB and calculates tier progress. `Ingest` calculates loyalty points from a confirmed booking. Both use `TABLE_NAME` as environment variable. `Get` function is invoked via API Gateway. `Ingest` function is invoked via SNS topic.
 
-#### Configuration
-
-Both functions use `TABLE_NAME` as environment variable. `Get` function is invoked via API Gateway. `Ingest` function is invoked via SNS topic.
+No custom metrics being emitted as of now.
 
 ## Integrations
 

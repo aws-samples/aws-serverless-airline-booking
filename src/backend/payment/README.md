@@ -25,15 +25,16 @@ Resource | Method | Description
 
 ### Collect and Refund functions
 
-Both functions call our Lambda Stripe Charge API as part of the [Booking](../booking/README.md) business workflow to collect previous pre-authorizations and refund should a booking isn't successful.
+Both functions call our Lambda Stripe Charge API as part of the [Booking](../booking/README.md) business workflow to collect previous pre-authorizations and refund should a booking isn't successful. `PAYMENT_API_URL` environment variable defined SAR App API URL.
 
-#### Configuration
+Custom metrics currently emitted to CloudWatch:
 
-Both functions use `PAYMENT_API_URL` environment variable  to call SAR App API. 
-
-#### Operations
-
-X-Ray, structured logging and custom metrics are implemented via Lambda powertools. Custom metrics created are `InvalidPaymentRequest`, `SuccessfulPayment` and `FailedPayment`
+Metric | Description | Dimensions
+------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
+ColdStart | Number of cold start executions | `function_name`, `service`
+InvalidPaymentRequest | Number of payment transactions that didn't include pre-authorization/authorization charge token | `operation`, `service`
+SuccessfulPayment | Number of payments successfully collected from confirmed bookings | `service`
+FailedPayment | Number of payments that failed to be collected from confirmed bookings e.g. payment already collected from charge token | `service` 
 
 ### Parameter store
 

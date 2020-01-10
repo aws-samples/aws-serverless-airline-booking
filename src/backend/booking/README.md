@@ -65,6 +65,20 @@ Collect Payment | Collect Payment function | Collects payment from a pre-authori
 Confirm Booking | Confirm Booking function | Confirms booking and set status to `CONFIRMED` in the Booking table
 Notify Booking Confirmed | Notify Booking function | Publishes a message to Booking SNS topic
 
+Custom metrics currently emitted to CloudWatch:
+
+Metric | Description | Dimensions
+------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
+ColdStart | Number of cold start executions | `function_name`, `service`
+InvalidBookingRequest | Number of booking transactions that didn't include booking ID | `operation`, `service`
+SuccessfulCancellation | Number of successful booking cancellations | `service`
+FailedCancellation | Number of booking that failed to be cancelled  | `service`
+SuccessfulBooking | Number of bookings confirmed successfully | `service` 
+SuccessfulNotification | Number of booking notifications successfully delivered to customers | `service` 
+FailedNotification | Number of booking notifications that failed to be delivered to customers | `service` 
+SuccessfulReservation | Number of successful booking reservations | `service` 
+FailedReservation | Number of bookings that failed to be reserved | `service` 
+
 ## Integrations
 
 ### Front-end
