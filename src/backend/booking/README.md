@@ -85,4 +85,6 @@ See [Payment integration section for more information](../payment/README.md)
 
 ### Decisions log
 
-TBW
+Decision | Description | Timeframe
+------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
+State Machine for booking process | Primarily to illustrate Saga in practice including handling failed overall executions with a DLQ. This should be simplified after re:Invent 2019, specially booking confirmation. | During Twitch season (Apr-Aug '19)
