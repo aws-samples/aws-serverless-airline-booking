@@ -69,7 +69,15 @@ Notify Booking Confirmed | Notify Booking function | Publishes a message to Book
 
 ### Front-end
 
-TBW
+Booking provides a [GraphQL Booking data type and a getBookingByStatus query](../../../amplify/backend/api/awsserverlessairline/schema.graphql). Using `@key`, Booking implements a Global Secondary Index (GS) to fetch booking by customer and status using `getBookingByStatus` query as opposed to `listBookings` scan operation.
+
+Flight IDs are stored in Booking table and fetched via `@connection` that effectively queries a separate table (Flight from Catalog) using a GSI.
+
+![Booking front-end integration](../../../media/booking-frontend-integration.png)
+
+### Loyalty
+
+See [Loyalty integration section for more information](../loyalty/README.md)
 
 ### Payment
 
