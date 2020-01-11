@@ -37,7 +37,7 @@ type Flight
 type Booking 
     @model(subscriptions: null) 
     @auth(rules: [
-      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
+      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read]},
       {allow: groups, groups: ["Admin"]}
     ])
     @key(name: "ByCustomerStatus", 

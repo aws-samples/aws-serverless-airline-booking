@@ -25,6 +25,7 @@ backend:
         - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
         - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
+        - export STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY:-UNDEFINED}
         ##
         # Export key deployed resources to System Manager Parameter Store
         ##
@@ -38,6 +39,7 @@ backend:
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/publicKey" VALUE=${STRIPE_PUBLIC_KEY}
         ##
         # Deploy SAM based back-end
         ##
@@ -46,6 +48,9 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Expose Stripe public key as a VueJS runtime env
+        - export STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY:-UNDEFINED}
+        - echo "VUE_APP_StripePublicKey=${STRIPE_PUBLIC_KEY}" >> src/frontend/.env
         ##
         # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
         ##

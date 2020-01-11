@@ -38,14 +38,13 @@ At the end of the first deployment, you should have a new URL where you can visi
 
 **Public key for tokenizing card data during flight booking**
 
-1. Within your fork, open front-end environment variable file **`src/frontend/.env`**
-2. Update the value of **`VUE_APP_StripePublicKey`** with your Stripe public key
+1. Within [AWS Amplify Console](https://console.aws.amazon.com/amplify/home), select your App and expand ``Environment Variables``
+2. Add **`STRIPE_PUBLIC_KEY`** environment variable and its value
 
 **Secret key for collecting pre-authorized charges**
 
 1. Within [AWS Amplify Console](https://console.aws.amazon.com/amplify/home), select your App and expand ``Environment Variables``
 2. Add **`STRIPE_SECRET_KEY`** environment variable and its value
-
 
 ### Adding your first flight
 
