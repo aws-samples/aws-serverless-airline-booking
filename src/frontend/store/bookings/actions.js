@@ -10,6 +10,9 @@ import {
   getBookingByStatus
 } from "./graphql";
 
+const paymentEndpoint =
+  process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set";
+
 /**
  *
  * Booking [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchBooking retrieves all bookings for current authenticated customer.
@@ -122,15 +125,12 @@ export async function createBooking(
 ) {
   console.group("store/bookings/actions/createBooking");
   try {
-    let paymentEndpoint =
-      process.env.VUE_APP_PaymentChargeUrl || "no payment gateway endpoint set";
     const customerEmail = rootState.profile.user.attributes.email;
 
     console.info(
       `Processing payment before proceeding to booking for flight ${outboundFlight}`
     );
     let chargeToken = await processPayment({
-      endpoint: paymentEndpoint,
       paymentToken,
       outboundFlight,
       customerEmail
@@ -161,7 +161,6 @@ export async function createBooking(
  * Process Payment function - processPayment calls Payment endpoint to pre-authorize charge upon tokenized payment details
  *
  * @param {object} obj - Object containing params to process payment
- * @param {string} obj.endpoint - Payment endpoint
  * @param {object} obj.paymentToken - Tokenized payment info
  * @param {object} obj.paymentToken.details - Tokenized payment details including last4, id, etc.
  * @param {object} obj.paymentToken.id - Payment token
@@ -170,18 +169,12 @@ export async function createBooking(
  * @returns {promise} - Promise representing whether payment was successfully pre-authorized
  * @example
  *   let chargeToken = await processPayment({
- *      endpoint: paymentEndpoint,
  *      paymentToken,
  *      outboundFlight,
  *      customerEmail
  *   });
  */
-async function processPayment({
-  endpoint,
-  paymentToken,
-  outboundFlight,
-  customerEmail
-}) {
+async function processPayment({ paymentToken, outboundFlight, customerEmail }) {
   console.group("store/bookings/actions/processPayment");
   Loading.show({
     message: "Charging a pre-authorization..."
@@ -200,7 +193,7 @@ async function processPayment({
   console.log("Charge data to be processed");
   console.log(chargeData);
   try {
-    const data = await axios.post(endpoint, chargeData);
+    const data = await axios.post(paymentEndpoint, chargeData);
     const {
       data: {
         createdCharge: { id: chargeId }
