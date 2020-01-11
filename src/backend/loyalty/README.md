@@ -50,7 +50,7 @@ Upon a successful booking confirmation, Booking sends booking data to Loyalty SN
 ![Booking integration](../../../media/loyalty-booking-integration.png)
 
 
-### Decisions log
+## Decisions log
 
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------

@@ -60,7 +60,7 @@ Process Booking state machine invokes `Collect` and `Refund` function as part of
 
 ![Booking state machine](../../../media/booking-state-machine.png)
 
-### Decisions log
+## Decisions log
 
 Almost as a tech debt record, this help us understand why certain patterns were implemented over others.
 

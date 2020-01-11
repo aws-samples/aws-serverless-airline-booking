@@ -56,7 +56,7 @@ Catalog provides a [GraphQL Flight data type and a getFlightBySchedule query](..
 
 ![Catalog front-end integration](../../../media/catalog-frontend-integration.png)
 
-### Decisions log
+## Decisions log
 
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------

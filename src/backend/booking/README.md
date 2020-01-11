@@ -106,7 +106,7 @@ See [Loyalty integration section for more information](../loyalty/README.md)
 
 See [Payment integration section for more information](../payment/README.md)
 
-### Decisions log
+## Decisions log
 
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
