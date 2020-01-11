@@ -27,6 +27,14 @@ It enforces `IAM` authorization - See integration for more details on why.
 
 No custom metrics being emitted as of now.
 
+### Parameter store
+
+`{env}` being a git branch from where deployment originates (e.g. twitch):
+
+Parameter | Description
+------------------------------------------------- | ---------------------------------------------------------------------------------
+/{env}/service/loyalty/api/url" | Loyalty REST API url
+
 ## Integrations
 
 ### Front-end

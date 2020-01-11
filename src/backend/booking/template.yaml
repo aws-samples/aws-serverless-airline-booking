@@ -429,7 +429,7 @@ Resources:
     ProcessBookingParameter:
         Type: "AWS::SSM::Parameter"
         Properties:
-            Name: !Sub /${Stage}/service/booking/stateMachine
+            Name: !Sub /${Stage}/service/booking/statemachine/processBooking
             Description: Step Functions State Machine ARN
             Type: String
             Value: !Ref ProcessBooking
@@ -437,7 +437,7 @@ Resources:
     BookingTopicParameter:
         Type: "AWS::SSM::Parameter"
         Properties:
-            Name: !Sub /${Stage}/service/booking/topic
+            Name: !Sub /${Stage}/service/booking/messaging/bookingTopic
             Description: Booking SNS Topic ARN
             Type: String
             Value: !Ref BookingTopic

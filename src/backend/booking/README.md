@@ -79,6 +79,15 @@ FailedNotification | Number of booking notifications that failed to be delivered
 SuccessfulReservation | Number of successful booking reservations | `service` 
 FailedReservation | Number of bookings that failed to be reserved | `service` 
 
+### Parameter store
+
+`{env}` being a git branch from where deployment originates (e.g. twitch):
+
+Parameter | Description
+------------------------------------------------- | ---------------------------------------------------------------------------------
+/{env}/service/booking/statemachine/processBooking | Process Booking Step Functions State Machine ARN
+/{env}/service/booking/messaging/bookingTopic | SNS Topic ARN for booking operations
+
 ## Integrations
 
 ### Front-end
@@ -102,3 +111,4 @@ See [Payment integration section for more information](../payment/README.md)
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 State Machine for booking process | Primarily to illustrate Saga in practice including handling failed overall executions with a DLQ. This should be simplified after re:Invent 2019, specially booking confirmation. | During Twitch season (Apr-Aug '19)
+
