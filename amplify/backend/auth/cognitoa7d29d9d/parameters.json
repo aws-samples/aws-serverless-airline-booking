@@ -31,12 +31,10 @@
     "userpoolClientGenerateSecret": true,
     "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [
+        "phone_number",
         "email",
         "family_name",
-        "given_name",
-        "phone_number",
-        "custom:luggage_preference",
-        "custom:meal_preference"
+        "given_name"
     ],
     "userpoolClientReadAttributes": [
         "email",
@@ -44,14 +42,12 @@
         "given_name",
         "phone_number",
         "email_verified",
-        "phone_number_verified",
-        "custom:luggage_preference",
-        "custom:meal_preference"
+        "phone_number_verified"
     ],
     "userpoolClientLambdaRole": "cognitoa7d29d9d_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": true,
     "roleExternalId": "cognitoa7d29d9d_role_external_id",
-    "useDefault": "default",
+    "useDefault": "manual",
     "authSelections": "identityPoolAndUserPool",
     "resourceName": "cognitoa7d29d9d",
     "authRoleArn": {
@@ -72,5 +68,9 @@
     "parentStack": {
         "Ref": "AWS::StackId"
     },
-    "permissions": []
+    "permissions": [],
+    "thirdPartyAuth": false,
+    "userPoolGroups": false,
+    "adminQueries": false,
+    "userPoolGroupList": []
 }
