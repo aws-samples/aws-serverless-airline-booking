@@ -34,7 +34,9 @@
         "phone_number",
         "email",
         "family_name",
-        "given_name"
+        "given_name",
+        "custom:luggage_preference",
+        "custom:meal_preference"
     ],
     "userpoolClientReadAttributes": [
         "email",
@@ -42,7 +44,9 @@
         "given_name",
         "phone_number",
         "email_verified",
-        "phone_number_verified"
+        "phone_number_verified",
+        "custom:luggage_preference",
+        "custom:meal_preference"
     ],
     "userpoolClientLambdaRole": "cognitoa7d29d9d_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": true,
