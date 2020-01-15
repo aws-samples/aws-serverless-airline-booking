@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/osx,node,linux,python,windows,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=osx,node,linux,python,windows,visualstudiocode
 
@@ -305,19 +304,6 @@ dist/
 # local env files
 .env.local
 .env.*.local
-
-#amplify
-amplify/\#current-cloud-backend
-amplify/.config/local-*
-amplify/backend/amplify-meta.json
-amplify/backend/awscloudformation
-amplify/backend/api/*/resolvers
-build/
-dist/
-node_modules/
-aws-exports.js
-awsconfiguration.json
-schema.json
 
 # Custom
 TEMPORARY/
@@ -633,3 +619,18 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/node,linux,macos,python,windows,visualstudiocode
 amplify/mock-data
+
+#amplify
+amplify/\#current-cloud-backend
+amplify/.config/local-*
+amplify/mock-data
+amplify/backend/amplify-meta.json
+amplify/backend/awscloudformation
+build/
+dist/
+node_modules/
+aws-exports.js
+awsconfiguration.json
+amplifyconfiguration.json
+amplify-gradle-config.json
+amplifyxc.config
