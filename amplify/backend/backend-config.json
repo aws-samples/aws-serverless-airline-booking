@@ -1,9 +1,10 @@
 {
 	"auth": {
-		"cognitoa7d29d9d": {
+		"awsserverlessairline44ea6421": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation",
-			"dependsOn": []
+			"dependsOn": [],
+			"customAuth": false
 		}
 	},
 	"api": {
@@ -16,12 +17,11 @@
 					"defaultAuthentication": {
 						"authenticationType": "AMAZON_COGNITO_USER_POOLS",
 						"userPoolConfig": {
-							"userPoolId": "authcognitoa7d29d9d"
+							"userPoolId": "authawsserverlessairline44ea6421"
 						}
 					}
 				}
 			}
 		}
-	},
-	"function": {}
+	}
 }
