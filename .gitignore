@@ -621,3 +621,8 @@ dist/
 node_modules/
 aws-exports.js
 awsconfiguration.json
+
+## Frontend
+src/frontend/graphql
+src/backend
+datasources.json

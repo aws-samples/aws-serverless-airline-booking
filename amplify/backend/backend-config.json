@@ -1,6 +1,6 @@
 {
 	"auth": {
-		"airlineworkshop827454db": {
+		"airlineworkshopb9c87969": {
 			"service": "Cognito",
 			"providerPlugin": "awscloudformation",
 			"dependsOn": []

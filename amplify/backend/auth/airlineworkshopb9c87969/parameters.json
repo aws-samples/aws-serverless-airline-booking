@@ -1,8 +1,8 @@
 {
-    "identityPoolName": "airlineworkshop827454db_identitypool_827454db",
+    "identityPoolName": "airlineworkshopb9c87969_identitypool_b9c87969",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "airlin827454db",
-    "userPoolName": "airlineworkshop827454db_userpool_827454db",
+    "resourceNameTruncated": "airlinb9c87969",
+    "userPoolName": "airlineworkshopb9c87969_userpool_b9c87969",
     "autoVerifiedAttributes": [
         "email"
     ],
@@ -18,9 +18,7 @@
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [],
     "requiredAttributes": [
-        "email",
-        "family_name",
-        "given_name"
+        "email"
     ],
     "userpoolClientGenerateSecret": true,
     "userpoolClientRefreshTokenValidity": 30,
@@ -30,9 +28,9 @@
     "userpoolClientReadAttributes": [
         "email"
     ],
-    "userpoolClientLambdaRole": "airlin827454db_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "airlinb9c87969_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "resourceName": "airlineworkshop827454db",
+    "resourceName": "airlineworkshopb9c87969",
     "authSelections": "identityPoolAndUserPool",
     "authRoleArn": {
         "Fn::GetAtt": [
@@ -47,10 +45,6 @@
         ]
     },
     "useDefault": "default",
-    "triggers": "{}",
-    "parentStack": {
-        "Ref": "AWS::StackId"
-    },
-    "permissions": [],
+    "userPoolGroupList": [],
     "dependsOn": []
 }
