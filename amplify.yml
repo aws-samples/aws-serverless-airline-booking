@@ -3,10 +3,10 @@ backend:
   phases:
     preBuild:
       commands:
-        - npm install -g @aws-amplify/cli@3.16.0 # pinned known working version
+        - npm install -g @aws-amplify/cli@4.11.0 # pinned known working version
     build:
       commands:
-        - '# Execute Amplify CLI with the helper script'
+        - "# Execute Amplify CLI with the helper script"
         - amplifyPush --simple
 frontend:
   phases:
@@ -20,8 +20,7 @@ frontend:
   artifacts:
     baseDirectory: src/dist
     files:
-      - '**/*'
+      - "**/*"
   cache:
     paths:
       - src/node_modules/**/*
-
