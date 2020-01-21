@@ -59,7 +59,7 @@ frontend:
         - ls -l .
         - ls -l src/
         - ls -l src/frontend
-        - test -f src/aws-exports.js && cp src/aws-exports.js src/frontend/ # temporary fix: https://github.com/aws-amplify/amplify-console/issues/342
+        ##- test -f src/aws-exports.js && cp src/aws-exports.js src/frontend/ # temporary fix: https://github.com/aws-amplify/amplify-console/issues/342
         - cd src/frontend
         - npm install
     build:
