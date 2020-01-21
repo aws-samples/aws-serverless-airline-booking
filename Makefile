@@ -67,11 +67,11 @@ deploy.booking: ##=> Deploy booking service using SAM
 			--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM \
 			--parameter-overrides \
-				BookingTable=$${BOOKING_TABLE_NAME} \
-				FlightTable=$${FLIGHT_TABLE_NAME} \
-				CollectPaymentFunction=/service/payment/collect-function/$${AWS_BRANCH} \
-				RefundPaymentFunction=/service/payment/refund-function/$${AWS_BRANCH} \
-				AppsyncApiId=$${GRAPHQL_API_ID} \
+				BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
+				FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
+				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
+				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
+				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
 				Stage=$${AWS_BRANCH}
 
 deploy.payment: ##=> Deploy payment service using SAM
@@ -85,9 +85,7 @@ deploy.payment: ##=> Deploy payment service using SAM
 			--template-file packaged.yaml \
 			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides \
-				Stage=$${AWS_BRANCH} \
-				StripeKey=$${STRIPE_SECRET_KEY}
+			--parameter-overrides Stage=$${AWS_BRANCH}
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)
@@ -102,7 +100,7 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 			--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM \
 			--parameter-overrides \
-				BookingSNSTopic=/service/booking/booking-topic/$${AWS_BRANCH} \
+				BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
 				Stage=$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID}
 
@@ -122,6 +120,14 @@ deploy.perftest: ##=> Deploying Gatling components for performance testing
 		cdk list && \
 		cdk bootstrap && \
 		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
+		
+export.parameter:
+	$(info [+] Adding new parameter named "${NAME}")
+	aws ssm put-parameter \
+		--name "$${NAME}" \
+		--type "String" \
+		--value "$${VALUE}" \
+		--overwrite
 
 #############
 #  Helpers  #
@@ -166,4 +172,7 @@ define HELP_MESSAGE
 
 	...::: Delete all SAM based services :::...
 	$ make delete
+
+	...::: Export parameter and its value to System Manager Parameter Store :::...
+	$ make export.parameter NAME="/env/service/amplify/api/id" VALUE="xzklsdio234"
 endef
