@@ -1,40 +1,38 @@
-export const processBooking = `mutation ProcessBooking($input: CreateBookingInput!) {
-  processBooking(input: $input) {
-    id
-  }
-}
-`
-
-export const listBookings = `query ListBookings(
-  $filter: ModelBookingFilterInput
-  $limit: Int
-  $nextToken: String
-) {
-  listBookings(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    items {
-      id
-      status
-      bookingReference
-      outboundFlight {
+export const processBookingMutation = `mutation ProcessBooking($input: CreateBookingInput!) {
+      processBooking(input: $input) {
         id
-        departureDate
-        departureAirportCode
-        departureAirportName
-        departureCity
-        departureLocale
-        arrivalDate
-        arrivalAirportCode
-        arrivalAirportName
-        arrivalCity
-        arrivalLocale
-        ticketPrice
-        ticketCurrency
-        flightNumber
       }
-      checkedIn
-      createdAt
-    }
-    nextToken
-  }
-}
-`
+    }`
+
+export const listBookingsQuery = `query ListBookings(
+      $filter: ModelBookingFilterInput
+      $limit: Int
+      $nextToken: String
+    ) {
+      listBookings(filter: $filter, limit: $limit, nextToken: $nextToken) {
+        items {
+          id
+          status
+          outboundFlight {
+            id
+            departureDate
+            departureAirportCode
+            departureAirportName
+            departureCity
+            departureLocale
+            arrivalDate
+            arrivalAirportCode
+            arrivalAirportName
+            arrivalCity
+            arrivalLocale
+            ticketPrice
+            ticketCurrency
+            flightNumber
+            seatAllocation
+          }
+          createdAt
+          bookingReference
+        }
+        nextToken
+      }
+    }`

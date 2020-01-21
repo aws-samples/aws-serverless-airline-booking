@@ -3,17 +3,21 @@ import Booking from '../../shared/models/BookingClass'
 import Flight from '../../shared/models/FlightClass'
 // @ts-ignore
 import { Loading } from 'quasar'
+import { processPayment } from './payment';
 import axios from 'axios'
 
 // [GraphQL-Example]
-// import { API, graphqlOperation } from "aws-amplify";
-// import {
-//   processBooking as processBookingMutation,
-//   listBookings
-// } from "./graphql";
+// import { listBookingsQuery, processBookingMutation } from './graphql';
+// const BookingStatus = Object.freeze({ CONFIRMED: 'CONFIRMED' });
+// const bookingFilter = {
+//   filter: {
+//     status: {
+//       eq: BookingStatus.CONFIRMED
+//     }
+//   }
+// };
 
-const paymentEndpoint = 'https://PAYMENT_ENDPOINT'
-// const bookingEndpoint = "https://CATALOG_ENDPOINT"
+const bookingEndpoint = process.env.VUE_APP_BookingEndpoint || 'no booking endpoint set'
 
 /**
  *
@@ -23,21 +27,6 @@ const paymentEndpoint = 'https://PAYMENT_ENDPOINT'
  * @param {object} context - Vuex action context (context.commit, context.getters, context.state, context.dispatch)
  * @returns {promise} - Promise representing whether bookings from Booking service have been updated in the store
  * @see {@link SET_BOOKINGS} for more info on mutation
- * @example
- * // exerpt from src/views/Bookings.vue
- * import { mapState, mapGetters } from "vuex";
- * ...
- * async mounted() {
- *    if (this.isAuthenticated) {
- *       await this.$store.dispatch("bookings/fetchBooking");
- *    }
- * },
- * computed: {
- *    ...mapState({
- *        bookings: state => state.bookings.bookings
- *    }),
- *    ...mapGetters("profile", ["isAuthenticated"])
- * }
  */
 export async function fetchBooking ({ commit, rootState, rootGetters }) {
   Loading.show({
@@ -55,48 +44,6 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
 
   try {
     // [GraphQL-Example]
-    // const BookingStatus = Object.freeze({ CONFIRMED: 'CONFIRMED' });
-    // const bookingFilter = {
-    //   filter: {
-    //     status: {
-    //       eq: BookingStatus.CONFIRMED
-    //     }
-    //   }
-    // };
-
-    // const listBookingsQuery = `query ListBookings(
-    //   $filter: ModelBookingFilterInput
-    //   $limit: Int
-    //   $nextToken: String
-    // ) {
-    //   listBookings(filter: $filter, limit: $limit, nextToken: $nextToken) {
-    //     items {
-    //       id
-    //       status
-    //       outboundFlight {
-    //         id
-    //         departureDate
-    //         departureAirportCode
-    //         departureAirportName
-    //         departureCity
-    //         departureLocale
-    //         arrivalDate
-    //         arrivalAirportCode
-    //         arrivalAirportName
-    //         arrivalCity
-    //         arrivalLocale
-    //         ticketPrice
-    //         ticketCurrency
-    //         flightNumber
-    //         seatAllocation
-    //       }
-    //       createdAt
-    //       bookingReference
-    //     }
-    //     nextToken
-    //   }
-    // }`
-
     // const result = await axios({
     //   url: bookingEndpoint,
     //   method: 'post',
@@ -112,6 +59,7 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
     //   }
     // })
 
+    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
     // const {
     //   data: {
     //     data: { listBookings: bookingsData }
@@ -120,7 +68,7 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
 
     // [REST-Example]
     // const { data: bookingData } = await axios({
-    //   url: bookingEndpoint + '/bookings',
+    //   url: bookingEndpoint,
     //   method: 'GET',
     //   headers: {
     //     Authorization: credentials.idToken // API Gateway only accepts ID Token
@@ -161,29 +109,6 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
  * @param {Flight} obj.outboundFlight - Outbound Flight
  * @param {Flight} [obj.inboundFlight] - Inbound Flight
  * @returns {promise} - Promise representing booking effectively made in the Booking service.
- * @example
- * // exerpt from src/views/FlightSelection.vue
- * methods: {
- *    async payment() {
- *        let options = {
- *           name: this.form.name,
- *           address_zip: this.form.postcode,
- *           address_country: this.form.country
- *        }
- *
- *        try {
- *            const { token, error } = await stripe.createToken(card, options);
- *            this.token.details = token;
- *            this.token.error = error;
- *
- *            if (this.token.error) throw this.token.error;
- *
- *            await this.$store.dispatch("bookings/createBooking", {
- *              paymentToken: this.token,
- *              outboundFlight: this.selectedFlight
- *            });
- *        ...
- *        }
  */
 export async function createBooking (
   { rootState, rootGetters },
@@ -205,11 +130,9 @@ export async function createBooking (
   console.log(credentials)
 
   const chargeToken = await processPayment({
-    endpoint: paymentEndpoint,
     paymentToken: paymentToken,
     outboundFlight: outboundFlight,
-    // customerEmail: rootState.profile.user.attributes.email
-    customerEmail: 'email@address.com'
+    customerEmail: rootState.profile.user.attributes.email
   })
 
   Loading.show({
@@ -231,81 +154,6 @@ export async function createBooking (
 
 /**
  *
- * Process Payment function - processPayment calls Payment endpoint to pre-authorize charge upon tokenized payment details
- *
- * @param {object} obj - Object containing params to process payment
- * @param {string} obj.endpoint - Payment endpoint
- * @param {object} obj.paymentToken - Tokenized payment info
- * @param {object} obj.paymentToken.details - Tokenized payment details including last4, id, etc.
- * @param {object} obj.paymentToken.id - Payment token
- * @param {Flight} obj.outboundFlight - Outbound flight
- * @param {string} obj.customerEmail - Customer Email address for payment notification
- * @returns {promise} - Promise representing whether payment was successfully pre-authorized
- * @example
- *   let chargeToken = await processPayment({
- *      endpoint: paymentEndpoint,
- *      paymentToken,
- *      outboundFlight,
- *      customerEmail
- *   });
- */
-async function processPayment ({
-  endpoint,
-  paymentToken,
-  outboundFlight,
-  customerEmail
-}) {
-  Loading.show({
-    message: 'Charging a pre-authorization...'
-  })
-
-  if (!paymentToken) throw new Error('Invalid payment token')
-
-  const chargeData = {
-    amount: outboundFlight.ticketPrice || '0',
-    currency: outboundFlight.ticketCurrency || 'EUR',
-    stripeToken: paymentToken.details.id,
-    description: `Payment by ${customerEmail}`,
-    email: customerEmail
-  }
-
-  console.group('store/bookings/actions/processPayment')
-  console.info('Sending data to pre-authorize payment...')
-  console.log(chargeData)
-
-  try {
-    // [Mock - Example]
-    const data = {
-      data: {
-        id: 'ch_1FKkCR2eZvKYlo2CgqNRhtYl'
-      }
-    }
-
-    // [REST-Example]
-    // const data = await axios.post(endpoint, chargeData)
-
-    console.info('Pre-authorized payment response...')
-    console.dir(data)
-
-    const {
-      data: {
-        id: chargeId
-      }
-    } = data
-
-    console.log(chargeId)
-    console.groupEnd()
-
-    return chargeId
-  } catch (err) {
-    console.error(err)
-    console.groupEnd()
-    throw err
-  }
-}
-
-/**
- *
  * Process Booking function - processBooking uses processBooking mutation to kick off an async Booking Workflow that ultimatelly reserves flight seat, creates a booking reference, collect payment, etc.
  *
  * @param {object} obj - Object containing params to process payment
@@ -315,15 +163,6 @@ async function processPayment ({
  * @param {object} obj.credentials.idToken - JWT ID token
  * @param {object} obj.credentials.accessToken - JWT Access token
  * @returns {promise} - Promise representing whether Booking Workflow was successfully initiated
- * @example
- *   const {
- *   // @ts-ignore
- *     data: {
- *      processBooking: { id: bookingProcessId }
- *     }
- *   } = await API.graphql(
- *     graphqlOperation(processBookingMutation, processBookingInput)
- *   );
  */
 async function processBooking ({ chargeToken, outboundFlight, credentials }) {
   console.group('store/bookings/actions/processBooking')
@@ -341,12 +180,6 @@ async function processBooking ({ chargeToken, outboundFlight, credentials }) {
     //   }
     // }
 
-    // const processBookingMutation = `mutation ProcessBooking($input: CreateBookingInput!) {
-    //   processBooking(input: $input) {
-    //     id
-    //   }
-    // }`
-
     // const result = await axios({
     //   url: bookingEndpoint,
     //   method: 'post',
@@ -362,6 +195,7 @@ async function processBooking ({ chargeToken, outboundFlight, credentials }) {
     //   }
     // })
 
+    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
     // const {
     //   data: {
     //     data: { processBookingMutation: { id: bookingProcessId }
@@ -370,7 +204,7 @@ async function processBooking ({ chargeToken, outboundFlight, credentials }) {
 
     // [REST-Example]
     // const data = await axios({
-    //   url: bookingEndpoint + '/bookings',
+    //   url: bookingEndpoint,
     //   method: 'post',
     //   data: {
     //     paymentToken: chargeToken,

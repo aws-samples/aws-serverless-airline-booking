@@ -13,33 +13,6 @@ import { Auth } from 'aws-amplify'
  * @see {@link isAuthenticated} for more info on getter
  * @see {@link SET_USER} for more info on mutation
  * @returns {promise} - Promise representing updated profile information in the store
- * @example
- * // exerpt from src/views/Profile.vue
- * async mounted() {
- *    AmplifyEventBus.$on("authState", info => {
- *       if (info === "signedOut") {
- *         this.$store.dispatch("profile/getSession")
- *          .catch(
- *            this.$router.push({ name: "auth", query: { redirectTo: "home" } })
- *          );
- *       }
- *    });
- * }
- *
- * // exerpt from src/router.js as a Route Guard
- * router.beforeEach(async (to, from, next) => {
- *    if (to.matched.some(record => record.meta.requiresAuth)) {
- *        if (!store.getters["profile/isAuthenticated"]) {
- *            try {
- *                await store.dispatch("profile/getSession");
- *                next();
- *            } catch (err) {
- *                next({ name: "auth", query: { redirectTo: to.name } });
- *            }
- *        }
- *    }
- *    next();
- * });
  */
 export function getSession ({ commit, getters }) {
   return new Promise((resolve, reject) => {

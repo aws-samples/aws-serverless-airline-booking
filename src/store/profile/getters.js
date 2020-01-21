@@ -5,7 +5,6 @@
  * @see {@link getSession} for more information on action that calls isAuthenticated
  */
 export const isAuthenticated = state => {
-  // Uncomment line below once Auth has been setup
   return !!state.user
   // [Mock-Example]
   // Disables route guard when auth isn't setup

@@ -12,6 +12,17 @@ frontend:
   phases:
     preBuild:
       commands:
+        ##
+        ## Expose endpoints at build time
+        ##
+        - export PAYMENT_ENDPOINT=${PAYMENT_ENDPOINT:-UNDEFINED}
+        - export BOOKING_ENDPOINT=${BOOKING_ENDPOINT:-UNDEFINED}
+        - export LOYALTY_ENDPOINT=${LOYALTY_ENDPOINT:-UNDEFINED}
+        - export CATALOG_ENDPOINT=${CATALOG_ENDPOINT:-UNDEFINED}
+        - echo "VUE_APP_PaymentEndpoint=${PAYMENT_ENDPOINT}" >> src/frontend/.env
+        - echo "VUE_APP_BookingEndpoint=${BOOKING_ENDPOINT}" >> src/frontend/.env
+        - echo "VUE_APP_LoyaltyEndpoint=${LOYALTY}" >> src/frontend/.env
+        - echo "VUE_APP_CatalogEndpoint=${CATALOG}" >> src/frontend/.env
         - cd src
         - npm install
     build:

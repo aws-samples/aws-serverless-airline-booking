@@ -2,8 +2,9 @@ import Flight from '../../shared/models/FlightClass'
 
 // [Mock-Example]
 import axios from 'axios'
+// import { listFlightQuery, getFlightQuery } from './graphql.js'
 
-// const catalogEndpoint = 'https://a5otqx8fob.execute-api.eu-west-1.amazonaws.com/Prod'
+const catalogEndpoint = process.env.VUE_APP_CatalogEndpoint || 'no booking endpoint set'
 
 /**
  *
@@ -20,19 +21,6 @@ import axios from 'axios'
  * @returns {promise} - Promise representing whether flights from Catalog have been updated in the store
  * @see {@link SET_FLIGHTS} for more info on mutation
  * @see {@link SET_LOADER} for more info on mutation
- * @example
- * // exerpt from src/views/FlightResults.vue
- * async mounted() {
- * // @ts-ignore
- * if (this.isAuthenticated) {
- *    await this.$store.dispatch("catalog/fetchFlights", {
- *       date: this.date,
- *       departure: this.departure,
- *       arrival: this.arrival
- *    });
- *
- *    this.filteredFlights = this.sortByDeparture(this.flights);
- * }
  */
 export async function fetchFlights ({ commit, rootGetters }, { date, departure, arrival }) {
   commit('SET_LOADER', true)
@@ -66,28 +54,6 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
     //   }
     // };
 
-    // const listFlightQuery = `query listFlights($filter: ModelFlightFilterInput) {
-    //   listFlights(filter: $filter) {
-    //         items {
-    //           id
-    //           departureDate
-    //           departureAirportCode
-    //           departureAirportName
-    //           departureCity
-    //           departureLocale
-    //           arrivalDate
-    //           arrivalAirportCode
-    //           arrivalAirportName
-    //           arrivalCity
-    //           arrivalLocale
-    //           ticketPrice
-    //           ticketCurrency
-    //           flightNumber
-    //           seatAllocation
-    //         }
-    //   }
-    // }`
-
     // const result = await axios({
     //   url: catalogEndpoint,
     //   method: 'post',
@@ -103,6 +69,7 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
     //   }
     // })
 
+    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
     // const {
     //   data: {
     //     data: { listFlights: flightData }
@@ -110,7 +77,7 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
     // } = result
 
     // [REST-Example]
-    // const { data: flightData } = await axios.get(catalogEndpoint + '/getFlights', {
+    // const { data: flightData } = await axios.get(catalogEndpoint, {
     //   params: {
     //     arrival: arrival,
     //     departure: departure,
@@ -123,11 +90,6 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
 
     // [Mock-Example]
     const { data: flightData } = await axios.get('/mocks/flights.json')
-
-    // data mutations happen within a Flight class
-    // here we convert graphQL results into an array of Flights
-    // before comitting to Vuex State Management
-    // const flights = flightData.Items.map(flight => new Flight(flight))
     const flights = flightData.map(flight => new Flight(flight))
 
     console.info('Committing Flights to the store...')
@@ -156,17 +118,6 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
  * @param {string} obj.flightId - Flight Unique Identifier
  * @returns {promise} - Promise representing flight from Catalog service.
  * @see {@link SET_LOADER} for more info on mutation
- * @example
- * // exerpt from src/views/FlightSelection.vue
- * async beforeMount() {
- *    if (this.isAuthenticated) {
- *        if (!this.flight) {
- *            this.selectedFlight = await this.$store.dispatch("catalog/fetchByFlightId", {
- *              flightId: this.flightId
- *            });
- *        }
- *    }
- * },
  */
 export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
   const credentials = {
@@ -182,26 +133,6 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
     commit('SET_LOADER', true)
 
     // [GraphQL-Example]
-    // const getFlightQuery = `query GetFlight($id: ID!) {
-    //     getFlight(id: $id) {
-    //       id
-    //       departureDate
-    //       departureAirportCode
-    //       departureAirportName
-    //       departureCity
-    //       departureLocale
-    //       arrivalDate
-    //       arrivalAirportCode
-    //       arrivalAirportName
-    //       arrivalCity
-    //       arrivalLocale
-    //       ticketPrice
-    //       ticketCurrency
-    //       flightNumber
-    //       seatAllocation
-    //     }
-    // }`
-
     // const result = await axios({
     //   url: catalogEndpoint,
     //   method: 'post',
@@ -217,6 +148,7 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
     //   }
     // })
 
+    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
     // const {
     //   data: {
     //     data: { listFlights: flightData }
@@ -224,7 +156,7 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
     // } = result
 
     // [REST Example]
-    // var { data: flightData } = await axios.get(catalogEndpoint + '/getFlights', {
+    // var { data: flightData } = await axios.get(catalogEndpoint, {
     //   params: {
     //     id: flightId
     //   },

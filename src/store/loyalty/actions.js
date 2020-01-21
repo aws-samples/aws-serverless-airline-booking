@@ -4,7 +4,10 @@ import { Loading } from 'quasar'
 
 import axios from 'axios'
 
-// const loyaltyEndpoint = 'https://489ibclmwd.execute-api.eu-west-1.amazonaws.com/Prod'
+const loyaltyEndpoint = process.env.VUE_APP_LoyaltyEndpoint || 'no loyalty endpoint set'
+
+// [GraphQL-Example]
+// import { fetchLoyaltyQuery } from './graphql'
 
 /**
  * Loyalty [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchLoyalty retrieves current authenticated user loyalty info from Loyalty service.
@@ -16,13 +19,6 @@ import axios from 'axios'
  * @param {object} context.commit - Vuex mutation function (context.commit)
  * @returns {promise} - Promise representing updated whether loyalty information has been updated in the store
  * @see {@link SET_LOYALTY} for more info on mutation
- * @example
- * // exerpt from src/views/Profile.vue
- * async mounted() {
- *    if (this.isAuthenticated) {
- *        await this.$store.dispatch("loyalty/fetchLoyalty");
- *    }
- * }
  */
 export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
   Loading.show({
@@ -40,15 +36,6 @@ export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
 
   try {
     // [GraphQL-Example]
-    // const fetchLoyaltyQuery = `query getLoyalty_status($cust_id: ID!) {
-    //   getLoyalty_status(cust_id: $cust_id) {
-    //     cust_id
-    //     points
-    //     tier
-    //     remaining_pointss
-    //   }
-    // }`
-
     // const result = await axios({
     //   url: loyaltyEndpoint,
     //   method: 'post',
@@ -64,6 +51,7 @@ export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
     //   }
     // })
 
+    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
     // const {
     //   data: {
     //     data: { getLoyalty_status: loyaltyData }
@@ -71,7 +59,7 @@ export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
     // } = result
 
     // [REST-Example]
-    // const { data: loyaltyData } = await axios.get(loyaltyEndpoint + '/getLoyaltyPoints', {
+    // const { data: loyaltyData } = await axios.get(loyaltyEndpoint, {
     //   headers: {
     //     Authorization: credentials.idToken
     //   }
