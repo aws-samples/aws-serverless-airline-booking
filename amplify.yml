@@ -21,8 +21,8 @@ frontend:
         - export CATALOG_ENDPOINT=${CATALOG_ENDPOINT:-UNDEFINED}
         - echo "VUE_APP_PaymentEndpoint=${PAYMENT_ENDPOINT}" >> src/frontend/.env
         - echo "VUE_APP_BookingEndpoint=${BOOKING_ENDPOINT}" >> src/frontend/.env
-        - echo "VUE_APP_LoyaltyEndpoint=${LOYALTY}" >> src/frontend/.env
-        - echo "VUE_APP_CatalogEndpoint=${CATALOG}" >> src/frontend/.env
+        - echo "VUE_APP_LoyaltyEndpoint=${LOYALTY_ENDPOINT}" >> src/frontend/.env
+        - echo "VUE_APP_CatalogEndpoint=${CATALOG_ENDPOINT}" >> src/frontend/.env
         - cd src
         - npm install
     build:
