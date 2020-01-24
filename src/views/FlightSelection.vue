@@ -42,7 +42,7 @@
                     data-test="form-name"
                     no-parent-field
                     @blur="$v.form.name.$touch"
-                    error-label="Some error"
+                    error-label="Name is invalid"
                   />
               </label>
               <label>
@@ -57,6 +57,8 @@
                     :options="form.countryOptions"
                     hide-underline
                     data-test="form-country"
+                    @blur="$v.form.country.$touch"
+                    error-label="Country is invalid"
                   />
                 </div>
               </label>
@@ -70,6 +72,8 @@
                     hide-underline
                     data-test="form-postcode"
                     no-parent-field
+                    @blur="$v.form.postcode.$touch"
+                    error-label="Postcode is invalid"
                   />
               </label>
               <label>
@@ -82,12 +86,15 @@
                     hide-underline
                     data-test="form-cardNumber"
                     no-parent-field
+                    @blur="$v.form.cardNumber.$touch"
+                    error-label="Card number is invalid"
+                    maxlength="16"
                   />
               </label>
               <label>
                 <span class="text-secondary">Expire Month</span>
                 <q-input
-                    placeholder="01"
+                    placeholder="1 (e.g. 1 for January)"
                     type="number"
                     v-model="form.cardExpireMonth"
                     class="form__input field form__cardExpireMonth"
@@ -95,14 +102,17 @@
                     hide-underline
                     data-test="form-cardExpireMonth"
                     no-parent-field
-                    min="01"
+                    min="1"
                     max="12"
+                    maxlength="2"
+                    @blur="$v.form.cardExpireMonth.$touch"
+                    error-label="Card number is invalid"
                   />
               </label>
               <label>
                 <span class="text-secondary">Expire Year</span>
                   <q-input
-                    placeholder="23"
+                    placeholder="2022"
                     type="number"
                     v-model="form.cardExpireYear"
                     class="form__input field form__cardExpireYear"
@@ -112,6 +122,9 @@
                     no-parent-field
                     min="2020"
                     max="2100"
+                    maxlength="4"
+                    @blur="$v.form.cardExpireYear.$touch"
+                    error-label="Card number is invalid"
                   />
               </label>
               <label>
@@ -125,6 +138,9 @@
                     hide-underline
                     data-test="form-cardCvc"
                     no-parent-field
+                    maxlength="4"
+                    @blur="$v.form.cardCvc.$touch"
+                    error-label="Card CVC is invalid"
                   />
               </label>
             </div>
@@ -209,7 +225,7 @@ export default {
    * @param {boolean} loading - Loader state used to control Flight Loader when fetching flights
    */
   computed: {
-    ...mapGetters('profile', ['isAuthenticated']),
+    ...mapGetters('profile', ['isAuthenticated', 'email']),
     ...mapState({
       loading: state => state.catalog.loading,
       customer: state => state.profile.user
@@ -264,9 +280,9 @@ export default {
           }
         ],
         cardNumber: '1055 444 3032 4679',
-        cardExpireMonth: '1',
-        cardExpireYear: '22',
-        cardCvc: '444'
+        cardExpireMonth: 1,
+        cardExpireYear: 2022,
+        cardCvc: null
       },
       selectedFlight: this.flight
     };
@@ -280,14 +296,13 @@ export default {
     async payment () {
       this.$v.form.$touch()
 
-      if (this.$v.form.$error) {
-        this.$q.notify('Please review fields again.')
-        return
+      if (this.$v.form.$invalid) {
+        this.$q.notify('Please make sure all fields are filled.')
+        throw new Error('Form is invalid...', this.$v.form)
       }
 
-      const details = {
+      const paymentDetails = {
         name: this.form.name,
-        address_zip: this.form.postcode,
         address_country: this.form.country,
         address_postcode: this.form.postcode,
         card: {
@@ -299,21 +314,16 @@ export default {
       };
 
       try {
-        console.log('Tokenizing payment data...');
         console.log('Form details...')
-        console.log(details);
+        console.table(paymentDetails);
 
-        // await this.$store.dispatch('bookings/createBooking', {
-        //   paymentToken: this.token,
-        //   outboundFlight: this.selectedFlight
-        // })
-
-        const email =
-          (this.customer.attributes && this.customer.attributes.email) ||
-          'email';
+        await this.$store.dispatch('bookings/createBooking', {
+          paymentDetails: paymentDetails,
+          outboundFlight: this.selectedFlight
+        })
 
         this.$q.loading.show({
-          message: `Your booking is being processed - We'll soon contact you via ${email}.`
+          message: `Your booking is being processed - We'll soon contact you via ${this.email}.`
         })
 
         setTimeout(() => {
@@ -322,6 +332,7 @@ export default {
         }, 3000)
       } catch (err) {
         this.$q.loading.hide();
+        this.$q.notify(`${err}`)
         console.error(err);
       }
     }

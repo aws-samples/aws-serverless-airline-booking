@@ -35,26 +35,31 @@
 
 <script>
 // @ts-nocheck
-import BookingFlight from "../components/BookingFlight";
-import { mapState, mapGetters } from "vuex";
+import BookingFlight from '../components/BookingFlight';
+import { mapState, mapGetters } from 'vuex';
 
 /**
  * Booking view displays bookings from authenticated customer.
  * It uses `BookingFlight` component to render bookings once fetched
  */
 export default {
-  name: "Bookings",
+  name: 'Bookings',
   components: {
     BookingFlight
   },
-  async mounted() {
+  async mounted () {
     /** authentication guards prevent authenticated users to view Bookings
      * however, the component doesn't stop from rendering asynchronously
      * this guarantees we attempt talking to Booking service
      * if our authentication guards && profile module have an user in place
      */
     if (this.isAuthenticated) {
-      await this.$store.dispatch("bookings/fetchBooking");
+      try {
+        await this.$store.dispatch('bookings/fetchBooking');
+      } catch (err) {
+        this.$q.notify(err);
+        console.error(err);
+      }
     }
   },
   /**
@@ -65,7 +70,7 @@ export default {
     ...mapState({
       bookings: state => state.bookings.bookings
     }),
-    ...mapGetters("profile", ["isAuthenticated"])
+    ...mapGetters('profile', ['isAuthenticated'])
   }
 };
 </script>

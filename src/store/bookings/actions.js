@@ -92,9 +92,9 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
     return bookings
   } catch (err) {
     Loading.hide()
-    console.error(err)
+    const errorMessage = `Error when fetching bookings: ${err.message}`
     console.groupEnd()
-    throw new Error(err)
+    throw new Error(errorMessage)
   }
 }
 
@@ -105,34 +105,37 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
  * **NOTE**: It doesn't mutate the store
  * @param {object} context - Vuex action context (context.commit, context.getters, context.state, context.dispatch)
  * @param {object} obj - Object containing params required to create a booking
- * @param {object} obj.paymentToken - Stripe JS Payment token object
+ * @param {object} obj.paymentDetails - Payment details captured during flight selection
+ * @param {string} obj.paymentDetails.name - Payment card holder's name
+ * @param {string} obj.paymentDetails.address_country - Payment card registered country
+ * @param {string} obj.paymentDetails.address_postcode - Payment card registered postcode
+ * @param {object} obj.paymentDetails.card - Payment card details
+ * @param {string} obj.paymentDetails.card.number - Payment card number
+ * @param {string} obj.paymentDetails.card.expireMonth - Payment expireMonth e.g 1 (January)
+ * @param {string} obj.paymentDetails.card.expireYear - Payment expireYear e.g 2022
+ * @param {number} obj.paymentDetails.card.cvc - Payment cvc e.g (444)
  * @param {Flight} obj.outboundFlight - Outbound Flight
  * @param {Flight} [obj.inboundFlight] - Inbound Flight
  * @returns {promise} - Promise representing booking effectively made in the Booking service.
  */
 export async function createBooking (
   { rootState, rootGetters },
-  { paymentToken, outboundFlight }
+  { paymentDetails, outboundFlight }
 ) {
-  // const user = {
-  //   credentials: rootState.profile.user.signInUserSession.idToken.jwtToken,
-  //   id: rootState.profile.user.attributes.sub,
-  //   email: rootState.profile.user.attributes.email || 'customerEmail@address.com'
-  // }
+  console.group('store/bookings/actions/createBooking')
 
   const credentials = {
     idToken: rootGetters['profile/idToken'],
     accessToken: rootGetters['profile/accessToken']
   }
 
-  console.group('store/bookings/actions/createBooking')
   console.log('Credentials retrieved')
   console.log(credentials)
 
   const chargeToken = await processPayment({
-    paymentToken: paymentToken,
+    paymentDetails: paymentDetails,
     outboundFlight: outboundFlight,
-    customerEmail: rootState.profile.user.attributes.email
+    customerEmail: rootGetters['profile/email']
   })
 
   Loading.show({
@@ -234,8 +237,8 @@ async function processBooking ({ chargeToken, outboundFlight, credentials }) {
     console.groupEnd()
     return bookingProcessId
   } catch (err) {
-    console.error(err)
+    const errorMessage = `Error when processing booking: ${err.message}`
     console.groupEnd()
-    throw err
+    throw errorMessage
   }
 }

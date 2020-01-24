@@ -79,8 +79,8 @@ export async function fetchLoyalty ({ commit, rootState, rootGetters }) {
     return loyalty
   } catch (err) {
     Loading.hide()
-    console.log(err)
+    const errorMessage = `Error when fetching loyalty: ${err.message}`
     console.groupEnd()
-    throw err
+    throw new Error(errorMessage)
   }
 }

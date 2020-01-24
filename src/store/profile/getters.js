@@ -24,3 +24,9 @@ export const accessToken = state => {
 
   return accessToken
 }
+
+export const email = state => {
+  const email = (state.user && state.user.attributes && state.user.attributes.email) || 'email'
+
+  return email
+}
