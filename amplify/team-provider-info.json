@@ -9,7 +9,7 @@
             "UnauthRoleName": "amplify-awsserverlessairline-twitch-160135-unauthRole",
             "StackName": "amplify-awsserverlessairline-twitch-160135",
             "StackId": "arn:aws:cloudformation:eu-west-1:231436140809:stack/amplify-awsserverlessairline-twitch-160135/9acd3de0-37e2-11ea-a2db-0adf61345742",
-            "AmplifyAppId": "d15bjdppig222"
+            "AmplifyAppId": "d34s789vnlqyw4"
         },
         "categories": {
             "auth": {
