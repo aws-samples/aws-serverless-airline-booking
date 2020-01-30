@@ -90,7 +90,7 @@ Resources:
             Policies:
                 - Version: '2012-10-17'
                   Statement:
-                    Action: dynamodb:UpdateItem
+                    Action: dynamodb:PutItem
                     Effect: Allow
                     Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
 
