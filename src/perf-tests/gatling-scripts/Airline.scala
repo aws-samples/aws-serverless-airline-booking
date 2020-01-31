@@ -29,7 +29,7 @@ object Flight {
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
-                      .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50,"filter":{"departureDate":{"beginsWith":"2019"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
+                      .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50,"filter":{"departureDate":{"beginsWith":"2020"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
                       .asJson
                       .check(bodyString.saveAs("Query Flights"))
                       .check(status.not(404), status.not(500)))
@@ -99,7 +99,7 @@ object Make {
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
-                     .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50, "filter":{"departureDate":{"beginsWith":"2019"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
+                     .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50, "filter":{"departureDate":{"beginsWith":"2020"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
                       .asJson
                       .check(bodyString.saveAs("Query Flights"))
                       .check(jsonPath("$..id").find(randNum).saveAs("bookingId"))

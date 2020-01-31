@@ -9,19 +9,19 @@ RUN pip3 install awscli
 RUN pip3 install -r requirements.txt
 
 
-ENV COGNITO_CLIENT_ID 4o7m6870h4m3rgr0jmh94r98eu
+ENV COGNITO_CLIENT_ID 3bobvmq6k98mljio8ft6vvn9ka
 ENV COGNITO_URL https://cognito-idp.eu-west-1.amazonaws.com/ 
-ENV GRAPHQL_URL https://cjrxt2mu4ven3batd5rlrnz36i.appsync-api.eu-west-1.amazonaws.com/graphql
-ENV API_URL https://7ew4d2zmk5.execute-api.eu-west-1.amazonaws.com/prod/charge
+ENV GRAPHQL_URL https://yztnuxay65eo5ftfwaeimlc6ui.appsync-api.eu-west-1.amazonaws.com/graphql
+ENV API_URL https://7pelqgp04d.execute-api.eu-west-1.amazonaws.com/prod/charge
 ENV TOKEN_CSV user-with-token.csv
 ENV AWS_REGION eu-west-1
-ENV S3_BUCKET amplify-awsserverlessairline-twitchbase-172326-loadtest
+ENV S3_BUCKET amplify-awsserverlessairline-twitchbase-170504-loadtest
 ENV USER_COUNT 5
 ENV DURING_TIME 300
 ENV USER_CSV user.csv
 ENV FOLDERPATH ./
-ENV USER_POOL_ID eu-west-1_5Z3MA6mxd
-ENV APPSYNC_API_KEY 7kgeiqgh5bcmfdnwojfvxtb2hm
+ENV USER_POOL_ID eu-west-1_hewvNlih4
+ENV APPSYNC_API_KEY bvzsntjcm5d4hiyujrculantg4
 ENV PATH=/root/.local/bin:$PATH
 
 ENTRYPOINT [ "/usr/local/bin/python3" ]
