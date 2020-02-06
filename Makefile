@@ -18,13 +18,6 @@ init: ##=> Install OS deps and dev tools
 	$(info [*] Bootstrapping CI system...)
 	@$(MAKE) _install_os_packages
 
-outputs: ##=> Fetch SAM stack outputs
-	$(MAKE) outputs.payment
-
-outputs.payment: ##=> Converts Payments output stack to Vue env variables
-	 aws cloudformation describe-stacks --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} --query 'Stacks[0].Outputs[?OutputKey==`PaymentChargeUrl`].OutputValue' | jq -r '.[] | "VUE_APP_PaymentChargeUrl" + "=\"" + (.|tostring) + "\""' >> src/frontend/.env
-	 cat src/frontend/.env
-
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
 	$(MAKE) deploy.payment
