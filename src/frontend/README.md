@@ -53,7 +53,7 @@ Once you're all set, install front-end dependencies and run a local copy:
 2. `npm run serve`
 
 
-### I don't see this file or deleted accidentally, how do I recreate it
+### I don't have aws-exports, or deleted accidentally
 
 1. Open up your deployed App in Amplify Console by running `amplify console`
 2. At the bottom of the page under **Edit your backend**, copy and run the `amplify pull` command
