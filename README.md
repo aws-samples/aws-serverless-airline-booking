@@ -33,6 +33,10 @@ Service | Language | Description
 [Payment](./src/backend/payment/README.md) | YAML and Python | Provides payment authorization, collection and refund. Bulk of Payment integration with Stripe is done via a [Serverless Application Repository App](https://serverlessrepo.aws.amazon.com/applications/arn:aws:serverlessrepo:us-east-1:375983427419:applications~api-lambda-stripe-charge). Payment collection and refund operations within Booking business workflow are in Python
 [Loyalty](./src/backend/loyalty/README.md) | Typescript | Provides Loyalty points for customers including tiers. Fetching and ingesting Loyalty points are implemented in Typescript.
 
+### Front-end
+
+See more information about our [Front-end, components, routing and convention](./src/frontend/README.md)
+
 **High level infrastructure architecture**
 
 ![Serverless Airline Architecture](./media/prototype-architecture.png)
