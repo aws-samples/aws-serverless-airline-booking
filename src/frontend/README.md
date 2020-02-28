@@ -40,3 +40,23 @@ Route | View | Query strings
 /search/results/review | FlightSelection | flightId
 /profile | Profile | None
 /profile/bookings | Bookings | None
+
+## Running locally
+
+You can run the front-end locally while targeting the back-end and auth deployed in your AWS account. 
+
+If you followed [the deployment instructions](../../docs/getting_started.md), you should have  `src/frontend/aws-exports.js` file.
+
+Once you're all set, install front-end dependencies and run a local copy:
+
+1. `npm install`
+2. `npm run serve`
+
+
+### I don't see this file or deleted accidentally, how do I recreate it
+
+1. Open up your deployed App in Amplify Console by running `amplify console`
+2. At the bottom of the page under **Edit your backend**, copy and run the `amplify pull` command
+    - e.g. `amplify pull --appId d34s789vnlqyw4 --envName twitch`
+
+> NOTE: **Aws-exports** is a configuration file for AWS Amplify library containing Cognito User Pools, AppSync  API, and what authentication mechanism it should use along with its region.
