@@ -54,7 +54,7 @@ type Flight
 
 Catalog provides a [GraphQL Flight data type and a getFlightBySchedule query](../../../amplify/backend/api/awsserverlessairline/schema.graphql). Using `@key`, Flight implements a Global Secondary Index (GS) to fetch flights by airports and departure date using `getFlightBySchedule` query as opposed to `listFlights` scan operation.
 
-![Catalog front-end integration](../../../media/catalog-frontend-integration.png)
+![Catalog front-end integration](../../../media/frontend_modules_catalog.png)
 
 ## Decisions log
 
