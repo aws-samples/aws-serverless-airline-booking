@@ -297,6 +297,9 @@ $RECYCLE.BIN/
 
 ## Custom
 
+# Generated Docs
+html
+
 # Loyalty transpiled JS
 src/backend/loyalty/src/**/*.js
 dist/

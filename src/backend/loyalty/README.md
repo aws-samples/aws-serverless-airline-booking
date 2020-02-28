@@ -47,7 +47,7 @@ Loyalty provides a [GraphQL Loyalty data type and getLoyalty query](../../../amp
 
 Upon a successful booking confirmation, Booking sends booking data to Loyalty SNS topic. SNS invokes Ingest function to calculate points and ingests into DynamoDB.
 
-![Booking integration](../../../media/loyalty-booking-integration.png)
+![Booking integration](../../../media/frontend_modules_loyalty.png)
 
 
 ## Decisions log

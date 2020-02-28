@@ -19,6 +19,9 @@ export default class Flight {
    * @param {number} Flight.ticketPrice - Flight Ticket price
    * @param {string} Flight.ticketCurrency - Monetary currency name for flight ticket (e.g EUR)
    * @param {number} Flight.flightNumber - Flight number
+   * @param {string} Flight.seatAllocation - Deprecated: use seatCapacity instead
+   * @param {number} Flight.seatCapacity - Flight's passenger capacity (e.g. 200)
+  
    * @example
    * let flight = new Flight({
    *    id: "173ec46b-0e12-45fe-9ba1-511abde3d318",
