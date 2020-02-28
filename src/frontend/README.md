@@ -41,6 +41,16 @@ Route | View | Query strings
 /profile | Profile | None
 /profile/bookings | Bookings | None
 
+## Conventions
+
+We use the following conventions to ease maintenance as we grow the number of modules and services:
+
+* **Actions** - All interactions with back-ends regardless of its communication channel happen within each module's actions.js
+* **Mutation** - State isn't mutated directly but through mutations functions (e.g. `SET_BOOKINGS`) and are always uppercase
+* **GraphQL** - Custom GraphQL operations have a dedicated file close to its module (e.g. `catalog/graphql.js`)
+* **Shared Models** - Data permutation such as formatting flight departure dates differently are done at a class property level e.g. (e.g. `FlightClass`)
+* **Code documentation** - We document following JSDoc convention
+
 ## Running locally
 
 You can run the front-end locally while targeting the back-end and auth deployed in your AWS account. 
@@ -52,7 +62,6 @@ Once you're all set, install front-end dependencies and run a local copy:
 1. `npm install`
 2. `npm run serve`
 
-
 ### I don't have aws-exports, or deleted accidentally
 
 1. Open up your deployed App in Amplify Console by running `amplify console`
@@ -60,3 +69,10 @@ Once you're all set, install front-end dependencies and run a local copy:
     - e.g. `amplify pull --appId d34s789vnlqyw4 --envName twitch`
 
 > NOTE: **Aws-exports** is a configuration file for AWS Amplify library containing Cognito User Pools, AppSync  API, and what authentication mechanism it should use along with its region.
+
+## Generating code documentation
+
+For more detailed information on methods, constructor, and examples you can generate documentation locally:
+
+1. Run `npm run docs`
+2. Open `html/index.html`
