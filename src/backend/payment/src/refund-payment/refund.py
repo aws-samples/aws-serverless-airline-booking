@@ -138,4 +138,5 @@ def lambda_handler(event, context):
         log_metric(name="FailedRefund", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Refund Status annotation before raising error")
         tracer.put_annotation("RefundStatus", "FAILED")
+        logger.error({"operation": "refund_payment", "details": err})
         raise RefundException(details=err)

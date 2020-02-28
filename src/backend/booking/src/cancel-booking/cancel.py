@@ -111,5 +111,6 @@ def lambda_handler(event, context):
         log_metric(name="FailedCancellation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Status annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
+        logger.error({"operation": "cancel_booking", "details": err})
 
         raise BookingCancellationException(details=err)

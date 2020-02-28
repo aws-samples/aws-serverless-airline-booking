@@ -48,17 +48,15 @@ frontend:
   phases:
     preBuild:
       commands:
-        # Expose Stripe public key as a VueJS runtime env
-        - export STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY:-UNDEFINED}
-        - echo "VUE_APP_StripePublicKey=${STRIPE_PUBLIC_KEY}" >> src/frontend/.env
-        ##
-        # Retrieve SAM Stack outputs and convert into VueJS compatible runtime env
-        ##
-        - make outputs
         - cd src/frontend
         - npm install
     build:
       commands:
+        ## 
+        # Expose Stripe public key and Payment Charge URL as a VueJS runtime env
+        ## 
+        - export VUE_APP_StripePublicKey=${STRIPE_PUBLIC_KEY:-UNDEFINED}
+        - export VUE_APP_PaymentChargeUrl=$(aws ssm get-parameter --name /${AWS_BRANCH}/service/payment/api/charge/url --query 'Parameter.Value' --output text)
         - npm run build
   artifacts:
     baseDirectory: src/frontend/dist
