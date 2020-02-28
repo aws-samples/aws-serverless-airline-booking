@@ -278,9 +278,7 @@ export default {
 
         // eslint-disable-next-line
         this.$q.loading.show({
-          message: `Your booking is being processed - We'll soon contact you via ${
-            this.customer.email
-          }.`
+          message: `Your booking is being processed - We'll soon contact you via ${this.customer.email}.`
         });
         setTimeout(() => {
           this.$q.loading.hide();
