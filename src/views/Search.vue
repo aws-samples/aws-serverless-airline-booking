@@ -145,8 +145,8 @@ export default {
        * @param {object} departureDate - Departure date chosen by the customer
        * @param {object} suggestionList - Parsed list of airports offered as auto-suggestion
        */
-      departureCity: '',
-      arrivalCity: '',
+      departureCity: 'LGW',
+      arrivalCity: 'MAD',
       departureDate: new Date(),
       suggestionList: parseAirports()
     }
@@ -179,8 +179,8 @@ export default {
         minMatchCharLength: 3,
         keys: [field, 'sublabel']
       }
-      let fuse = new Fuse(list, options)
-      let result = fuse.search(token)
+      const fuse = new Fuse(list, options)
+      const result = fuse.search(token)
       return result
     }
   }

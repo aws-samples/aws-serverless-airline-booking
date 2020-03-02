@@ -3,7 +3,7 @@ import { Loading } from 'quasar';
 import axios from 'axios';
 
 const paymentEndpoint =
-    process.env.VUE_APP_PaymentEndpoint || 'no payment gateway endpoint set';
+  process.env.VUE_APP_PaymentEndpoint || 'no payment gateway endpoint set';
 
 /**
  *
@@ -61,7 +61,12 @@ export async function processPayment ({
   console.log(chargeData);
 
   try {
-    const data = await axios.post(paymentEndpoint, chargeData);
+    // [REST-Example]
+    // const data = await axios.post(paymentEndpoint, chargeData);
+
+    // [Mock-Example]
+    const data = await axios.get('/mocks/payment.json')
+
     const {
       data: {
         createdCharge: { id: chargeId }

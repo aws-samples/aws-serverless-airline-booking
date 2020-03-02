@@ -115,7 +115,6 @@ export async function fetchBooking ({ commit, rootState, rootGetters }) {
  * @param {string} obj.paymentDetails.card.expireYear - Payment expireYear e.g 2022
  * @param {number} obj.paymentDetails.card.cvc - Payment cvc e.g (444)
  * @param {Flight} obj.outboundFlight - Outbound Flight
- * @param {Flight} [obj.inboundFlight] - Inbound Flight
  * @returns {promise} - Promise representing booking effectively made in the Booking service.
  */
 export async function createBooking (

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { date } from 'quasar'
+import Flight from '../../shared/models/FlightClass';
 
 /** Class representing a Booking. All permutations of data from Booking, a different date format for instance, should happen here. */
 export default class Booking {
@@ -41,7 +42,7 @@ export default class Booking {
   constructor ({ id, createdAt, outboundFlight, bookingReference }) {
     this.id = id
     this.createdAt = new Date(createdAt)
-    this.outboundFlight = outboundFlight
+    this.outboundFlight = new Flight(outboundFlight)
     this.bookingReference = bookingReference
   }
 
