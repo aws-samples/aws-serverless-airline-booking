@@ -2,9 +2,43 @@
 
 Serverless Airline Booking is a complete web application that provides Flight Search, Payment, Booking and Loyalty points including end-to-end testing, GraphQL and CI/CD. This web application was the theme of [Build on Serverless Season 2 on AWS Twitch running from April 24th until August 7th](https://pages.awscloud.com/GLOBAL-devstrategy-OE-BuildOnServerless-2019-reg-event.html).
 
-For more up-to-date information on what's being implemented, take a look at our current [Boards](https://github.com/aws-samples/aws-serverless-airline-booking/projects).
+**This branch is read-only, and primarily represents what we discussed on Twitch** - For improvements and more up-to-date information check [Develop branch](https://github.com/aws-samples/aws-serverless-airline-booking/tree/develop) and [Boards](https://github.com/aws-samples/aws-serverless-airline-booking/projects).
 
 ![Serverless Airline Booking sample](./media/prototype-web.png)
+
+## Episodes
+
+List of episodes we ran last year:
+
+* **[Episode 1 - Development and Auth setup](http://bit.ly/2EwIHSc)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/2)
+* **[Episode 2 - Building the Catalog service](http://bit.ly/2VJZ1F6)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/3)
+* **[Episode 3 - Building the Booking service Pt 1](http://bit.ly/2YSmDcF)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/11)
+* **[Episode 4 - Building the Booking service Pt 1](http://bit.ly/2X5z1Fs)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/12)
+* **[Episode 5 - Building the Loyalty service](http://bit.ly/2Z8XfiP)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/15)
+* **[Episode 6 - Testing the Loyalty service](http://bit.ly/2Wy5f0d)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/15)
+* **[Episode 7 - Catch Up/Recap](https://youtu.be/rWTHXuLiOvk)**
+* **[Episode 8 - Integration and E2E Testing Pt 1](https://youtu.be/g99BohPWNyE)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/17)
+* **[Episode 9 - Integration and E2E Testing Pt 1](https://youtu.be/QiNwNKx1KT0)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/17)
+* **[Episode 10 - Optimising our Infrastructure Pt 1](https://www.twitch.tv/videos/457858667)**
+    - [WIP Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/19)
+* **[Episode 11 - Optimising our Infrastructure Pt 2](https://www.twitch.tv/videos/457907686)**
+    - [WIP Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/19)
+* **[Episode 12 - Gaining Observability Pt 1](https://www.twitch.tv/videos/457923264)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/27)
+* **[Episode 13 - Gaining Observability Pt 2](https://www.twitch.tv/videos/471252879)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/27)
+* **[Episode 14 - Bonus Episode - Load testing/Perf improvements](https://www.twitch.tv/videos/464384029)**
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/74)
+    - [Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/99)
+    - [WIP Pull request](https://github.com/aws-samples/aws-serverless-airline-booking/pull/81)
 
 ## Deployment
 
