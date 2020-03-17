@@ -10,8 +10,9 @@ Before you deploy, you must have the following in place:
 * [GitHub Account](https://github.com)
 * [Node 10 or greater](https://nodejs.org/en/download/)
 * [Amplify CLI 4.13.1 or greater installed and configured](https://aws-amplify.github.io/docs/cli-toolchain/quickstart#quickstart)
-* [Stripe Account](https://dashboard.stripe.com/register)
-    - Take note of your testing `Secret Key` and `Public Key` [located in the Stripe Dashboard](https://support.stripe.com/questions/locate-api-keys)
+* [Stripe Account](https://dashboard.stripe.com/register) or [Amazon Pay](https://pay.amazon.com/signup) account
+    - For Stripe, take note of your testing `Secret Key` and `Public Key` [located in the Stripe Dashboard](https://support.stripe.com/questions/locate-api-keys)
+    - For Amazon Pay, generate two keys: one public key and one private key. Exchange the public key for a publicKeyId to access Amazon Pay APIs.
 
 For prototyping, you need the following:
 
