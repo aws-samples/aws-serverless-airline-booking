@@ -16,6 +16,7 @@
     "core-js": "^3.4.4",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "fuse.js": "^3.4.5",
     "quasar-extras": "^2.0.4",
     "quasar-framework": "^0.17.20",
