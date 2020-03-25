@@ -1,0 +1,47 @@
+name: Front-end Build test
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - master
+      - twitch
+    paths:
+      - "src/frontend/**"
+  push:
+    branches:
+      - develop
+      - master
+      - twitch
+    paths:
+      - "src/frontend/**"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      max-parallel: 2
+      matrix:
+        node-version: [10.x, 12.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install dependencies
+      run: npm install
+      working-directory: ./src/frontend
+    - name: Build front-end
+      run: npm run build --if-present
+      working-directory: ./src/frontend
+    #
+    # Not implemented yet
+    #
+    # - name: Test front-end 
+    #   run: npm run build --if-present
+    #   working-directory: ./src/frontend
+  
