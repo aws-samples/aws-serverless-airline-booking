@@ -11,6 +11,7 @@ import s3 = require('@aws-cdk/aws-s3');
 import { Rule } from '@aws-cdk/aws-events';
 import lambda = require('@aws-cdk/aws-lambda')
 import targets = require('@aws-cdk/aws-events-targets')
+import ssm = require('@aws-cdk/aws-ssm');
 
 const STACK_NAME = process.env.STACK_NAME;
 const ROLE_NAME = `${STACK_NAME}-fargate-role`;
@@ -28,6 +29,7 @@ const GATLING_CONTAINER_NAME = `${STACK_NAME}-gatling-container`
 const MOCKDATA_CONTAINER_NAME = `${STACK_NAME}-mockdata-container`
 const STATE_MACHINE_NAME = `loadtest-${STACK_NAME}`
 const S3_BUCKET_NAME = `${STACK_NAME}-loadtest`
+const BRANCH_NAME = process.env.AWS_BRANCH
 
 export class PerftestStackAirlineStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -266,6 +268,13 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       targets: [ 
       ]
     })
+
+    new ssm.StringParameter(this, 'LoadTestS3Bucket', {
+      // description: 'Some user-friendly description',
+      parameterName: `${BRANCH_NAME}/service/loadtest/s3/bucket`,
+      stringValue: bucket.bucketName,
+      // allowedPattern: '.*',
+    });
 
     cwRule.addEventPattern({
       source: ['aws.ecs'],

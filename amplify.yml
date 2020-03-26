@@ -40,6 +40,7 @@ backend:
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/publicKey" VALUE=${STRIPE_PUBLIC_KEY}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/cognitoUrl" VALUE=https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/ 
         ##
         # Deploy SAM based back-end
         ##
