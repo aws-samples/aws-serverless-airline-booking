@@ -150,4 +150,5 @@ def lambda_handler(event, context):
         log_metric(name="FailedPayment", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Status annotation before raising error")
         tracer.put_annotation("PaymentStatus", "FAILED")
+        logger.error({"operation": "collect_payment", "details": err})
         raise PaymentException(details=err)

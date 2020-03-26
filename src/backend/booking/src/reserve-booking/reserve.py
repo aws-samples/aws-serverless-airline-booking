@@ -172,4 +172,5 @@ def lambda_handler(event, context):
         log_metric(name="FailedReservation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Reservation annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
+        logger.error({"operation": "reserve_booking", "details": err})
         raise BookingReservationException(details=err)

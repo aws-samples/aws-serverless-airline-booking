@@ -1,0 +1,25 @@
+{
+  "source": "./",
+  "destination": "./html",
+  "index": "./esdoc_index.md",
+  "plugins": [
+    {
+      "name": "esdoc-standard-plugin"
+    }
+  ],
+  "excludes": [
+    "aws-exports\\.js$",
+    "node_modules",
+    "router.js",
+    "babel.config.js",
+    ".external-ecmascript.js",
+    "queries.js",
+    "mutations.js",
+    "postcss.config.js",
+    "main.js",
+    "vue.config.js",
+    "jest.config.js",
+    ".eslintrc.js",
+    "dist/*"
+  ]
+}

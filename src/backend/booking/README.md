@@ -96,7 +96,7 @@ Booking provides a [GraphQL Booking data type and a getBookingByStatus query](..
 
 Flight IDs are stored in Booking table and fetched via `@connection` that effectively queries a separate table (Flight from Catalog) using a GSI.
 
-![Booking front-end integration](../../../media/booking-frontend-integration.png)
+![Booking front-end integration](../../../media/frontend_modules_bookings.png)
 
 ### Loyalty
 

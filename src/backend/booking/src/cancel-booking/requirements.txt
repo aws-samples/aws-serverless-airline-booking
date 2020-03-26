@@ -1,3 +1,3 @@
-boto3==1.9.56
-botocore==1.12.57
+boto3~=1.11
+botocore~=1.13
 ../shared/lambda_python_powertools/
