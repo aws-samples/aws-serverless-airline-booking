@@ -271,7 +271,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
 
     new ssm.StringParameter(this, 'LoadTestS3Bucket', {
       // description: 'Some user-friendly description',
-      parameterName: `${BRANCH_NAME}/service/loadtest/s3/bucket`,
+      parameterName: `/${BRANCH_NAME}/service/loadtest/s3/bucket`,
       stringValue: bucket.bucketName,
       // allowedPattern: '.*',
     });
