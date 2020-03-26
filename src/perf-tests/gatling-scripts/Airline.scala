@@ -14,6 +14,9 @@ val COGNITO_URL = sys.env("COGNITO_URL")
 val TOKEN_CSV = sys.env("TOKEN_CSV")
 val USER_COUNT = sys.env("USER_COUNT").toInt
 val DURING_TIME = sys.env("DURING_TIME").toInt
+val YEAR = 2020
+val DEPARTURE_CODE = "LGW"
+val ARRIVAL_CODE = "MAD"
 
 object Flight {
       val randomString = csv(TOKEN_CSV).circular
@@ -24,12 +27,15 @@ object Flight {
                               "User-Agent" -> "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36"                          
                             )
 
-      val query = feed(randomString)    
+      val query = feed(randomString)
+                      .exec( _.set("YEAR", YEAR))
+                      .exec( _.set("DEPARTURE_CODE", DEPARTURE_CODE))
+                      .exec( _.set("ARRIVAL_CODE", ARRIVAL_CODE))
                       .exec(http("Search Flights")
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
-                      .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50,"filter":{"departureDate":{"beginsWith":"2020"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
+                      .body(ElFileBody("queries/listFlights.json"))
                       .asJson
                       .check(bodyString.saveAs("Query Flights"))
                       .check(status.not(404), status.not(500)))
@@ -55,7 +61,7 @@ object User {
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
-                      .body(StringBody("""{"query":"query getLoyalty($customer: String) {  getLoyalty(customer: $customer) {    points    level    remainingPoints  }}","variables":{}}"""))
+                      .body(ElFileBody("queries/getLoyalty.json"))
                       .asJson
                       .check(bodyString.saveAs("User Profile"))
                       .check(status.not(404), status.not(500)))
@@ -70,7 +76,7 @@ object User {
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
-                      .body(StringBody("""{"query":"query ListBookings($filter: ModelBookingFilterInput, $limit: Int, $nextToken: String) {  listBookings(filter: $filter, limit: $limit, nextToken: $nextToken) {    items {      id      status      bookingReference      outboundFlight {        id        departureDate        departureAirportCode        departureAirportName        departureCity        departureLocale        arrivalDate        arrivalAirportCode        arrivalAirportName        arrivalCity        arrivalLocale        ticketPrice        ticketCurrency        flightNumber      }      checkedIn      createdAt    }    nextToken  }}","variables":{}}"""))
+                      .body(ElFileBody("queries/listBookings.json"))                 
                       .asJson
                       .check(bodyString.saveAs("Retrieve bookings"))
                       .check(status.not(404), status.not(500)))
@@ -92,14 +98,17 @@ object Make {
                             ) 
 
       val randSelect: Random = new Random()
-      val randNum: Int = randSelect.nextInt(50)           
+      val randNum: Int = randSelect.nextInt(50)         
 
-      val booking =  feed(randomString)    
+      val booking =  feed(randomString)
+                      .exec( _.set("YEAR", YEAR))
+                      .exec( _.set("DEPARTURE_CODE", DEPARTURE_CODE))
+                      .exec( _.set("ARRIVAL_CODE", ARRIVAL_CODE))    
                       .exec(http("Search Rand Flights")
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
-                     .body(StringBody("""{"query":"query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}","variables":{"limit":50, "filter":{"departureDate":{"beginsWith":"2020"},"departureAirportCode":{"eq":"LGW"},"arrivalAirportCode":{"eq":"MAD"}}}}"""))
+                      .body(ElFileBody("queries/listFlights.json"))
                       .asJson
                       .check(bodyString.saveAs("Query Flights"))
                       .check(jsonPath("$..id").find(randNum).saveAs("bookingId"))
@@ -112,18 +121,31 @@ object Make {
                       .exec(http("Stripe tokenization")
                       .post("https://api.stripe.com/v1/tokens")
                       .headers(headerMaps)
-                      .formParam("card[name]","John")
-                      .formParam("card[address_zip]","NC2+8234")
-                      .formParam("card[address_country]", "UK")
-                      .formParam("card[number]", "4242424242424242")
-                      .formParam("card[cvc]","123")
-                      .formParam("card[exp_month]","08")
-                      .formParam("card[exp_year]","25")
-                      .formParam("guid","7f94f22b-dd03-4d25-9482-48df472123dd")
-                      .formParam("muid","999143d3-02bc-4fc3-bf5f-510270268507")
-                      .formParam("sid","5fa32dea-d7ca-4154-8efd-3181894f126f")    
-                      .formParam("payment_user_agent","stripe.js%2F87a13246%3B+stripe-js-v3%2F87a13246") 
-                      .formParam("key","pk_test_BpxANYCOZO7waMV3TrPQHjXa")                   
+                      .formParamMap(Map(
+                        "card[name]" -> "John",
+                        "card[address_zip]" -> "NC2+8234",
+                        "card[address_country]" -> "UK",
+                        "card[number]" -> "4242424242424242",
+                        "card[cvc]" -> "123",
+                        "card[exp_month]" -> "08",
+                        "card[exp_year]" -> "32",
+                        "guid" -> "7f94f22b-dd03-4d25-9482-48df472123dd",
+                        "muid" -> "999143d3-02bc-4fc3-bf5f-510270268507",
+                        "sid"  -> "5fa32dea-d7ca-4154-8efd-3181894f126f",
+                        "key"  -> "pk_test_BpxANYCOZO7waMV3TrPQHjXa"
+                      ))
+                      // .formParam("card[name]","John")
+                      // .formParam("card[address_zip]","NC2+8234")
+                      // .formParam("card[address_country]", "UK")
+                      // .formParam("card[number]", "4242424242424242")
+                      // .formParam("card[cvc]","123")
+                      // .formParam("card[exp_month]","08")
+                      // .formParam("card[exp_year]","25")
+                      // .formParam("guid","7f94f22b-dd03-4d25-9482-48df472123dd")
+                      // .formParam("muid","999143d3-02bc-4fc3-bf5f-510270268507")
+                      // .formParam("sid","5fa32dea-d7ca-4154-8efd-3181894f126f")    
+                      // .formParam("payment_user_agent","stripe.js%2F87a13246%3B+stripe-js-v3%2F87a13246") 
+                      // .formParam("key","pk_test_BpxANYCOZO7waMV3TrPQHjXa")                   
                       .check(status.not(404), status.not(500))
                       .check(jsonPath("$.id").saveAs("stripeToken")))
                       .exec(session => {
@@ -135,7 +157,7 @@ object Make {
                       .header("Accept", "application/json, text/plain, */*")
                       .header("Content-Type", "application/json;charset=UTF-8")
                       .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36")
-                      .body(StringBody("""{"amount":${ticketPrice},"currency":"EUR","stripeToken":"${stripeToken}","description":"Payment by askdjas.adas@gmail.com","email":"askdjas.adas@gmail.com"}"""))
+                      .body(ElFileBody("queries/processCharge.json"))
                       .asJson
                       .check(jsonPath("$.createdCharge.id").saveAs("chargeId")))
                       .exec(s => {
@@ -149,7 +171,7 @@ object Make {
                       .header("Content-Type", "application/json;charset=UTF-8")
                       .header("Authorization", "${token}")
                       .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36")
-                      .body(StringBody("""{"query":"mutation ProcessBooking($input: CreateBookingInput!) {  processBooking(input: $input) {    id  }}","variables":{"input":{"paymentToken":"${chargeId}","bookingOutboundFlightId":"${bookingId}"}}}"""))
+                      .body(ElFileBody("queries/processBooking.json"))
                       .asJson)
                       .exec(p => {
                         println(p)
