@@ -271,7 +271,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
 
     new ssm.StringParameter(this, 'LoadTestS3Bucket', {
       // description: 'Some user-friendly description',
-      parameterName: `/${BRANCH_NAME}/service/loadtest/s3/bucket`,
+      parameterName: `/${BRANCH_NAME}/service/s3/loadtest/bucket`,
       stringValue: bucket.bucketName,
       // allowedPattern: '.*',
     });
@@ -286,35 +286,6 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     })
 
     cwRule.addTarget(new targets.LambdaFunction(ecsLambda))
-
-    new cdk.CfnOutput(this, "COGNITO_CLIENT_ID", {
-      value: COGNITO_CLIENT_ID
-    })
-
-    new cdk.CfnOutput(this, "COGNITO_URL", {
-      value: COGNITO_URL
-    })
-
-    new cdk.CfnOutput(this, "GRAPHQL_URL", {
-      value: GRAPHQL_URL
-    })
-
-    new cdk.CfnOutput(this, "API_URL", {
-      value: API_URL
-    })
-
-    new cdk.CfnOutput(this, 'S3_BUCKET', {
-      value: bucket.bucketName
-    })
-
-    new cdk.CfnOutput(this, "USER_POOL_ID", {
-      value: USER_POOL_ID
-    })
-
-    new cdk.CfnOutput(this, "APPSYNC_API_KEY", {
-      value: GRAPHQL_API_ID,
-    })
-
 
   }
 }

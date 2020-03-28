@@ -12,11 +12,13 @@ val GRAPHQL_URL = sys.env("GRAPHQL_URL")
 val API_URL     = sys.env("API_URL") 
 val COGNITO_URL = sys.env("COGNITO_URL") 
 val TOKEN_CSV = sys.env("TOKEN_CSV")
+val STRIPE_PUBLIC_KEY = sys.env("STRIPE_PUBLIC_KEY")
 val USER_COUNT = sys.env("USER_COUNT").toInt
-val DURING_TIME = sys.env("DURING_TIME").toInt
+val DURATION = sys.env("DURATION").toInt
 val YEAR = 2020
 val DEPARTURE_CODE = "LGW"
 val ARRIVAL_CODE = "MAD"
+
 
 object Flight {
       val randomString = csv(TOKEN_CSV).circular
@@ -103,7 +105,8 @@ object Make {
       val booking =  feed(randomString)
                       .exec( _.set("YEAR", YEAR))
                       .exec( _.set("DEPARTURE_CODE", DEPARTURE_CODE))
-                      .exec( _.set("ARRIVAL_CODE", ARRIVAL_CODE))    
+                      .exec( _.set("ARRIVAL_CODE", ARRIVAL_CODE))
+                      .exec(_.set("STRIPE_PUBLIC_KEY", STRIPE_PUBLIC_KEY))    
                       .exec(http("Search Rand Flights")
                       .post(GRAPHQL_URL)
                       .headers(headerMaps)
@@ -132,7 +135,7 @@ object Make {
                         "guid" -> "7f94f22b-dd03-4d25-9482-48df472123dd",
                         "muid" -> "999143d3-02bc-4fc3-bf5f-510270268507",
                         "sid"  -> "5fa32dea-d7ca-4154-8efd-3181894f126f",
-                        "key"  -> "pk_test_BpxANYCOZO7waMV3TrPQHjXa"
+                        "key"  -> "${STRIPE_PUBLIC_KEY}"
                       ))
                       // .formParam("card[name]","John")
                       // .formParam("card[address_zip]","NC2+8234")
@@ -187,11 +190,11 @@ object Make {
 
 setUp( 
     searchFlight.inject(
-       constantUsersPerSec(USER_COUNT) during (DURING_TIME) randomized),
+       constantUsersPerSec(USER_COUNT) during (DURATION) randomized),
     profile.inject(
-      rampUsersPerSec(1) to USER_COUNT during (DURING_TIME) randomized), 
+      rampUsersPerSec(1) to USER_COUNT during (DURATION) randomized), 
     listUserBookings.inject(
-      rampUsersPerSec(1) to USER_COUNT during (DURING_TIME) randomized), 
+      rampUsersPerSec(1) to USER_COUNT during (DURATION) randomized), 
     newBooking.inject(
-      constantUsersPerSec(USER_COUNT) during (DURING_TIME) randomized))
+      constantUsersPerSec(USER_COUNT) during (DURATION) randomized))
 }
