@@ -17,7 +17,7 @@ backend:
         - export DEPLOYMENT_BUCKET_NAME=$(jq -r '.providers.awscloudformation.DeploymentBucketName' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export AWS_DEFAULT_REGION=$(jq -r '.providers.awscloudformation.Region' amplify/#current-cloud-backend/amplify-meta.json)
         - export GRAPHQL_API_ID=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIIdOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
-        - export GRAPHQL_URL=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
+        - export APPSYNC_URL=$(jq -r '.api[(.api | keys)[0]].output.GraphQLAPIEndpointOutput' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export COGNITO_USER_POOL_ID=$(jq -r '.auth[(.auth | keys)[0]].output.UserPoolId' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${COGNITO_USER_POOL_ID} --query 'UserPool.Arn' --output text)
         - export COGNITO_USER_POOL_CLIENT_ID=$(jq -r '.auth[(.auth | keys)[0]].output.AppClientIDWeb' ./amplify/#current-cloud-backend/amplify-meta.json)
@@ -35,7 +35,7 @@ backend:
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/arn" VALUE=${COGNITO_USER_POOL_ARN}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/clientId" VALUE=${COGNITO_USER_POOL_CLIENT_ID}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/id" VALUE=${GRAPHQL_API_ID}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/url" VALUE=${GRAPHQL_URL}
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/url" VALUE=${APPSYNC_URL}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}

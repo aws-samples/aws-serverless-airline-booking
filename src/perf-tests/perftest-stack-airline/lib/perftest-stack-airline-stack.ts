@@ -42,7 +42,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     const USER_POOL_ID = process.env.USER_POOL_ID || "not_defined"
     const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || "not_defined"
     const COGNITO_URL = `https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/`
-    const GRAPHQL_URL = process.env.GRAPHQL_URL || "not_defined"
+    const APPSYNC_URL = process.env.APPSYNC_URL || "not_defined"
     const API_URL = process.env.API_URL || "not_defined"
     const GRAPHQL_API_ID = process.env.GRAPHQL_API_ID || "not_defined"
 
@@ -132,29 +132,47 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       streamPrefix: "mockdata"
     })
 
-    // Create container from local `Dockerfile` for Gatling
-    const gatlingAppContainer = gatlingTaskDefinition.addContainer(GATLING_CONTAINER_NAME, {
-      image: ecs.ContainerImage.fromEcrRepository(gatlingRepository),
-      logging: gatlingLogging
-    });
-
-    const tokenCSV = ssm.StringParameter.valueForStringParameter(this,`/${BRANCH_NAME}/service/loadtest/csv/token`);
+    const tokenCSV = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/loadtest/csv/token`);
     const userCSV = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/loadtest/csv/user`);
     const loadtestBucket = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/s3/loadtest/bucket`);
     const userPoolID = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/auth/userpool/id`);
     const cognitoClientID = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/auth/userpool/clientId`);
+    const appsyncAPIKey = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/api/id`)
+    const appsyncURL = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/api/url`)
+    const cognitoURL = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/auth/userpool/url`)
+    const apiURL = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/payment/api/charge/url`)
+    const stripePublicKey = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/payment/stripe/publicKey`)
+    const userCount = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/loadtest/usercount`)
+    const duration = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/loadtest/duration`)
+
+    // Create container from local `Dockerfile` for Gatling
+    const gatlingAppContainer = gatlingTaskDefinition.addContainer(GATLING_CONTAINER_NAME, {
+      image: ecs.ContainerImage.fromEcrRepository(gatlingRepository),
+      logging: gatlingLogging,
+      environment: {
+        "APPSYNC_URL": appsyncURL,
+        "API_URL": apiURL,
+        "COGNITO_URL": cognitoURL,
+        "TOKEN_CSV": tokenCSV,
+        "STRIPE_PUBLIC_KEY": stripePublicKey,
+        "USER_COUNT": userCount,
+        "DURATION": duration
+      }
+    });
 
     const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
       logging: mockDatalogging,
       environment: {
-        "TOKEN_CSV":  tokenCSV,
+        "TOKEN_CSV": tokenCSV,
         "USER_CSV": userCSV,
         "AWS_REGION": `${AWS_DEFAULT_REGION}`,
         "S3_BUCKET": loadtestBucket,
         "USER_POOL_ID": userPoolID,
-         "COGNITO_CLIENT_ID": cognitoClientID,
-        "FOLDERPATH": FOLDERPATH
+        "COGNITO_CLIENT_ID": cognitoClientID,
+        "FOLDERPATH": FOLDERPATH,
+        "APPSYNC_API_KEY": appsyncAPIKey,
+        "APPSYNC_URL": appsyncURL
       }
     });
 

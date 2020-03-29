@@ -9,7 +9,7 @@ from datetime import timedelta
 TOKEN_CSV = os.environ['FOLDERPATH'] + os.environ['TOKEN_CSV']
 USER_CSV = os.environ['FOLDERPATH'] + os.environ['USER_CSV']
 APPSYNC_API_KEY = os.environ['APPSYNC_API_KEY']
-APPSYNC_API_ENDPOINT_URL = os.environ['GRAPHQL_URL']
+APPSYNC_URL = os.environ['APPSYNC_URL']
 S3_BUCKET = os.environ['S3_BUCKET']
 START_DATE = os.getenv('START_DATE') or datetime.now()
 END_DATE = os.getenv('END_DATE') or datetime.now() + timedelta(days=7)
@@ -36,7 +36,7 @@ try:
         payload_obj = {"query": query}
         print(payload_obj)
         payload = json.dumps(payload_obj)
-        response = requests.request("POST", APPSYNC_API_ENDPOINT_URL, data=payload, headers=headers)
+        response = requests.request("POST", APPSYNC_URL, data=payload, headers=headers)
         return response
 
     if __name__ == '__main__':

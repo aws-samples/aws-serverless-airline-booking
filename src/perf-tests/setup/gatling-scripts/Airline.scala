@@ -8,7 +8,7 @@ import scala.util.Random
 
 class Airline extends Simulation {
 
-val GRAPHQL_URL = sys.env("GRAPHQL_URL") 
+val APPSYNC_URL = sys.env("APPSYNC_URL") 
 val API_URL     = sys.env("API_URL") 
 val COGNITO_URL = sys.env("COGNITO_URL") 
 val TOKEN_CSV = sys.env("TOKEN_CSV")
@@ -34,7 +34,7 @@ object Flight {
                       .exec( _.set("DEPARTURE_CODE", DEPARTURE_CODE))
                       .exec( _.set("ARRIVAL_CODE", ARRIVAL_CODE))
                       .exec(http("Search Flights")
-                      .post(GRAPHQL_URL)
+                      .post(APPSYNC_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
                       .body(ElFileBody("queries/listFlights.json"))
@@ -60,7 +60,7 @@ object User {
 
       val profile = feed(randomString)    
                       .exec(http("Retrieve Profile")
-                      .post(GRAPHQL_URL)
+                      .post(APPSYNC_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
                       .body(ElFileBody("queries/getLoyalty.json"))
@@ -75,7 +75,7 @@ object User {
 
       val bookings = feed(randomString)    
                       .exec(http("List bookings")
-                      .post(GRAPHQL_URL)
+                      .post(APPSYNC_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
                       .body(ElFileBody("queries/listBookings.json"))                 
@@ -108,7 +108,7 @@ object Make {
                       .exec( _.set("ARRIVAL_CODE", ARRIVAL_CODE))
                       .exec(_.set("STRIPE_PUBLIC_KEY", STRIPE_PUBLIC_KEY))    
                       .exec(http("Search Rand Flights")
-                      .post(GRAPHQL_URL)
+                      .post(APPSYNC_URL)
                       .headers(headerMaps)
                       .header("Authorization", "${token}" )
                       .body(ElFileBody("queries/listFlights.json"))
@@ -169,7 +169,7 @@ object Make {
                       })
                       .feed(randomString)
                       .exec(http("Process booking")
-                      .post(GRAPHQL_URL)
+                      .post(APPSYNC_URL)
                       .header("Accept", "application/json, text/plain, */*")
                       .header("Content-Type", "application/json;charset=UTF-8")
                       .header("Authorization", "${token}")
