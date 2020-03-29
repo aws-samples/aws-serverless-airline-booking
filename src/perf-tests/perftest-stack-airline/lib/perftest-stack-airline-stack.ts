@@ -30,6 +30,7 @@ const MOCKDATA_CONTAINER_NAME = `${STACK_NAME}-mockdata-container`
 const STATE_MACHINE_NAME = `loadtest-${STACK_NAME}`
 const S3_BUCKET_NAME = `${STACK_NAME}-loadtest`
 const BRANCH_NAME = process.env.AWS_BRANCH
+const FOLDERPATH = "./"
 
 export class PerftestStackAirlineStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -40,7 +41,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN || "not_defined"
     const USER_POOL_ID = process.env.USER_POOL_ID || "not_defined"
     const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || "not_defined"
-    const COGNITO_URL= `https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/`
+    const COGNITO_URL = `https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/`
     const GRAPHQL_URL = process.env.GRAPHQL_URL || "not_defined"
     const API_URL = process.env.API_URL || "not_defined"
     const GRAPHQL_API_ID = process.env.GRAPHQL_API_ID || "not_defined"
@@ -137,9 +138,42 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       logging: gatlingLogging
     });
 
+    const tokenCSV = ssm.StringParameter.fromStringParameterAttributes(this, 'TOKEN_CSV', {
+      parameterName: `/${BRANCH_NAME}/service/loadtest/csv/token`,
+      version: 1
+    });
+
+    const userCSV = ssm.StringParameter.fromStringParameterAttributes(this, 'USER_CSV', {
+      parameterName: `/${BRANCH_NAME}/service/loadtest/csv/user`,
+      version: 1
+    });
+
+    const loadtestBucket = ssm.StringParameter.fromStringParameterAttributes(this, 'S3_BUCKET', {
+      parameterName: `/${BRANCH_NAME}/service/s3/loadtest/bucket`,
+      version: 1
+    });
+
+    const userPoolID = ssm.StringParameter.fromStringParameterAttributes(this, 'USER_POOL_ID', {
+      parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/id`,
+      version: 1
+    });
+
+    const cognitoClientID = ssm.StringParameter.fromStringParameterAttributes(this, 'COGNITO_CLIENT_ID', {
+      parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/clientId`,
+      version: 1
+    });
+
     const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
-      logging: mockDatalogging
+      logging: mockDatalogging,
+      environment: {
+        "TOKEN_CSV": FOLDERPATH + tokenCSV.stringValue,
+        "USER_CSV": FOLDERPATH + userCSV.stringValue,
+        "AWS_REGION": `${AWS_DEFAULT_REGION}`,
+        "S3_BUCKET": loadtestBucket.stringValue,
+        "USER_POOL_ID": userPoolID.stringValue,
+        "COGNITO_CLIENT_ID": cognitoClientID.stringValue
+      }
     });
 
     // Step function for setting the load test
@@ -265,7 +299,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       description: "Rule that looks at ECS Task change state and triggers Lambda function",
       enabled: true,
       ruleName: "ECS-task-change-cdk",
-      targets: [ 
+      targets: [
       ]
     })
 
