@@ -153,10 +153,11 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       version: 1
     });
 
-    const userPoolID = ssm.StringParameter.fromStringParameterAttributes(this, 'USER_POOL_ID', {
-      parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/id`,
-      version: 1
-    });
+    const userPoolID = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/auth/userpool/id`)
+    // fromStringParameterAttributes(this, 'USER_POOL_ID', {
+    //   parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/id`,
+    //   version: 1
+    // });
 
     const cognitoClientID = ssm.StringParameter.fromStringParameterAttributes(this, 'COGNITO_CLIENT_ID', {
       parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/clientId`,
@@ -171,7 +172,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         "USER_CSV": userCSV.stringValue,
         "AWS_REGION": `${AWS_DEFAULT_REGION}`,
         "S3_BUCKET": loadtestBucket.stringValue,
-        "USER_POOL_ID": userPoolID.stringValue,
+        "USER_POOL_ID": userPoolID,
         // "COGNITO_CLIENT_ID": cognitoClientID.stringValue,
         "FOLDERPATH": FOLDERPATH
       }
