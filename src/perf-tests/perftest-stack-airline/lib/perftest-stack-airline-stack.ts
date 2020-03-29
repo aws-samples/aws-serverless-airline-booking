@@ -172,7 +172,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         "AWS_REGION": `${AWS_DEFAULT_REGION}`,
         "S3_BUCKET": loadtestBucket.stringValue,
         "USER_POOL_ID": userPoolID.stringValue,
-        "COGNITO_CLIENT_ID": cognitoClientID.stringValue,
+        // "COGNITO_CLIENT_ID": cognitoClientID.stringValue,
         "FOLDERPATH": FOLDERPATH
       }
     });
