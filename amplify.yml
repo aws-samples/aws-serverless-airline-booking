@@ -42,7 +42,8 @@ backend:
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/publicKey" VALUE=${STRIPE_PUBLIC_KEY}
         - make export.parameter NAME=" /${AWS_BRANCH}/service/auth/userpool/url" VALUE=https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/ 
         - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/usercount" VALUE=5
-        - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/duration" VALUE=300
+        - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/csv/token" VALUE=user-with-token.csv
+        - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/csv/user" VALUE=user.csv
         ##
         # Deploy SAM based back-end
         ##

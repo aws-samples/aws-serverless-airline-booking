@@ -20,8 +20,8 @@ API_URL=`aws ssm get-parameters --names /twitchbase/service/payment/api/charge/u
 USER_COUNT=`aws ssm get-parameters --names /twitchbase/service/loadtest/usercount --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
 DURATION=`aws ssm get-parameters --names /twitchbase/service/loadtest/duration --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
 FOLDERPATH=./
-TOKEN_CSV='user-with-token.csv'
-USER_CSV='user.csv'
+TOKEN_CSV=`aws ssm get-parameters --names /twitchbase/service/loadtest/csv/token --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
+USER_CSV=`aws ssm get-parameters --names /twitchbase/service/loadtest/csv/user --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
 
 echo "AWS_REGION=${AWS_REGION}" > setup.env
 echo "TOKEN_CSV=${TOKEN_CSV}" >> setup.env
