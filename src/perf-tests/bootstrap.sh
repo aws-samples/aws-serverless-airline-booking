@@ -17,8 +17,8 @@ S3_BUCKET=`aws ssm get-parameters --names /twitchbase/service/s3/loadtest/bucket
 COGNITO_URL=`aws ssm get-parameters --names /twitchbase/service/auth/userpool/url --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
 GRAPHQL_URL=`aws ssm get-parameters --names /twitchbase/service/amplify/api/url --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
 API_URL=`aws ssm get-parameters --names /twitchbase/service/payment/api/charge/url --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
-USER_COUNT=`aws ssm get-parameters --names /twitchbase/service/service/loadtest/usercount --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
-DURATION=`aws ssm get-parameters --names /twitchbase/service/service/loadtest/duration --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
+USER_COUNT=`aws ssm get-parameters --names /twitchbase/service/loadtest/usercount --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
+DURATION=`aws ssm get-parameters --names /twitchbase/service/loadtest/duration --region ${AWS_REGION} --query "Parameters[*].Value" --output text`
 FOLDERPATH=./
 TOKEN_CSV='user-with-token.csv'
 USER_CSV='user.csv'
@@ -35,7 +35,7 @@ echo "COGNITO_URL=${COGNITO_URL}" >> setup.env
 echo "GRAPHQL_URL=${GRAPHQL_URL}" >> setup.env
 echo "API_URL=${API_URL}" >> setup.env
 echo "STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}" >> setup.env
-echo "DURING_TIME=${DURING_TIME}" >> setup.env
+echo "DURATION=${DURATION}" >> setup.env
 echo "USER_COUNT=${USER_COUNT}" >> setup.env
 
 
