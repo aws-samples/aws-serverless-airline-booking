@@ -138,42 +138,22 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       logging: gatlingLogging
     });
 
-    const tokenCSV = ssm.StringParameter.fromStringParameterAttributes(this, 'TOKEN_CSV', {
-      parameterName: `/${BRANCH_NAME}/service/loadtest/csv/token`,
-      version: 1
-    });
-
-    const userCSV = ssm.StringParameter.fromStringParameterAttributes(this, 'USER_CSV', {
-      parameterName: `/${BRANCH_NAME}/service/loadtest/csv/user`,
-      version: 1
-    });
-
-    const loadtestBucket = ssm.StringParameter.fromStringParameterAttributes(this, 'S3_BUCKET', {
-      parameterName: `/${BRANCH_NAME}/service/s3/loadtest/bucket`,
-      version: 1
-    });
-
-    const userPoolID = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/auth/userpool/id`)
-    // fromStringParameterAttributes(this, 'USER_POOL_ID', {
-    //   parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/id`,
-    //   version: 1
-    // });
-
-    const cognitoClientID = ssm.StringParameter.fromStringParameterAttributes(this, 'COGNITO_CLIENT_ID', {
-      parameterName: `/${BRANCH_NAME}/service/amplify/auth/userpool/clientId`,
-      version: 1
-    });
+    const tokenCSV = ssm.StringParameter.valueForStringParameter(this,`/${BRANCH_NAME}/service/loadtest/csv/token`);
+    const userCSV = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/loadtest/csv/user`);
+    const loadtestBucket = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/s3/loadtest/bucket`);
+    const userPoolID = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/auth/userpool/id`);
+    const cognitoClientID = ssm.StringParameter.valueForStringParameter(this, `/${BRANCH_NAME}/service/amplify/auth/userpool/clientId`);
 
     const mockDataAppContainer = mockDataTaskDefinition.addContainer(MOCKDATA_CONTAINER_NAME, {
       image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
       logging: mockDatalogging,
       environment: {
-        "TOKEN_CSV":  tokenCSV.stringValue,
-        "USER_CSV": userCSV.stringValue,
+        "TOKEN_CSV":  tokenCSV,
+        "USER_CSV": userCSV,
         "AWS_REGION": `${AWS_DEFAULT_REGION}`,
-        "S3_BUCKET": loadtestBucket.stringValue,
+        "S3_BUCKET": loadtestBucket,
         "USER_POOL_ID": userPoolID,
-        // "COGNITO_CLIENT_ID": cognitoClientID.stringValue,
+         "COGNITO_CLIENT_ID": cognitoClientID,
         "FOLDERPATH": FOLDERPATH
       }
     });
