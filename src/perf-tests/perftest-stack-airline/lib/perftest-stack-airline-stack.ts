@@ -167,12 +167,13 @@ export class PerftestStackAirlineStack extends cdk.Stack {
       image: ecs.ContainerImage.fromEcrRepository(mockDataRepository),
       logging: mockDatalogging,
       environment: {
-        "TOKEN_CSV": FOLDERPATH + tokenCSV.stringValue,
-        "USER_CSV": FOLDERPATH + userCSV.stringValue,
+        "TOKEN_CSV":  tokenCSV.stringValue,
+        "USER_CSV": userCSV.stringValue,
         "AWS_REGION": `${AWS_DEFAULT_REGION}`,
         "S3_BUCKET": loadtestBucket.stringValue,
         "USER_POOL_ID": userPoolID.stringValue,
-        "COGNITO_CLIENT_ID": cognitoClientID.stringValue
+        "COGNITO_CLIENT_ID": cognitoClientID.stringValue,
+        "FOLDERPATH": FOLDERPATH
       }
     });
 
