@@ -153,6 +153,7 @@ export class PerftestStackAirlineStack extends cdk.Stack {
         "APPSYNC_URL": appsyncURL,
         "API_URL": apiURL,
         "COGNITO_URL": cognitoURL,
+        "S3_BUCKET": loadtestBucket,
         "TOKEN_CSV": tokenCSV,
         "STRIPE_PUBLIC_KEY": stripePublicKey,
         "USER_COUNT": userCount,
