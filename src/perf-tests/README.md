@@ -7,26 +7,32 @@ Under the [Setup | mock-scripts](./setup/mock-scripts) folder, you will find set
 - load mock flight data into Flights table
 - zips Gatling reports and upload to S3 bucket
 
-The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds` OR `5 minutes`. These can be updated in the Docker file. 
+The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds`(`5 minutes`). These can be overridden via Systems Manager Paramater store  
 
 All these steps are co-ordinated using AWS Step functions.
 
 # Steps
-After the perf-test stack has been deployed successfully, 
+After the perf-test stack has been deployed successfully, follow these steps:
 
-1. Execute `bootstrap.sh` under the perf-tests folder. This will build the docker images for `gatling-scripts` and `mock-scripts`. 
+1. Run `bootstrap.sh` under the **src/perf-tests** folder. This will build the docker images for `gatling-scripts` and `mock-scripts`. 
+
+    ```
+    ./bootstrap.sh
+    ```
 
 2. After the environment variables in the DockerFile is updated, we need to push them to Amazon ECR. First login to an Amazon ECR registry
     ```
     aws ecr get-login --no-include-email --region <AWS_REGION>
     ```
+    Example:  
+    > aws ecr get-login --no-include-email --region eu-west-1
 
 3. Copy paste the docker login command and enter.
     ```
     docker login -u AWS -p <> https://<AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com
     ```
 
-4. Push the latest docker images for `gatling-scripts` and `mock-scripts` to Amazon ECR
+4. Tag the docker images and push the latest tagged docker images for `gatling-scripts` and `mock-scripts` to Amazon ECR
 
     ```
     docker tag gatling:latest <replace_with_YOUR_gatling_ECR_repo_URI>:latest
@@ -49,9 +55,9 @@ After the perf-test stack has been deployed successfully,
 4. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws gatling:latest -ro airline
 5. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest cleanup.py
 
-## Run load test on AWS:
+## Run load test using Step functions:
 
-Execute the `start-load-test` Step function using the following input
+Start the execution of the `loadtest` Step function using the following input
 
 ```
 {
@@ -61,7 +67,7 @@ Execute the `start-load-test` Step function using the following input
 }
 ```
 
-This will setup users, load mock flight data, start gatling, consolidate the report to S3 bucket
+This will setup users, load mock flight data, start gatling, consolidate the report to **loadtest** S3 bucket
 
 <details>
 <summary><strong>Expand you want to run the individual steps manually:</strong></summary><p>

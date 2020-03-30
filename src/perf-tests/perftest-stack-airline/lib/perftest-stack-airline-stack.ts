@@ -39,12 +39,12 @@ export class PerftestStackAirlineStack extends cdk.Stack {
     // retrieving all environment variables
     const AWS_DEFAULT_REGION = process.env.AWS_DEFAULT_REGION
     const COGNITO_USER_POOL_ARN = process.env.COGNITO_USER_POOL_ARN || "not_defined"
-    const USER_POOL_ID = process.env.USER_POOL_ID || "not_defined"
-    const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || "not_defined"
-    const COGNITO_URL = `https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/`
-    const APPSYNC_URL = process.env.APPSYNC_URL || "not_defined"
-    const API_URL = process.env.API_URL || "not_defined"
-    const GRAPHQL_API_ID = process.env.GRAPHQL_API_ID || "not_defined"
+    // const USER_POOL_ID = process.env.USER_POOL_ID || "not_defined"
+    // const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || "not_defined"
+    // const COGNITO_URL = `https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/`
+    // const APPSYNC_URL = process.env.APPSYNC_URL || "not_defined"
+    // const API_URL = process.env.API_URL || "not_defined"
+    // const GRAPHQL_API_ID = process.env.GRAPHQL_API_ID || "not_defined"
 
     const role = new Role(this, ROLE_NAME, {
       roleName: ROLE_NAME,
