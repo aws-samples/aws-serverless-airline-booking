@@ -9,5 +9,3 @@ RUN pip3 install awscli
 RUN pip3 install -r requirements.txt
 
 ENTRYPOINT [ "/usr/local/bin/python3" ]
-# CMD [ "/usr/local/bin/python3", "./generate-token.py" ]
-# CMD [ "/usr/local/bin/python3", "./load-flight-data.py" ]

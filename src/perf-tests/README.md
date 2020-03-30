@@ -1,15 +1,45 @@
 # Overview
 
-This perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Fargate Cluster to run the setup and Gatling scripts.
+The perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Stepfunction where each tasks are run as AWS Fargate tasks to execute the setup and Gatling load test simulation.
 
-Under the [Setup | mock-scripts](./setup/mock-scripts) folder, you will find setup scripts that:
-- creates test users in Amazon Cognito userpool
-- load mock flight data into Flights table
-- zips Gatling reports and upload to S3 bucket
+**Components used:**
+
+<table>
+  <tr>
+    <th>Folder/File</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td rowspan="4">setpup | <b>gatling-scripts</b></td>
+    <td><b>Queries</b> - This folder contains all the GraphQL queries as input to the Airline.scala gatling simulation script</td>
+  </tr>
+  <tr>
+    <td><b>Airline.scala</b> - Gatling load test simulation script</td>
+  </tr>
+  <tr>
+   <td><b>run-gatling.sh</b> - This is used internally by DockerFile as Entrypoint to download the mock auth tokens for the test users from S3 bucket</td>
+  </tr>
+  <tr>
+            <td><b>logback.xml</b> - Set the level="TRACE" to enable debug tracing</td>
+  </tr>
+  <tr>
+    <td rowspan="3">setpup | <b>mock-scripts</b></td>
+    <td><b>setup-users.py</b> - The python script creates mock test users in Amazon Cognito Userpool, generates test authentication token and uploads it S3 bucket based on the test users in user.csv</td>
+  </tr>
+  <tr>
+    <td><b>load-flight-data.py</b> - This python script load mock flight data into DynamoDB table</td>
+  </tr>
+  <tr>
+   <td><b>cleanup.py</b> - This python script is run at the end to delete the mock test users from Amazon Cognito userpool, zips Gatling report and uploads it to S3 bucket</td>
+  </tr>
+  <tr>
+    <td><b>bootstrap.sh</b></td>
+    <td colspan="2">Retrieves all the environment variables from AWS Systems Manager Parameter Store and creates setp.env file. Use docker-compose to build the docker images for Gatling and mock scripts</td>
+  </tr>  
+  </table>
 
 The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds`(`5 minutes`). These can be overridden via Systems Manager Paramater store  
 
-All these steps are co-ordinated using AWS Step functions.
 
 # Steps
 After the perf-test stack has been deployed successfully, follow these steps:
@@ -49,11 +79,30 @@ After the perf-test stack has been deployed successfully, follow these steps:
 
 ## Run load test locally using docker:
 
-1. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest setup-users.py 
-2. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest load-flight-data.py
-3. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws gatling:latest -s Airline -nr -rf /opt/gatling/results/airline
-4. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws gatling:latest -ro airline
-5. docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest cleanup.py
+1. Creates test users in Amazon Cognito
+```
+ docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest setup-users.py 
+ ```
+
+2.  Creates a few mock flights with arrival and departure details in the DynamoDB table
+```
+docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest load-flight-data.py
+```
+
+3. Start the Airline perf test simulation. Default uses 5 concurrent users for 5 mins. You can override this by updating the setup.env file. The **simulation.log** file will uploaded to the loadtest S3 bucket. You can also run multiple parallel tasks 
+```
+docker run --env-file=setup.env -it -v ~/.aws:/root/.aws gatling:latest -s Airline -nr -rf /opt/gatling/results/airline
+```
+
+4. This step will generate the Gatling report from the simulation.log, uploaded in the previous step. In case of multiple parallel execution of the previous step (Step 3), this setup will parse all the simulation logs and generate a consolidate Gatling report. 
+```
+docker run --env-file=setup.env -it -v ~/.aws:/root/.aws gatling:latest -ro airline
+```
+
+5. This step zips the Gatling report into the loadtest S3 bucket. This step also deletes the mock test users created in Cognito.
+```
+docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest cleanup.py
+```
 
 ## Run load test using Step functions:
 
@@ -68,6 +117,9 @@ Start the execution of the `loadtest` Step function using the following input
 ```
 
 This will setup users, load mock flight data, start gatling, consolidate the report to **loadtest** S3 bucket
+
+  ![StepFunctions](./images/load-test_sfn.png)
+
 
 <details>
 <summary><strong>Expand you want to run the individual steps manually:</strong></summary><p>

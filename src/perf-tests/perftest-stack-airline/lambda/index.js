@@ -1,5 +1,9 @@
 'use strict'
 
+// 
+//  The Loadtest Step function executes a series of tasks (creates mock users, load flight data etc) 
+//  and this Lambda function calls Step Functions with the task token for each of those tasks 
+
 const AWS = require('aws-sdk')
 const sfn = new AWS.StepFunctions()
 
