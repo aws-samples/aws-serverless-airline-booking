@@ -10,7 +10,7 @@ The perf-test stack uses [Gatling](https://gatling.io/), open source tool for lo
     <th>Description</th>
   </tr>
   <tr>
-    <td rowspan="4">setpup | <b>gatling-scripts</b></td>
+    <td rowspan="4">setup | <b>gatling-scripts</b></td>
     <td><b>Queries</b> - This folder contains all the GraphQL queries as input to the Airline.scala gatling simulation script</td>
   </tr>
   <tr>
@@ -23,7 +23,7 @@ The perf-test stack uses [Gatling](https://gatling.io/), open source tool for lo
             <td><b>logback.xml</b> - Set the level="TRACE" to enable debug tracing</td>
   </tr>
   <tr>
-    <td rowspan="3">setpup | <b>mock-scripts</b></td>
+    <td rowspan="3">setup | <b>mock-scripts</b></td>
     <td><b>setup-users.py</b> - The python script creates mock test users in Amazon Cognito Userpool, generates test authentication token and uploads it S3 bucket based on the test users in user.csv</td>
   </tr>
   <tr>
