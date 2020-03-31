@@ -1,6 +1,12 @@
 # Overview
 
-The perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Stepfunction where each tasks are run as AWS Fargate tasks to execute the setup and Gatling load test simulation. The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds`(`5 minutes`). These can be overridden via Systems Manager Paramater store  
+The perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Stepfunction where each tasks are run as AWS Fargate tasks to execute the setup and Gatling load test simulation. The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds`(`5 minutes`). These can be overridden via Systems Manager Paramater store.
+
+The scenarios tested are:
+- **Random flight search** by injecting 5 users over 5 minutes duration.
+- **Retrieve User profile & Loyalty details** for random users. The load pattern ramps up with 1 users to 5 users over the 5 minutes duration.
+- **List Booking details** for users. The load pattern ramps up with 1 users to 5 users over the 5 minutes duration.
+- **Create new flight booking** by injecting 5 concurrent users over 5 minutes duration.
 
 **Components used:**
 

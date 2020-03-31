@@ -137,18 +137,6 @@ object Make {
                         "sid"  -> "5fa32dea-d7ca-4154-8efd-3181894f126f",
                         "key"  -> "${STRIPE_PUBLIC_KEY}"
                       ))
-                      // .formParam("card[name]","John")
-                      // .formParam("card[address_zip]","NC2+8234")
-                      // .formParam("card[address_country]", "UK")
-                      // .formParam("card[number]", "4242424242424242")
-                      // .formParam("card[cvc]","123")
-                      // .formParam("card[exp_month]","08")
-                      // .formParam("card[exp_year]","25")
-                      // .formParam("guid","7f94f22b-dd03-4d25-9482-48df472123dd")
-                      // .formParam("muid","999143d3-02bc-4fc3-bf5f-510270268507")
-                      // .formParam("sid","5fa32dea-d7ca-4154-8efd-3181894f126f")    
-                      // .formParam("payment_user_agent","stripe.js%2F87a13246%3B+stripe-js-v3%2F87a13246") 
-                      // .formParam("key","pk_test_BpxANYCOZO7waMV3TrPQHjXa")                   
                       .check(status.not(404), status.not(500))
                       .check(jsonPath("$.id").saveAs("stripeToken")))
                       .exec(session => {
