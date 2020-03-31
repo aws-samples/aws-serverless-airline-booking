@@ -43,7 +43,7 @@ backend:
         ##
         # Enable TTL configuration on the Flight Table
         ##
-        - aws dynamodb update-time-to-live --table-name $FLIGHT_TABLE_NAME --time-to-live-specification "Enabled=true, AttributeName=ttl"
+        - aws dynamodb describe-time-to-live --table-name $FLIGHT_TABLE_NAME | grep -q 'DISABLED' && aws dynamodb update-time-to-live --table-name $FLIGHT_TABLE_NAME --time-to-live-specification "Enabled=true, AttributeName=ttl"
         ##
         # Deploy SAM based back-end
         ##
