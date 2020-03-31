@@ -64,12 +64,11 @@ function createFlight(departureAirport, arrivalAirport, start, end){
   const flightNumber = (faker.hacker.abbreviation()+faker.random.number());
   const flight = {
     id: faker.random.uuid(),
-    arrivalAirportCodeDepartureDate: arrivalAirport.code+"#"+flightDeparture,
     departureDate: flightDeparture,
     departureAirportCode: departureAirport.code,
     departureAirportName: departureAirport.name,
     departureCity: departureAirport.city,
-    departureLocale: faker.random.locale,
+    departureLocale: faker.random.locale(),
     arrivalDate: flightArrival,
     arrivalAirportCode: arrivalAirport.code,
     arrivalAirportName: arrivalAirport.name,
