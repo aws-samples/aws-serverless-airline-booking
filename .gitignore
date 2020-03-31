@@ -151,7 +151,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -311,7 +310,6 @@ dist/
 # Custom
 TEMPORARY/
 codebuild_build.sh
-Dockerfile
 packaged.yaml
 *.aws-sam/
 artifacts/
@@ -477,7 +475,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
