@@ -24,14 +24,16 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
 	$(MAKE) deploy.log-processing
-	$(MAKE) deploy.perftest
+## Enable the deploy.perftest if you need to deploy the perfoormance test stack
+	$(MAKE) deploy.perftest 
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
 	$(MAKE) delete.log-processing
-	$(MAKE) delete.perftest
+## Enable 
+#	$(MAKE) delete.perftest
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}

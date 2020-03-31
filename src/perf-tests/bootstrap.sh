@@ -36,44 +36,46 @@ main() {
     echo "COGNITO_URL=${COGNITO_URL}" >> setup.env
     echo "TOKEN_CSV=${TOKEN_CSV}" >> setup.env
 
-    ssmParameters=`aws ssm get-parameters \
-                    --names ${KEY_COGNITO_CLIENT_ID} \
-                            ${KEY_STRIPE_PUBLIC_KEY} \
-                            ${KEY_USER_POOL_ID} \
-                            ${KEY_USER_COUNT} \
-                            ${KEY_DURATION} \
-                            ${KEY_API_URL} \
-                            ${KEY_APPSYNC_URL} \
-                            ${KEY_COGNITO_URL} \
-                            ${KEY_S3_BUCKET} \
-                            ${KEY_USER_CSV} \
-                    --region ${AWS_REGION} --query "Parameters[*]"`
+    json_key() {        
+        echo $1 | base64 --decode | jq -r $2
+    }
+    
+    ssmParameters=$(aws ssm get-parameters \
+                        --names "${KEY_COGNITO_CLIENT_ID}" \
+                                "${KEY_STRIPE_PUBLIC_KEY}" \
+                                "${KEY_USER_POOL_ID}" \
+                                "${KEY_USER_COUNT}" \
+                                "${KEY_DURATION}" \
+                                "${KEY_API_URL}" \
+                                "${KEY_APPSYNC_URL}" \
+                                "${KEY_COGNITO_URL}" \
+                                "${KEY_S3_BUCKET}" \
+                                "${KEY_USER_CSV}" \
+                        --region "${AWS_REGION}" --query "Parameters[*]")
 
-    for row in $(echo "${ssmParameters}" | jq -r '.[] | @base64'); do
-        _jq() {
-        echo ${row} | base64 --decode | jq -r ${1}
-        }
-
-        if [ "$(_jq '.Name')" == "${KEY_COGNITO_CLIENT_ID}" ]; then
-            echo "COGNITO_CLIENT_ID="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_STRIPE_PUBLIC_KEY}" ]; then
-            echo "STRIPE_PUBLIC_KEY="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_USER_POOL_ID}" ]; then
-            echo "USER_POOL_ID="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_USER_COUNT}" ]; then
-            echo "USER_COUNT="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_DURATION}" ]; then
-            echo "DURATION="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_API_URL}" ]; then
-            echo "API_URL="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_APPSYNC_URL}" ]; then
-            echo "APPSYNC_URL="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_COGNITO_URL}" ]; then
-            echo "COGNITO_URL="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_S3_BUCKET}" ]; then
-            echo "S3_BUCKET="$(_jq '.Value')"" >> setup.env
-        elif [ "$(_jq '.Name')" == "${KEY_USER_CSV}" ]; then
-            echo "USER_CSV="$(_jq '.Value')"" >> setup.env
+    parameters=$(echo "${ssmParameters}" | jq -r '.[] | @base64')
+ 
+    for row in ${parameters}; do
+        if [ "$(json_key ${row} '.Name')" == "${KEY_COGNITO_CLIENT_ID}" ]; then
+            echo "COGNITO_CLIENT_ID=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_STRIPE_PUBLIC_KEY}" ]; then
+            echo "STRIPE_PUBLIC_KEY=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_USER_POOL_ID}" ]; then
+            echo "USER_POOL_ID=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_USER_COUNT}" ]; then
+            echo "USER_COUNT=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_DURATION}" ]; then
+            echo "DURATION=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_API_URL}" ]; then
+            echo "API_URL=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_APPSYNC_URL}" ]; then
+            echo "APPSYNC_URL=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_COGNITO_URL}" ]; then
+            echo "COGNITO_URL=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_S3_BUCKET}" ]; then
+            echo "S3_BUCKET=$(json_key ${row} '.Value')" >> setup.env
+        elif [ "$(json_key ${row} '.Name')" == "${KEY_USER_CSV}" ]; then
+            echo "USER_CSV=$(json_key ${row} '.Value')" >> setup.env
         fi
     done
 
@@ -84,7 +86,6 @@ main() {
     docker-compose build
 
     echo -e "${YELLOW}***** Completed Building the docker images  ***** ${NC}"
-
 }
 
 read -rp "Enter AWS region and AWS Branch name => eg: eu-west-1 twitchbase : " inputs
