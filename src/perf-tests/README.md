@@ -1,6 +1,6 @@
 # Overview
 
-The perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Stepfunction where each tasks are run as AWS Fargate tasks to execute the setup and Gatling load test simulation.
+The perf-test stack uses [Gatling](https://gatling.io/), open source tool for load testing. The stack creates AWS Stepfunction where each tasks are run as AWS Fargate tasks to execute the setup and Gatling load test simulation. The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds`(`5 minutes`). These can be overridden via Systems Manager Paramater store  
 
 **Components used:**
 
@@ -34,15 +34,16 @@ The perf-test stack uses [Gatling](https://gatling.io/), open source tool for lo
   </tr>
   <tr>
     <td><b>bootstrap.sh</b></td>
-    <td colspan="2">Retrieves all the environment variables from AWS Systems Manager Parameter Store and creates setp.env file. Use docker-compose to build the docker images for Gatling and mock scripts</td>
+    <td colspan="2">The bash script use docker-compose to build Gatling and mockdata docker images. All the parameters are passed as ENV variables to the DockerFile.  These environment variables are retrieved from Systems Manager Parameter Store and creates setp.env file. </td>
   </tr>  
   </table>
 
-The Gatling simulation script uses constantUsersPerSec and rampUsersPerSec to inject users for the given scenarios. By default, it uses `5 users` for a duration of `300 seconds`(`5 minutes`). These can be overridden via Systems Manager Paramater store  
+# Steps:
+To deploy the **perf-test** stack, uncomment the `deploy.perftest` in the [MakeFile](./../MakeFile)
 
+![MakeFile](./images/MakeFile.png)
 
-# Steps
-After the perf-test stack has been deployed successfully, follow these steps:
+After the `perf-test` stack has been deployed successfully, follow these steps:
 
 1. Run `bootstrap.sh` under the **src/perf-tests** folder. This will build the docker images for `gatling-scripts` and `mock-scripts`. 
 
@@ -50,7 +51,7 @@ After the perf-test stack has been deployed successfully, follow these steps:
     ./bootstrap.sh
     ```
 
-2. After the environment variables in the DockerFile is updated, we need to push them to Amazon ECR. First login to an Amazon ECR registry
+2. After the docker build is complete, lets push the images to Amazon ECR. First login to an Amazon ECR registry
     ```
     aws ecr get-login --no-include-email --region <AWS_REGION>
     ```
@@ -106,7 +107,7 @@ docker run --env-file=setup.env -it -v ~/.aws:/root/.aws mockdata:latest cleanup
 
 ## Run load test using Step functions:
 
-Start the execution of the `loadtest` Step function using the following input
+You can also run the Load test using the load-test StepFunction, which is created as part of the perf-test stack. Ensure the docker images are tagged and pushed to Amazon ECR before starting the StepFunction execution. Start the execution of the `loadtest` Step function using the following input
 
 ```
 {
