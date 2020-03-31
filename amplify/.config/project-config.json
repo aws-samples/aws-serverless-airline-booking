@@ -1,6 +1,6 @@
 {
     "projectName": "awsserverlessairline",
-    "version": "2.0",
+    "version": "3.0",
     "frontend": "javascript",
     "javascript": {
         "framework": "vue",

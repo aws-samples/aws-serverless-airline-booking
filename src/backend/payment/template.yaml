@@ -22,7 +22,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:375983427419:applications/api-lambda-stripe-charge
-        SemanticVersion: 4.4.0
+        SemanticVersion: 4.4.1
       Parameters:
         EnableInstantCapture: "false"
         SSMParameterPath: !Sub ${Stage}/service/payment/stripe/secretKey
@@ -69,6 +69,28 @@ Resources:
       Type: String
       Value: !Sub ${RefundPayment.Arn}
 
+  PaymentCaptureEndpointParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${Stage}/service/payment/api/capture/url"
+      Type: String
+      Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
+
+  PaymentChargeEndpointParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${Stage}/service/payment/api/charge/url"
+      Type: String
+      Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+
+  PaymentRefundEndpointParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${Stage}/service/payment/api/refund/url"
+      Type: String
+      Value: !Sub ${StripePaymentApplication.Outputs.RefundApiUrl}
+
+
 Outputs:
   CollectPaymentFunction:
     Value: !Sub ${CollectPayment.Arn}
@@ -87,5 +109,5 @@ Outputs:
     Description: Payment Endpoint for collecting payments
 
   RefundApiUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+    Value: !Sub ${StripePaymentApplication.Outputs.RefundApiUrl}
     Description: Payment Endpoint for refunding payments

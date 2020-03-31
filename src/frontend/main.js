@@ -30,6 +30,9 @@ Vue.use(AmplifyPlugin, AmplifyModules);
 
 Vue.use(Quasar, {
   config: {
+    plugins: {
+      Notify
+    },
     notify: {
       position: "top",
       timeout: 0,

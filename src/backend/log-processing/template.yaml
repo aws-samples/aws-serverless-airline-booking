@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
-Description: > 
+Description: >
   Log Processing utilities stack.
   Provides a dedicated Kinesis stream for log ingestion.
   Subscribe new and existing Lambda function logs named `Airline` to Kinesis
@@ -9,15 +9,13 @@ Description: >
   Creates Custom Metrics for Memory Used, Size, and Estimated Cost for each function and version
   Also creates custom metrics based on "MONITORING|<metric_value>|<metric_unit>|<metric_name>|<namespace>|<dimensions>" format
 
-
 Resources:
-
   # Kinesis Stream that will receive Logs from CloudWatch Logs
   LogProcessingStream:
-      Type: AWS::Kinesis::Stream
-      Properties:
-          RetentionPeriodHours: 48
-          ShardCount: 1
+    Type: AWS::Kinesis::Stream
+    Properties:
+      RetentionPeriodHours: 48
+      ShardCount: 1
 
   # SAR App that will consume from Kinesis stream and create Custom Metrics
   ProcessCustomMetricsAsync:
@@ -28,7 +26,7 @@ Resources:
         SemanticVersion: 1.7.0
       Parameters:
         # What's the event source you will intend to use? If logs are pushed from CloudWatch Logs to Lambda directly, then use 'Lambda'. If logs are pushed to a Kinesis Stream first, then use 'Kinesis'. Other event sources are not supported (yet).
-        EventSourceType: 'Kinesis' # Uncomment to override default value
+        EventSourceType: "Kinesis" # Uncomment to override default value
         # (optional) Only relevant to the Kinesis event source type. The ARN to the Kinesis stream to  subscribe the function to.
         KinesisStreamArn: !Sub ${LogProcessingStream.Arn} # Uncomment to override default value
         # (optional) Only relevant to the Kinesis event source type. The batch size to use for the  subscription.
@@ -47,10 +45,10 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-set-log-group-retention
-        SemanticVersion: 1.2.0
+        SemanticVersion: 1.4.0
       Parameters:
         # The number of days to retain logs in CloudWatch Logs for.
-        RetentionDays: '14' # Uncomment to override default value
+        RetentionDays: "14" # Uncomment to override default value
 
   # Subscribe new and existing CloudWatch Log groups to ship logs to Kinesis
   SubscribeLogsToProcessingStream:
@@ -58,22 +56,19 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:374852340823:applications/auto-subscribe-log-group-to-arn
-        SemanticVersion: 1.7.0
+        SemanticVersion: 1.11.1
       Parameters:
         # The ARN of the Lambda function or Kinesis stream to subscribe a newly created CloudWatch log group to
         DestinationArn: !Sub ${LogProcessingStream.Arn}
         ## Disables processing of own logs
-        ExcludePrefix: 'ProcessCustomMetricsAsync' # Uncomment to override default value
+        ExcludePrefix: "ProcessCustomMetricsAsync" # Uncomment to override default value
         # Only subscribe to functions created for this project
         ## Otherwise we'd override all CloudWatch Logs by subscribing to our Kinesis
-        Prefix: '/aws/lambda/Airline' # Uncomment to override default value
+        Prefix: "/aws/lambda/Airline" # Uncomment to override default value
         # Only captures REPORT and Custom Metrics log events; reduces cost and unnecessary noise
-        FilterPattern: '?REPORT ?MONITORING'
-
+        FilterPattern: "?REPORT ?MONITORING"
 
 Outputs:
   LogProcessingStream:
     Value: !Sub ${LogProcessingStream.Arn}
     Description: Kinesis Stream used for log processing
-
-

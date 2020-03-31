@@ -59,10 +59,15 @@ Resources:
       FunctionName: !Sub Airline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
+        - Version: '2012-10-17'
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable
@@ -82,9 +87,9 @@ Resources:
       FunctionName: !Sub Airline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Policies:
-        - DynamoDBCrudPolicy:
+        - DynamoDBReadPolicy:
             TableName: !Ref LoyaltyDataTable
       Environment:
         Variables:

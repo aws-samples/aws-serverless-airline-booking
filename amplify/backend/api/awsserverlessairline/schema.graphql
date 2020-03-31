@@ -27,7 +27,7 @@ type Flight
     ticketPrice: Int!
     ticketCurrency: String!
     flightNumber: Int!
-    seatAllocation: Int @deprecated(reason: "use seatCapacity instead. seatAllocation will be removed in the stable release.")
+    seatAllocation: Int # Disabling due to regression in amplify-cli 4.13.1: @deprecated(reason: "use seatCapacity instead. seatAllocation will be removed in the stable release.")
     seatCapacity: Int!
 }
 
@@ -37,7 +37,7 @@ type Flight
 type Booking 
     @model(subscriptions: null) 
     @auth(rules: [
-      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read, update]},
+      {allow: owner, ownerField: "customer", identityField: "sub", operations: [read]},
       {allow: groups, groups: ["Admin"]}
     ])
     @key(name: "ByCustomerStatus", 

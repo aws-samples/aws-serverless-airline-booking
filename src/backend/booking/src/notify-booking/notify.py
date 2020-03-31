@@ -168,5 +168,5 @@ def lambda_handler(event, context):
         log_metric(name="FailedNotification", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Notification annotation before raising error")
         tracer.put_annotation("BookingNotificationStatus", "FAILED")
-
+        logger.error({"operation": "notify_booking", "details": err})
         raise BookingNotificationException(details=err)

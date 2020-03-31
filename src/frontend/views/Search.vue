@@ -71,7 +71,8 @@
         :disable="
           !$v.departureCity.isAirport ||
             $v.departureCity.$invalid ||
-            (!$v.arrivalCity.isAirport || $v.arrivalCity.$invalid)
+            !$v.arrivalCity.isAirport ||
+            $v.arrivalCity.$invalid
         "
       >
         <q-icon

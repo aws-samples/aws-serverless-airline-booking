@@ -51,8 +51,11 @@ Resources:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref BookingTable
+                - Version: '2012-10-17'
+                  Statement:
+                    Action: dynamodb:UpdateItem
+                    Effect: Allow
+                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
 
     CancelBooking:
         Type: AWS::Serverless::Function
@@ -66,8 +69,12 @@ Resources:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref BookingTable
+                - Version: '2012-10-17'
+                  Statement:
+                    Action: dynamodb:UpdateItem
+                    Effect: Allow
+                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+
 
     ReserveBooking:
         Type: AWS::Serverless::Function
@@ -81,8 +88,11 @@ Resources:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref BookingTable
+                - Version: '2012-10-17'
+                  Statement:
+                    Action: dynamodb:PutItem
+                    Effect: Allow
+                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
 
     BookingTopic:
         Type: AWS::SNS::Topic
@@ -129,13 +139,13 @@ Resources:
                                 - !Sub ${NotifyBooking.Arn}
                                 - !Ref CollectPaymentFunction
                                 - !Ref RefundPaymentFunction
-                - PolicyName: DynamoDBCRUD
+                - PolicyName: FlightTableUpdate
                   PolicyDocument:
                       Version: 2012-10-17
                       Statement:
                           - Effect: Allow
                             Action:
-                                - dynamodb:*
+                                - dynamodb:UpdateItem
                             Resource:
                                 - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${FlightTable}
                 - PolicyName: Send2DLQ
@@ -429,7 +439,7 @@ Resources:
     ProcessBookingParameter:
         Type: "AWS::SSM::Parameter"
         Properties:
-            Name: !Sub /${Stage}/service/booking/stateMachine
+            Name: !Sub /${Stage}/service/booking/statemachine/processBooking
             Description: Step Functions State Machine ARN
             Type: String
             Value: !Ref ProcessBooking
@@ -437,7 +447,7 @@ Resources:
     BookingTopicParameter:
         Type: "AWS::SSM::Parameter"
         Properties:
-            Name: !Sub /${Stage}/service/booking/topic
+            Name: !Sub /${Stage}/service/booking/messaging/bookingTopic
             Description: Booking SNS Topic ARN
             Type: String
             Value: !Ref BookingTopic

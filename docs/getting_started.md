@@ -7,45 +7,39 @@
 Before you deploy, you must have the following in place:
 
 * [AWS Account](https://aws.amazon.com/account/)
-* [Python 3.7 or greater](https://realpython.com/installing-python/)
-* [Node 8.10 or greater](https://nodejs.org/en/download/)
-* [Amplify CLI 3.17.0 or greater installed and configured](https://aws-amplify.github.io/docs/cli-toolchain/quickstart#quickstart)
-* [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* [Docker](https://docs.docker.com/install/)
+* [GitHub Account](https://github.com)
+* [Node 10 or greater](https://nodejs.org/en/download/)
+* [Amplify CLI 4.13.1 or greater installed and configured](https://aws-amplify.github.io/docs/cli-toolchain/quickstart#quickstart)
 * [Stripe Account](https://dashboard.stripe.com/register)
     - Take note of your testing `Secret Key` and `Public Key` [located in the Stripe Dashboard](https://support.stripe.com/questions/locate-api-keys)
+
+For prototyping, you need the following:
+
+* [Python 3.7 or greater](https://realpython.com/installing-python/)
+* [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+* [Docker](https://docs.docker.com/install/)
 
 ## Howto
 
 Follow these instructions to deploy the Serverless Airline application:
 
-1) Fork this project and take note of the url
-2) Within an empty directory, initialize the project with **``amplify init --app <fork-github-url>``**
-3) Choose to create a new environment (i.e. dev)
-4) Verify that you now have at least `Auth` and `Api` categories by running **`amplify status`**
-5) Deploy amplify managed infrastructure by running **`amplify push`**
-6) Once complete, open [AWS Amplify Console](https://console.aws.amazon.com/amplify/home)
-    - If this is your first time using Amplify Console, select **`Deploy`**
-7) Click on `Connect app`, select `GitHub`, choose your Fork repo and select the branch **`develop`**
-8) Under "Existing Amplify backend detected", **select your new environment** created in Step 2
-9) Choose an existing Amplify Console IAM Role or create a new one
+[![One-click deployment](https://oneclick.amplifyapp.com/button.svg)](https://console.aws.amazon.com/amplify/home#/deploy?repo=https://github.com/aws-samples/aws-serverless-airline-booking)
 
-At the end of the first deployment, you should have a new URL where you can visit and sign the first user up - Next steps being setup payment and add flights.
+1) Use **1-click deployment** button above
+2) Expand `environment variables` and add your Stripe's keys
+    - `STRIPE_PUBLIC_KEY`
+    - `STRIPE_SECRET_KEY`
+3) If you don't have an IAM Service Role, create one
+4) Amplify Console forked this repository in your GitHub account, **clone your fork repo locally**
+5) Within your new app in Amplify Console, wait for deployment to complete (this may take a while)
+6) Choose **Backend environments**, and select the environment you see
+7) Under **Edit backend**, copy the `amplify pull` command displayed
+8) Within your forked repository locally, run the command you copied and follow the instructions
+    - This command synchronizes what's deployed to your local Amplify environment
+
+Within Amplify Console, you should see an auto-generated URL under **Frontend environment** - You can now sign-up for a new user, and add your first flight
 
 > **NOTE**: We're currently working on an ETL feature to automatically add flights as part of CI.
-
-### Setting up Stripe integration
-
-**Public key for tokenizing card data during flight booking**
-
-1. Within your fork, open front-end environment variable file **`src/frontend/.env`**
-2. Update the value of **`VUE_APP_StripePublicKey`** with your Stripe public key
-
-**Secret key for collecting pre-authorized charges**
-
-1. Within [AWS Amplify Console](https://console.aws.amazon.com/amplify/home), select your App and expand ``Environment Variables``
-2. Add **`STRIPE_SECRET_KEY`** environment variable and its value
-
 
 ### Adding your first flight
 
