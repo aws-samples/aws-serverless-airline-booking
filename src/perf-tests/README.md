@@ -4,7 +4,7 @@ The perf-test stack uses [Gatling](https://gatling.io/), open source tool for lo
 
 The scenarios tested are:
 - **Random flight search** by injecting 5 users over 5 minutes duration.
-- **Retrieve User profile & Loyalty details** for random users. The load pattern ramps up with 1 users to 5 users over the 5 minutes duration.
+- **Retrieve User profile & Loyalty details** for random users. The load pattern ramps up with 1 user to 5 users over the 5 minutes duration.
 - **List Booking details** for users. The load pattern ramps up with 1 users to 5 users over the 5 minutes duration.
 - **Create new flight booking** by injecting 5 concurrent users over 5 minutes duration.
 
@@ -127,6 +127,12 @@ This will setup users, load mock flight data, start gatling, consolidate the rep
 
   ![StepFunctions](./images/load-test_sfn.png)
 
+## Results:
+
+- Download the results.zip folder from the load-test S3 bucket (refer to the perf-test stack output)
+- Open the index.html and you should see a report similar to the below
+
+  ![Report](./images/gatling-report.png)
 
 <details>
 <summary><strong>Expand you want to run the individual steps manually:</strong></summary><p>
@@ -159,12 +165,5 @@ aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --laun
 aws ecs run-task --cluster CLUSTER_NAME --task-definition TASK_DEFINITION --launch-type "FARGATE" \
 --network-configuration "awsvpcConfiguration={subnets=[PROVIDE_SUBNET_IDs],assignPublicIp=ENABLED}" \
 --overrides="containerOverrides=[{name=CONTAINER_NAME,command=./cleanup.py}]"
-
-## Results:
-
-- Download the results.zip folder from the S3 bucket (refer to the perf-test stack output)
-- Open the index.html and you should see a report similar to the below
-
-  ![Report](./images/gatling-report.png)
 
   </p></details>
