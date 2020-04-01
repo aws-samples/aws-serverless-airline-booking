@@ -29,7 +29,7 @@ exports.generate = async (event, context) => {
 
   console.log("Generated flights for chunk %i: %i", index, allFlights.length);
   //write the file
-  const chunkFilename = `raw/${execution}/flights/${index}_flights.json`
+  const chunkFilename = `raw/${execution}/flights/${index}_flights.json`;
   console.log("Uploading file to S3: ", chunkFilename);
   return s3.upload({
     Bucket: etlBucketName,
@@ -62,8 +62,10 @@ function createFlight(departureAirport, arrivalAirport, start, end){
   const flightDeparture = getRandomDate(start, end);
   const flightArrival = getRandomDate(flightDeparture, end);
   const flightNumber = (faker.hacker.abbreviation()+faker.random.number());
+  const availableSeats = Math.floor(Math.random() * Math.floor(50)) + 1;
   const flight = {
     id: faker.random.uuid(),
+    "arrivalAirportCode#DepartureDate": arrivalAirport.code+"#"+flightDeparture.toISOString(),
     departureDate: flightDeparture,
     departureAirportCode: departureAirport.code,
     departureAirportName: departureAirport.name,
@@ -77,7 +79,8 @@ function createFlight(departureAirport, arrivalAirport, start, end){
     ticketPrice: faker.finance.amount(),
     ticketCurrency: faker.finance.currencyCode(),
     flightNumber: flightNumber.length > 4 ? flightNumber.substring(0, 4) : flightNumber,
-    seatAllocation: (Math.floor(Math.random() * Math.floor(50))+1),
+    seatAllocation: availableSeats,
+    seatCapacity: availableSeats,
     ttl: Math.floor(flightArrival / 1000) //Delete flight after arrival
   };
   return flight;
