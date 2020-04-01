@@ -61,7 +61,6 @@ function generateFlights(route){
 function createFlight(departureAirport, arrivalAirport, start, end){
   const flightDeparture = getRandomDate(start, end);
   const flightArrival = getRandomDate(flightDeparture, end);
-  const flightNumber = (faker.hacker.abbreviation()+faker.random.number());
   const availableSeats = Math.floor(Math.random() * Math.floor(50)) + 1;
   const flight = {
     id: faker.random.uuid(),
@@ -76,9 +75,9 @@ function createFlight(departureAirport, arrivalAirport, start, end){
     arrivalAirportName: arrivalAirport.name,
     arrivalCity: arrivalAirport.city,
     arrivalLocale: faker.random.locale(),
-    ticketPrice: faker.finance.amount(),
+    ticketPrice: parseInt(faker.finance.amount()),
     ticketCurrency: faker.finance.currencyCode(),
-    flightNumber: flightNumber.length > 4 ? flightNumber.substring(0, 4) : flightNumber,
+    flightNumber: faker.random.number(),
     seatAllocation: availableSeats,
     seatCapacity: availableSeats,
     ttl: Math.floor(flightArrival / 1000) //Delete flight after arrival
