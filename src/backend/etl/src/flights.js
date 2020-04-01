@@ -65,7 +65,7 @@ function createFlight(departureAirport, arrivalAirport, start, end){
   const availableSeats = Math.floor(Math.random() * Math.floor(50)) + 1;
   const flight = {
     id: faker.random.uuid(),
-    "arrivalAirportCode#DepartureDate": arrivalAirport.code+"#"+flightDeparture.toISOString(),
+    "arrivalAirportCode#departureDate": arrivalAirport.code+"#"+flightDeparture.toISOString(),
     departureDate: flightDeparture,
     departureAirportCode: departureAirport.code,
     departureAirportName: departureAirport.name,
