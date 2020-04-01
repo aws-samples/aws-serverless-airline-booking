@@ -2,6 +2,7 @@ const etlBucketName = process.env.ETL_BUCKET_NAME;
 const AWS = require('aws-sdk');
 const faker = require('faker');
 const moment = require('moment');
+const timezones =  require("./data/timezones.json");
 const s3 = new AWS.S3();
 
 
@@ -69,12 +70,12 @@ function createFlight(departureAirport, arrivalAirport, start, end){
     departureAirportCode: departureAirport.code,
     departureAirportName: departureAirport.name,
     departureCity: departureAirport.city,
-    departureLocale: faker.random.locale(),
+    departureLocale: timezones[departureAirport.code],
     arrivalDate: flightArrival,
     arrivalAirportCode: arrivalAirport.code,
     arrivalAirportName: arrivalAirport.name,
     arrivalCity: arrivalAirport.city,
-    arrivalLocale: faker.random.locale(),
+    arrivalLocale: timezones[arrivalAirport.code],
     ticketPrice: parseInt(faker.finance.amount()),
     ticketCurrency: faker.finance.currencyCode(),
     flightNumber: faker.random.number(),
