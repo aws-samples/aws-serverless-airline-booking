@@ -6,6 +6,11 @@ Parameters:
     Type: String
     Description: Environment stage or git branch
 
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
+    Description: CloudWatch Logs retention period
+
 Globals:
   Function:
     Timeout: 5
@@ -30,7 +35,7 @@ Resources:
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub Airline-CollectPayment-${Stage}
+      FunctionName: !Sub ServerlessAirline-CollectPayment-${Stage}
       Handler: collect.lambda_handler
       Runtime: python3.7
       CodeUri: src/collect-payment
@@ -43,7 +48,7 @@ Resources:
   RefundPayment:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub Airline-RefundPayment-${Stage}
+      FunctionName: !Sub ServerlessAirline-RefundPayment-${Stage}
       Handler: refund.lambda_handler
       CodeUri: src/refund-payment
       Runtime: python3.7
@@ -52,6 +57,18 @@ Resources:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
           STAGE: !Ref Stage
+
+  RefundPaymentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${RefundPayment}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  CollectPaymentLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CollectPayment}"
+      RetentionInDays: !Ref LogRetentionInDays
 
   CollectPaymentParameter:
     Type: "AWS::SSM::Parameter"
