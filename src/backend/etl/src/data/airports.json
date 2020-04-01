@@ -1,17 +1,5 @@
 [
     {
-        "name": "Keflavik International Airport",
-        "code": "KEF",
-        "country": "IS",
-        "city": "Reykjavík"
-    },
-    {
-        "name": "Ottawa Macdonald-Cartier International Airport",
-        "code": "YOW",
-        "country": "CA",
-        "city": "Ottawa"
-    },
-    {
         "name": "Brussels Airport",
         "code": "BRU",
         "country": "BE",
@@ -24,10 +12,16 @@
         "city": "Berlin"
     },
     {
-        "name": "Lennart Meri Tallinn Airport",
-        "code": "TLL",
-        "country": "EE",
-        "city": "Tallinn"
+        "name": "Frankfurt am Main Airport",
+        "code": "FRA",
+        "country": "DE",
+        "city": "Frankfurt am Main"
+    },
+    {
+        "name": "Munich Airport",
+        "code": "MUC",
+        "country": "DE",
+        "city": "Munich"
     },
     {
         "name": "Helsinki Vantaa Airport",
@@ -36,10 +30,22 @@
         "city": "Helsinki"
     },
     {
+        "name": "Manchester Airport",
+        "code": "MAN",
+        "country": "GB",
+        "city": "Manchester"
+    },
+    {
         "name": "London Luton Airport",
         "code": "LTN",
         "country": "GB",
         "city": "London"
+    },
+    {
+        "name": "Southampton Airport",
+        "code": "SOU",
+        "country": "GB",
+        "city": "Southampton"
     },
     {
         "name": "London Gatwick Airport",
@@ -54,34 +60,28 @@
         "city": "London"
     },
     {
+        "name": "Glasgow International Airport",
+        "code": "GLA",
+        "country": "GB",
+        "city": "Glasgow"
+    },
+    {
+        "name": "Edinburgh Airport",
+        "code": "EDI",
+        "country": "GB",
+        "city": "Edinburgh"
+    },
+    {
         "name": "London Stansted Airport",
         "code": "STN",
         "country": "GB",
         "city": "London"
     },
     {
-        "name": "Amsterdam Airport Schiphol",
-        "code": "AMS",
-        "country": "NL",
-        "city": "Amsterdam"
-    },
-    {
-        "name": "Dublin Airport",
-        "code": "DUB",
-        "country": "IE",
-        "city": "Dublin"
-    },
-    {
-        "name": "Copenhagen Kastrup Airport",
-        "code": "CPH",
-        "country": "DK",
-        "city": "Copenhagen"
-    },
-    {
-        "name": "Luxembourg-Findel International Airport",
-        "code": "LUX",
-        "country": "LU",
-        "city": "Luxembourg"
+        "name": "Adolfo Suárez Madrid–Barajas Airport",
+        "code": "MAD",
+        "country": "ES",
+        "city": "Madrid"
     },
     {
         "name": "Oslo Gardermoen Airport",
