@@ -38,11 +38,16 @@ Parameters:
         Type: AWS::SSM::Parameter::Value<String>
         Description: Parameter Name for AWS AppSync API ID
 
+    LogRetentionInDays:
+        Type: Number
+        Default: 14
+        Description: CloudWatch Logs retention period
+
 Resources:
     ConfirmBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-ConfirmBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-ConfirmBooking-${Stage}
             Handler: confirm.lambda_handler
             CodeUri: src/confirm-booking
             Runtime: python3.7
@@ -60,7 +65,7 @@ Resources:
     CancelBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-CancelBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-CancelBooking-${Stage}
             Handler: cancel.lambda_handler
             CodeUri: src/cancel-booking
             Runtime: python3.7
@@ -79,7 +84,7 @@ Resources:
     ReserveBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-ReserveBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-ReserveBooking-${Stage}
             Handler: reserve.lambda_handler
             CodeUri: src/reserve-booking
             Runtime: python3.7
@@ -100,7 +105,7 @@ Resources:
     NotifyBooking:
         Type: AWS::Serverless::Function
         Properties:
-            FunctionName: !Sub Airline-NotifyBooking-${Stage}
+            FunctionName: !Sub ServerlessAirline-NotifyBooking-${Stage}
             Handler: notify.lambda_handler
             CodeUri: src/notify-booking
             Runtime: python3.7
@@ -112,6 +117,30 @@ Resources:
             Policies:
                 - SNSPublishMessagePolicy:
                       TopicName: !Sub ${BookingTopic.TopicName}
+
+    ConfirmBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${ConfirmBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
+
+    CancelBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${CancelBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
+
+    ReserveBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${ReserveBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
+
+    NotifyBookingLogGroup:
+        Type: AWS::Logs::LogGroup
+        Properties:
+            LogGroupName: !Sub "/aws/lambda/${NotifyBooking}"
+            RetentionInDays: !Ref LogRetentionInDays
 
     StatesExecutionRole:
         Type: AWS::IAM::Role
