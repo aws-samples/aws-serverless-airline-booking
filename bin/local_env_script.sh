@@ -23,10 +23,8 @@ function fetch_env_vars() {
 
 function print_vars() {
     for env in ${ENV_VARS[@]}; do
-        echo -e \\t "export $env=${!env}"
+        echo -e "${BOLD}export $env=${!env}${NOCOLOR}"
     done
-
-    echo -e "\\n"
 }
 
 function prompt_aws_cli_profile() {
@@ -39,7 +37,7 @@ function prompt_aws_cli_profile() {
 function prompt_amplify_env() {
     echo -e "[*] Listing Amplify environments available"
     amplify env list
-    echo -en "[?] Which ${BOLD}Amplify environment${NOCOLOR} would you like to use:  "
+    echo -en "[?] Which ${BOLD}Amplify environment${NOCOLOR} would you like to use: "
     read AWS_BRANCH
 }
 
