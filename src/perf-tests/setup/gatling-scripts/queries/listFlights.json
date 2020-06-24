@@ -1,0 +1,17 @@
+{
+    "query": "query ListFlights($filter: ModelFlightFilterInput, $limit: Int, $nextToken: String) {  listFlights(filter: $filter, limit: $limit, nextToken: $nextToken) { items { id      departureDate      departureAirportCode      departureAirportName      departureCity      departureLocale      arrivalDate      arrivalAirportCode      arrivalAirportName      arrivalCity      arrivalLocale      ticketPrice      ticketCurrency      flightNumber      seatAllocation    }    nextToken  }}",
+    "variables": {
+        "limit": 50,
+        "filter": {
+            "departureDate": {
+                "beginsWith": "${YEAR}"
+            },
+            "departureAirportCode": {
+                "eq": "${DEPARTURE_CODE}"
+            },
+            "arrivalAirportCode": {
+                "eq": "${ARRIVAL_CODE}"
+            }
+        }
+    }
+}

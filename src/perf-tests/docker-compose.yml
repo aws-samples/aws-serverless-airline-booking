@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+    gatling:
+        build: ./setup/gatling-scripts
+        image: gatling:latest
+        env_file:
+            - setup.env
+    mock:
+        build: ./setup/mock-scripts
+        image: mockdata:latest
+        env_file:
+            - setup.env
