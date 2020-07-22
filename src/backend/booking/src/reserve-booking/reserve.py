@@ -5,25 +5,21 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
 
-from lambda_python_powertools.logging import (
-    logger_inject_process_booking_sfn,
-    logger_setup,
-    MetricUnit,
-    log_metric,
-)
-
+# TODO: Migrate original Powertools to newly OSS Powertools as a custom middleware
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
 logger = logger_setup()
 tracer = Tracer()
+metrics = Metrics()
 
 session = boto3.Session()
 dynamodb = session.resource("dynamodb")
 table_name = os.getenv("BOOKING_TABLE_NAME", "undefined")
 table = dynamodb.Table(table_name)
-
-_cold_start = True
 
 
 class BookingReservationException(Exception):
@@ -101,6 +97,7 @@ def reserve_booking(booking):
         raise BookingReservationException(details=err)
 
 
+@metrics.metrics.add_metrics(capture_cold_start_metric=True)
 @tracer.capture_lambda_handler(process_booking_sfn=True)
 @logger_inject_process_booking_sfn
 def lambda_handler(event, context):
@@ -140,20 +137,8 @@ def lambda_handler(event, context):
     BookingReservationException
         Booking Reservation Exception including error message upon failure
     """
-    global _cold_start
-    if _cold_start:
-        log_metric(
-            name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
-        )
-        _cold_start = False
-
     if not is_booking_request_valid(event):
-        log_metric(
-            name="InvalidBookingRequest",
-            unit=MetricUnit.Count,
-            value=1,
-            operation="reserve_booking",
-        )
+        metrics.add_metric(name="InvalidReservationRequest", unit=MetricUnit.Count, value=1)
         logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid booking request")
 
@@ -161,7 +146,7 @@ def lambda_handler(event, context):
         logger.debug(f"Reserving booking for customer {event['customerId']}")
         ret = reserve_booking(event)
 
-        log_metric(name="SuccessfulReservation", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="SuccessfulReservation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Reservation annotation")
         tracer.put_annotation("Booking", ret["bookingId"])
         tracer.put_annotation("BookingStatus", "RESERVED")
@@ -169,7 +154,7 @@ def lambda_handler(event, context):
         # Step Functions use the return to append `bookingId` key into the overall output
         return ret["bookingId"]
     except BookingReservationException as err:
-        log_metric(name="FailedReservation", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="FailedReservation", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Booking Reservation annotation before raising error")
         tracer.put_annotation("BookingStatus", "ERROR")
         logger.error({"operation": "reserve_booking", "details": err})

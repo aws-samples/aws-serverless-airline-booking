@@ -11,6 +11,7 @@ Globals:
         Environment:
             Variables:
                 POWERTOOLS_SERVICE_NAME: booking
+                POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
                 LOG_LEVEL: INFO
 
 Parameters:
