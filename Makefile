@@ -23,7 +23,6 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
-	$(MAKE) deploy.log-processing
 ## Enable the deploy.perftest if you need to deploy the performance test stack
 #	$(MAKE) deploy.perftest 
 
@@ -31,7 +30,6 @@ delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
-	$(MAKE) delete.log-processing
 ## Enable the delete.perftest if you need to delete the performance test stack
 #	$(MAKE) delete.perftest
 
@@ -43,9 +41,6 @@ delete.payment: ##=> Delete payment service
 
 delete.loyalty: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
-
-delete.log-processing:
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
 
 delete.perftest:
 	cdk destroy $${PERF_TEST_STACK_NAME}
@@ -98,14 +93,6 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 				BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
 				Stage=$${AWS_BRANCH} \
 				AppsyncApiId=$${GRAPHQL_API_ID}
-
-deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
-	$(info [*] Packaging and deploying Loyalty service...)
-	cd src/backend/log-processing && \
-		sam deploy \
-			--template-file template.yaml \
-			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
 deploy.perftest: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
