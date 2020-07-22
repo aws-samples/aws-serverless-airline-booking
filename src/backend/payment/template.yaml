@@ -19,6 +19,7 @@ Globals:
     Environment:
       Variables:
         POWERTOOLS_SERVICE_NAME: payment
+        POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
         LOG_LEVEL: INFO
 
 Resources:
