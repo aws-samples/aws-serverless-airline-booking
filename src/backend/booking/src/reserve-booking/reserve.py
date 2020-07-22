@@ -97,7 +97,7 @@ def reserve_booking(booking):
         raise BookingReservationException(details=err)
 
 
-@metrics.metrics.add_metrics(capture_cold_start_metric=True)
+@metrics.log_metrics(capture_cold_start_metric=True)
 @tracer.capture_lambda_handler(process_booking_sfn=True)
 @logger_inject_process_booking_sfn
 def lambda_handler(event, context):
