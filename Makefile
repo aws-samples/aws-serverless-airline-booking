@@ -24,12 +24,16 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
 	$(MAKE) deploy.log-processing
+## Enable the deploy.perftest if you need to deploy the performance test stack
+#	$(MAKE) deploy.perftest 
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
 	$(MAKE) delete.log-processing
+## Enable the delete.perftest if you need to delete the performance test stack
+#	$(MAKE) delete.perftest
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
@@ -42,6 +46,9 @@ delete.loyalty: ##=> Delete booking service
 
 delete.log-processing:
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
+
+delete.perftest:
+	cdk destroy $${PERF_TEST_STACK_NAME}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -100,6 +107,15 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
 
+deploy.perftest: ##=> Deploying Gatling components for performance testing
+	$(info [*] Deploying Gatling components for performance testing ...)
+	cd src/perf-tests/perftest-stack-airline && \
+		npm install && \
+		npm run build && \
+		cdk list && \
+		cdk bootstrap && \
+		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
+		
 export.parameter:
 	$(info [+] Adding new parameter named "${NAME}")
 	aws ssm put-parameter \
@@ -117,6 +133,7 @@ _install_os_packages:
 	yum install jq -y
 	$(info [*] Upgrading Python SAM CLI and CloudFormation linter to the latest version...)
 	python3 -m pip install --upgrade --user cfn-lint aws-sam-cli
+	npm -g install aws-cdk
 
 define HELP_MESSAGE
 

@@ -1,0 +1,7 @@
+{
+    "amount":"${ticketPrice}",
+    "currency": "EUR",
+    "stripeToken": "${stripeToken}",
+    "description": "Payment by random.user@gmail.com",
+    "email": "random.user@gmail.com"
+}
