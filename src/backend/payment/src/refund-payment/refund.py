@@ -2,22 +2,19 @@ import os
 
 import requests
 
-from lambda_python_powertools.logging import (
-    MetricUnit,
-    log_metric,
-    logger_inject_process_booking_sfn,
-    logger_setup,
-)
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
+
+# TODO: Migrate original Powertools to newly OSS Powertools as a custom middleware
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
 logger = logger_setup()
 tracer = Tracer()
-
+metrics = Metrics()
 
 # Payment API Capture URL to collect payment(i.e. https://endpoint/capture)
 payment_endpoint = os.getenv("PAYMENT_API_URL")
-
-_cold_start = True
 
 
 class RefundException(Exception):
@@ -79,6 +76,7 @@ def refund_payment(charge_id):
         raise RefundException(status_code=ret.status_code, details=err)
 
 
+@metrics.log_metrics(capture_cold_start_metric=True)
 @tracer.capture_lambda_handler(process_booking_sfn=True)
 @logger_inject_process_booking_sfn
 def lambda_handler(event, context):
@@ -106,21 +104,11 @@ def lambda_handler(event, context):
     RefundException
         Refund Exception including error message upon failure
     """
-
-    global _cold_start
-    if _cold_start:
-        log_metric(
-            name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
-        )
-        _cold_start = False
-
     payment_token = event.get("chargeId")
     customer_id = event.get("customerId")
 
     if not payment_token:
-        log_metric(
-            name="InvalidPaymentRequest", unit=MetricUnit.Count, value=1, operation="refund_payment"
-        )
+        metrics.add_metric(name="InvalidRefundRequest", unit=MetricUnit.Count, value=1)
         logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid Charge ID")
 
@@ -128,14 +116,14 @@ def lambda_handler(event, context):
         logger.debug(f"Refunding payment from customer {customer_id} using {payment_token} token")
         ret = refund_payment(payment_token)
 
-        log_metric(name="SuccessfulRefund", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="SuccessfulRefund", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Refund Status annotation")
         tracer.put_annotation("Refund", ret["refundId"])
         tracer.put_annotation("PaymentStatus", "REFUNDED")
 
         return ret
     except RefundException as err:
-        log_metric(name="FailedRefund", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="FailedRefund", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Refund Status annotation before raising error")
         tracer.put_annotation("RefundStatus", "FAILED")
         logger.error({"operation": "refund_payment", "details": err})

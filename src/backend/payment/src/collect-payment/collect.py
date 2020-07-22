@@ -2,18 +2,16 @@ import os
 
 import requests
 
-from lambda_python_powertools.logging import (
-    MetricUnit,
-    log_metric,
-    logger_inject_process_booking_sfn,
-    logger_setup,
-)
+from aws_lambda_powertools import Metrics
+from aws_lambda_powertools.metrics import MetricUnit
+
+# TODO: Migrate original Powertools to newly OSS Powertools as a custom middleware
+from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
 from lambda_python_powertools.tracing import Tracer
 
 logger = logger_setup()
 tracer = Tracer()
-
-_cold_start = True
+metrics = Metrics()
 
 # Payment API Capture URL to collect payment(i.e. https://endpoint/capture)
 payment_endpoint = os.getenv("PAYMENT_API_URL")
@@ -82,7 +80,7 @@ def collect_payment(charge_id):
         logger.error({"operation": "collect_payment", "details": err})
         raise PaymentException(status_code=ret.status_code, details=err)
 
-
+@metrics.log_metrics(capture_cold_start_metric=True)
 @tracer.capture_lambda_handler(process_booking_sfn=True)
 @logger_inject_process_booking_sfn
 def lambda_handler(event, context):
@@ -114,23 +112,11 @@ def lambda_handler(event, context):
     BookingConfirmationException
         Booking Confirmation Exception including error message upon failure
     """
-    global _cold_start
-    if _cold_start:
-        log_metric(
-            name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
-        )
-        _cold_start = False
-
     pre_authorization_token = event.get("chargeId")
     customer_id = event.get("customerId")
 
     if not pre_authorization_token:
-        log_metric(
-            name="InvalidPaymentRequest",
-            unit=MetricUnit.Count,
-            value=1,
-            operation="collect_payment",
-        )
+        metrics.add_metric(name="InvalidPaymentRequest", unit=MetricUnit.Count, value=1)
         logger.error({"operation": "invalid_event", "details": event})
         raise ValueError("Invalid Charge ID")
 
@@ -140,14 +126,14 @@ def lambda_handler(event, context):
         )
         ret = collect_payment(pre_authorization_token)
 
-        log_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Status annotation")
         tracer.put_annotation("PaymentStatus", "SUCCESS")
 
         # Step Functions can append multiple values if you return a single dict
         return ret
     except PaymentException as err:
-        log_metric(name="FailedPayment", unit=MetricUnit.Count, value=1)
+        metrics.add_metric(name="FailedPayment", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Status annotation before raising error")
         tracer.put_annotation("PaymentStatus", "FAILED")
         logger.error({"operation": "collect_payment", "details": err})

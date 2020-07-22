@@ -25,6 +25,12 @@ Parameters:
     Type: String
     Description: AWS AppSync API ID
 
+  LogRetentionInDays:
+    Type: Number
+    Default: 14
+    Description: CloudWatch Logs retention period
+
+
 Resources:
   LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
@@ -56,7 +62,7 @@ Resources:
   IngestFunc:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub Airline-IngestLoyalty-${Stage}
+      FunctionName: !Sub ServerlessAirline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
       Runtime: nodejs10.x
@@ -84,7 +90,7 @@ Resources:
   GetFunc:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub Airline-GetLoyalty-${Stage}
+      FunctionName: !Sub ServerlessAirline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
       Runtime: nodejs10.x
@@ -103,6 +109,18 @@ Resources:
             Path: /loyalty/{customerId}
             RestApiId: !Ref LoyaltyApi
 
+  IngestLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${IngestFunc}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  GetLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${GetFunc}"
+      RetentionInDays: !Ref LogRetentionInDays
+
   LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
@@ -120,16 +138,16 @@ Resources:
       #   AllowHeaders:
       #     "'Content-Type,Authorization,X-Amz-Date'"
       #   MaxAge: "'600'"
-      TracingEnabled: True
-      # AccessLogSetting:
-      #   - DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group/custom_log_group_name"
-      #     Format: "$context.identity.sourceIp $context.identity.caller $context.identity.user [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.responseLength $context.requestId"
+      AccessLogSetting:
+        DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LoyaltyApiLogGroup}"
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "error": "$context.error.message", "user_arn": "$context.identity.userArn"}'
       MethodSettings:
         - MetricsEnabled: True
           ResourcePath: "/*"
           HttpMethod: "*"
           ThrottlingRateLimit: 100
           ThrottlingBurstLimit: 50
+          LoggingLevel: INFO
       Auth:
         DefaultAuthorizer: AWS_IAM
       DefinitionBody:
@@ -155,6 +173,12 @@ Resources:
                 type: aws_proxy
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFunc.Arn}/invocations
+
+  LoyaltyApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/ServerlessAirline-Loyalty-${LoyaltyApi}-${Stage}
+      RetentionInDays: !Ref LogRetentionInDays
 
   # Resources for API Gateway integration with AppSync
 

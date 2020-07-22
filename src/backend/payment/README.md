@@ -32,7 +32,8 @@ Custom metrics currently emitted to CloudWatch:
 Metric | Description | Dimensions
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 ColdStart | Number of cold start executions | `function_name`, `service`
-InvalidPaymentRequest | Number of payment transactions that didn't include pre-authorization/authorization charge token | `operation`, `service`
+InvalidPaymentRequest | Number of payment transactions that didn't include pre-authorization/authorization charge token for collection | `service`
+InvalidRefundRequest | Number of payment transactions that didn't include pre-authorization/authorization charge token for refund | `service`
 SuccessfulPayment | Number of payments successfully collected from confirmed bookings | `service`
 FailedPayment | Number of payments that failed to be collected from confirmed bookings e.g. payment already collected from charge token | `service` 
 
@@ -67,3 +68,4 @@ Almost as a tech debt record, this help us understand why certain patterns were 
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 Abstract Stripe implementation | Most customers already have a payment provider and we wanted to replicate that with minimum effort. API Gateway provides a contract for payment operations regardless of the payment provider, and Lambda functions provide additional operations visibility. | During Twitch season (Apr-Aug '19)
+Drop Logging Stack | AWS Lambda Powertools Metrics utilize the new Amazon CloudWatch Embedded Metrics Format (EMF) making our custom implementation unnecessary. This also has the benefit of not requiring any additional stack. | July 22nd 2020
