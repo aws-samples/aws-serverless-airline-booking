@@ -41,6 +41,10 @@ backend:
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
         - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/publicKey" VALUE=${STRIPE_PUBLIC_KEY}
         ##
+        # Enable TTL configuration on the Flight Table
+        ##
+        - if aws dynamodb describe-time-to-live --table-name $FLIGHT_TABLE_NAME | grep -q 'DISABLED'; then aws dynamodb update-time-to-live --table-name $FLIGHT_TABLE_NAME --time-to-live-specification "Enabled=true, AttributeName=ttl"; fi
+        ##
         # Deploy SAM based back-end
         ##
         - make deploy
@@ -52,9 +56,9 @@ frontend:
         - npm install
     build:
       commands:
-        ## 
+        ##
         # Expose Stripe public key and Payment Charge URL as a VueJS runtime env
-        ## 
+        ##
         - export VUE_APP_StripePublicKey=${STRIPE_PUBLIC_KEY:-UNDEFINED}
         - export VUE_APP_PaymentChargeUrl=$(aws ssm get-parameter --name /${AWS_BRANCH}/service/payment/api/charge/url --query 'Parameter.Value' --output text)
         - npm run build

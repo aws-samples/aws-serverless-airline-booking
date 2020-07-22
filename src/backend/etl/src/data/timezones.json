@@ -1,0 +1,82 @@
+{
+  "BRU": {
+    "code": "BRU",
+    "countryCode": "BE",
+    "timezone": "Europe/Brussels"
+  },
+  "SXF": {
+    "code": "SXF",
+    "countryCode": "DE",
+    "timezone": "Europe/Berlin"
+  },
+  "FRA": {
+    "code": "FRA",
+    "countryCode": "DE",
+    "timezone": "Europe/Berlin"
+  },
+  "MUC": {
+    "code": "MUC",
+    "countryCode": "DE",
+    "timezone": "Europe/Berlin"
+  },
+  "HEL": {
+    "code": "HEL",
+    "countryCode": "FI",
+    "timezone": "Europe/Helsinki"
+  },
+  "MAN": {
+    "code": "MAN",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "LTN": {
+    "code": "LTN",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "SOU": {
+    "code": "SOU",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "LGW": {
+    "code": "LGW",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "LHR": {
+    "code": "LHR",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "GLA": {
+    "code": "GLA",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "EDI": {
+    "code": "EDI",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "STN": {
+    "code": "STN",
+    "countryCode": "GB",
+    "timezone": "Europe/London"
+  },
+  "MAD": {
+    "code": "MAD",
+    "countryCode": "ES",
+    "timezone": "Europe/Madrid"
+  },
+  "OSL": {
+    "code": "OSL",
+    "countryCode": "NO",
+    "timezone": "Europe/Oslo"
+  },
+  "ARN": {
+    "code": "ARN",
+    "countryCode": "SE",
+    "timezone": "Europe/Stockholm"
+  }
+}

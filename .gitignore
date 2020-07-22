@@ -622,6 +622,8 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/node,linux,macos,python,windows,visualstudiocode
 amplify/mock-data
+/.idea/
+/*.iml
 
 #amplify
 amplify/\#current-cloud-backend

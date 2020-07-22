@@ -1,0 +1,255 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Booking service
+
+Globals:
+  Function:
+    Timeout: 5
+
+
+Parameters:
+  FlightTable:
+    Type: String
+    Description: Flight Table
+
+  FlightsPerDay:
+    Type: Number
+    Description: Number of Flights to be created per day (multiples of 2)
+    Default: 10
+    MaxValue: 240
+
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+
+Resources:
+  ETLBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # BucketName: !Sub etl-bucket-${AWS::StackName}
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 30
+            Status: Enabled
+
+  AddAirportsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: airport.add
+      Runtime: nodejs12.x
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ETLBucket
+      Environment:
+        Variables:
+          ETL_BUCKET_NAME: !Ref ETLBucket
+
+  CreateFlightRoutesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: flightRoutes.create
+      Runtime: nodejs12.x
+      Timeout: 300
+      MemorySize: 512
+      Policies:
+          - S3CrudPolicy:
+              BucketName: !Ref ETLBucket
+      Environment:
+        Variables:
+          ETL_BUCKET_NAME: !Ref ETLBucket
+          FLIGHTS_PER_DAY: !Ref FlightsPerDay
+
+  GenerateFlightsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: flights.generate
+      Runtime: nodejs12.x
+      Timeout: 900
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ETLBucket
+      Environment:
+        Variables:
+          ETL_BUCKET_NAME: !Ref ETLBucket
+
+  AddFlightsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: flightsdb.addToDatabase
+      Runtime: nodejs12.x
+      Timeout: 900
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref ETLBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FlightTable
+      Environment:
+        Variables:
+          ETL_BUCKET_NAME: !Ref ETLBucket
+          FLIGHTS_TABLE_NAME: !Ref FlightTable
+
+  ScheduledExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: StateMachineExecutionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:DescribeExecution
+                  - states:DescribeStateMachineForExecution
+                  - states:GetExecutionHistory
+                  - states:StopExecution
+                  - states:StartExecution
+                Resource:
+                  - !Ref AddFlights
+
+  StatesExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: StatesExecutionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !Sub ${AddAirportsFunction.Arn}
+                  - !Sub ${CreateFlightRoutesFunction.Arn}
+                  - !Sub ${GenerateFlightsFunction.Arn}
+                  - !Sub ${AddFlightsFunction.Arn}
+
+  ScheduledExecution:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Scheduled execution for ETL"
+      ScheduleExpression: "rate(30 days)"
+      State: ENABLED
+      Targets:
+        -
+          Arn: !Ref AddFlights
+          Id: "ETLStepFunction"
+          RoleArn: !Sub ${ScheduledExecutionRole.Arn}
+
+  AddFlights:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionString: !Sub |
+        {
+          "StartAt": "Add Airports",
+          "States": {
+            "Add Airports": {
+              "Type": "Task",
+              "Resource": "${AddAirportsFunction.Arn}",
+              "TimeoutSeconds": 5,
+              "Parameters": {
+                "execution.$": "$$.Execution.Name"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "FlightAddingException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "BackoffRate": 2,
+                  "MaxAttempts": 2
+                }
+              ],
+              "ResultPath": "$.airports",
+              "OutputPath": "$.airports",
+              "Next": "Create Flights Routes"
+            },
+            "Create Flights Routes": {
+              "Type": "Task",
+              "Resource": "${CreateFlightRoutesFunction.Arn}",
+              "TimeoutSeconds": 900,
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "FlightAddingException"
+                  ],
+                  "IntervalSeconds": 1,
+                  "BackoffRate": 2,
+                  "MaxAttempts": 2
+                }
+              ],
+              "InputPath": "$",
+              "Parameters": {
+                "airportFileKey.$": "$.airportFileKey",
+                "execution.$": "$$.Execution.Name"
+              },
+              "ResultPath": "$.routes",
+              "Next": "Create Flights"
+            },
+            "Create Flights": {
+              "Type": "Map",
+              "InputPath": "$",
+              "ItemsPath": "$.routes",
+              "Parameters": {
+                "routeFileKey.$": "$$.Map.Item.Value.Key",
+                "execution.$": "$$.Execution.Name",
+                "index.$": "$$.Map.Item.Index"
+              },
+              "Iterator": {
+                "StartAt": "ProcessRoutes",
+                "States": {
+                  "ProcessRoutes": {
+                    "Type": "Task",
+                    "Resource": "${GenerateFlightsFunction.Arn}",
+                    "Next": "AddFlightsToDatabase",
+                    "ResultPath" : "$.routesOutput"
+                  },
+                  "AddFlightsToDatabase": {
+                    "Type": "Task",
+                    "Resource": "${AddFlightsFunction.Arn}",
+                    "Parameters": {
+                      "flightsFileKey.$": "$.routesOutput.Key",
+                      "execution.$": "$.execution",
+                      "index.$": "$.index"
+                    },
+                    "End": true
+                  }
+                }
+              },
+              "ResultPath": "$.createdFlights",
+              "Next": "Flights Added"
+            },
+            "Flights Added": {
+              "Type": "Pass",
+              "End": true
+            }
+          }
+        }
+      RoleArn: !Sub ${StatesExecutionRole.Arn}
+
+
+Outputs:
+  AddFlightsStateMachine:
+    Value: !Ref AddFlights
+    Description: The ARN of the Add Flights StateMachine

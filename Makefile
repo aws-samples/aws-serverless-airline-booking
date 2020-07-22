@@ -24,12 +24,14 @@ deploy: ##=> Deploy services
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
 	$(MAKE) deploy.log-processing
+	$(MAKE) deploy.etl
 
 delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
 	$(MAKE) delete.log-processing
+	$(MAKE) delete.etl
 
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
@@ -42,6 +44,9 @@ delete.loyalty: ##=> Delete booking service
 
 delete.log-processing:
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH}
+
+delete.etl:
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-etl-$${AWS_BRANCH}
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -99,6 +104,22 @@ deploy.log-processing: ##=> Deploy Log Processing for CloudWatch Logs
 			--template-file template.yaml \
 			--stack-name $${STACK_NAME}-log-processing-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND
+
+deploy.etl: ##=> Deploy etl service using SAM
+	$(info [*] Packaging and deploying ETL service...)
+	cd src/backend/etl/src && \
+		npm install
+	cd src/backend/etl && \
+		sam package \
+			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
+			--output-template-file packaged.yaml && \
+		sam deploy \
+			--template-file packaged.yaml \
+			--stack-name $${STACK_NAME}-etl-$${AWS_BRANCH} \
+			--capabilities CAPABILITY_IAM \
+			--parameter-overrides \
+				FlightTable=$${FLIGHT_TABLE_NAME} \
+				Stage=$${AWS_BRANCH}
 
 export.parameter:
 	$(info [+] Adding new parameter named "${NAME}")
