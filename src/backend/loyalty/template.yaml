@@ -177,7 +177,7 @@ Resources:
   LoyaltyApiLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/apigateway/ServerlessAirline-LoyaltyApi-${LoyaltyApi}-${Stage}
+      LogGroupName: !Sub /aws/apigateway/ServerlessAirline-Loyalty-${LoyaltyApi}-${Stage}
       RetentionInDays: !Ref LogRetentionInDays
 
   # Resources for API Gateway integration with AppSync
