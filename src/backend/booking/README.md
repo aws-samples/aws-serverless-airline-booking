@@ -70,7 +70,10 @@ Custom metrics currently emitted to CloudWatch:
 Metric | Description | Dimensions
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 ColdStart | Number of cold start executions | `function_name`, `service`
-InvalidBookingRequest | Number of booking transactions that didn't include booking ID | `operation`, `service`
+InvalidCancellationRequest | Number of booking transactions that didn't include booking ID for cancellation | `service`
+InvalidConfirmationRequest | Number of booking transactions that didn't include booking ID for confirmation | `service`
+InvalidNotificationRequest | Number of booking transactions that didn't include customer ID and price for notification | `service`
+InvalidReservationRequest | Number of booking transactions that didn't include customer, charge and flight IDs for reservation | `service`
 SuccessfulCancellation | Number of successful booking cancellations | `service`
 FailedCancellation | Number of booking that failed to be cancelled  | `service`
 SuccessfulBooking | Number of bookings confirmed successfully | `service` 
@@ -111,4 +114,4 @@ See [Payment integration section for more information](../payment/README.md)
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 State Machine for booking process | Primarily to illustrate Saga in practice including handling failed overall executions with a DLQ. This should be simplified after re:Invent 2019, specially booking confirmation. | During Twitch season (Apr-Aug '19)
-
+Drop Logging Stack | AWS Lambda Powertools Metrics utilize the new Amazon CloudWatch Embedded Metrics Format (EMF) making our custom implementation unnecessary. This also has the benefit of not requiring any additional stack. | July 22nd 2020
