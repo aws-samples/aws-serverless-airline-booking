@@ -20,6 +20,7 @@ init: ##=> Install OS deps and dev tools
 
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
+	$(MAKE) deploy.shared-lambda-layers
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
@@ -30,6 +31,7 @@ delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
+	$(MAKE) delete.shared-lambda-layers
 ## Enable the delete.perftest if you need to delete the performance test stack
 #	$(MAKE) delete.perftest
 
@@ -44,6 +46,9 @@ delete.loyalty: ##=> Delete booking service
 
 delete.perftest:
 	cdk destroy $${PERF_TEST_STACK_NAME}
+
+delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
+	$(MAKE) -C src/backend/shared/libs delete
 
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
@@ -102,7 +107,10 @@ deploy.perftest: ##=> Deploying Gatling components for performance testing
 		cdk list && \
 		cdk bootstrap && \
 		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
-		
+
+deploy.shared-lambda-layers: ##=> Deploy shared Lambda Layers using SAM
+	$(MAKE) -C src/backend/shared/libs deploy
+
 export.parameter:
 	$(info [+] Adding new parameter named "${NAME}")
 	aws ssm put-parameter \
