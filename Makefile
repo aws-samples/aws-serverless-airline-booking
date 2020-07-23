@@ -53,7 +53,6 @@ delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
 deploy.booking: ##=> Deploy booking service using SAM
 	$(info [*] Packaging and deploying Booking service...)
 	cd src/backend/booking && \
-		sam build && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
 			--output-template-file packaged.yaml && \
@@ -67,7 +66,8 @@ deploy.booking: ##=> Deploy booking service using SAM
 				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
 				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
 				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
-				Stage=$${AWS_BRANCH}
+				Stage=$${AWS_BRANCH} \
+				SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
 
 deploy.payment: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
