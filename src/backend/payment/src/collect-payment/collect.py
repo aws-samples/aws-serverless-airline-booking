@@ -1,15 +1,12 @@
 import os
 
 import requests
-
-from aws_lambda_powertools import Metrics
+from aws_lambda_powertools import Logger, Metrics, Tracer
 from aws_lambda_powertools.metrics import MetricUnit
 
-# TODO: Migrate original Powertools to newly OSS Powertools as a custom middleware
-from lambda_python_powertools.logging import logger_inject_process_booking_sfn, logger_setup
-from lambda_python_powertools.tracing import Tracer
+from process_booking import process_booking_handler
 
-logger = logger_setup()
+logger = Logger()
 tracer = Tracer()
 metrics = Metrics()
 
@@ -18,11 +15,8 @@ payment_endpoint = os.getenv("PAYMENT_API_URL")
 
 
 class PaymentException(Exception):
-    def __init__(self, message=None, status_code=None, details=None):
-        super(PaymentException, self).__init__()
-
+    def __init__(self, message=None, details=None):
         self.message = message or "Payment failed"
-        self.status_code = status_code or 500
         self.details = details or {}
 
 
@@ -47,42 +41,41 @@ def collect_payment(charge_id):
             amount collected
     """
     if not payment_endpoint:
-        logger.error({"operation": "invalid_config", "details": os.environ})
+        logger.error({"operation": "input_validation", "details": os.environ})
         raise ValueError("Payment API URL is invalid -- Consider reviewing PAYMENT_API_URL env")
 
     payment_payload = {"chargeId": charge_id}
 
     try:
-        logger.debug({"operation": "collect_payment", "details": payment_payload})
+        logger.debug({"operation": "payment_collection", "details": payment_payload})
         ret = requests.post(payment_endpoint, json=payment_payload)
         ret.raise_for_status()
+
+        payment_response = ret.json()
+        tracer.put_metadata(charge_id, ret)
         logger.info(
             {
-                "operations": "collect_payment",
+                "operation": "payment_collection",
                 "details": {
                     "response_headers": ret.headers,
-                    "response_payload": ret.json(),
+                    "response_payload": payment_response,
                     "response_status_code": ret.status_code,
                     "url": ret.url,
                 },
             }
         )
-        payment_response = ret.json()
-
-        logger.debug("Adding collect payment operation result as tracing metadata")
-        tracer.put_metadata(charge_id, ret)
 
         return {
             "receiptUrl": payment_response["capturedCharge"]["receipt_url"],
             "price": payment_response["capturedCharge"]["amount"],
         }
     except requests.exceptions.RequestException as err:
-        logger.error({"operation": "collect_payment", "details": err})
-        raise PaymentException(status_code=ret.status_code, details=err)
+        logger.exception({"operation": "payment_collection"})
+        raise PaymentException(details=err)
+
 
 @metrics.log_metrics(capture_cold_start_metric=True)
-@tracer.capture_lambda_handler(process_booking_sfn=True)
-@logger_inject_process_booking_sfn
+@process_booking_handler(logger=logger)
 def lambda_handler(event, context):
     """AWS Lambda Function entrypoint to collect payment
 
@@ -117,7 +110,7 @@ def lambda_handler(event, context):
 
     if not pre_authorization_token:
         metrics.add_metric(name="InvalidPaymentRequest", unit=MetricUnit.Count, value=1)
-        logger.error({"operation": "invalid_event", "details": event})
+        logger.error({"operation": "input_validation", "details": event})
         raise ValueError("Invalid Charge ID")
 
     try:
@@ -125,16 +118,12 @@ def lambda_handler(event, context):
             f"Collecting payment from customer {customer_id} using {pre_authorization_token} token"
         )
         ret = collect_payment(pre_authorization_token)
-
         metrics.add_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=1)
-        logger.debug("Adding Payment Status annotation")
         tracer.put_annotation("PaymentStatus", "SUCCESS")
 
-        # Step Functions can append multiple values if you return a single dict
-        return ret
+        return ret  # Step Functions can append multiple values if you return a single dict
     except PaymentException as err:
         metrics.add_metric(name="FailedPayment", unit=MetricUnit.Count, value=1)
-        logger.debug("Adding Payment Status annotation before raising error")
         tracer.put_annotation("PaymentStatus", "FAILED")
-        logger.error({"operation": "collect_payment", "details": err})
-        raise PaymentException(details=err)
+        logger.exception({"operation": "payment_collection"})
+        raise

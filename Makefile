@@ -72,7 +72,6 @@ deploy.booking: ##=> Deploy booking service using SAM
 deploy.payment: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
 	cd src/backend/payment && \
-		sam build && \
 		sam package \
 			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
 			--output-template-file packaged.yaml && \
@@ -80,7 +79,9 @@ deploy.payment: ##=> Deploy payment service using SAM
 			--template-file packaged.yaml \
 			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
 			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides Stage=$${AWS_BRANCH}
+			--parameter-overrides \
+				Stage=$${AWS_BRANCH} \
+				SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)

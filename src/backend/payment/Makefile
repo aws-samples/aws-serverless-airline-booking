@@ -1,4 +1,5 @@
 PROFILE := "twitch"
+SHARED_LIBS_LAYER ?= "arn:aws:lambda:eu-west-1:231436140809:layer:ProjectSharedLibs:2"
 
 target:
 	@$(MAKE) pr
@@ -22,14 +23,16 @@ test-html:
 
 pr: lint test 
 
-build-collect-payment:
-	sam build CollectPayment
+invoke-collect-payment:
+	sam local invoke \
+		--event src/collect-payment/event.json \
+		--env-vars local-env-vars.json CollectPayment \
+		--parameter-overrides SharedLibsLayer=${SHARED_LIBS_LAYER} \
+		--profile ${PROFILE}
 
-invoke-collect-payment: build-collect-payment
-	sam local invoke --event src/collect-payment/event.json --env-vars local-env-vars.json CollectPayment --profile ${PROFILE}
-
-build-refund-payment:
-	sam build RefundPayment
-
-invoke-refund-payment: build-refund-payment
-	sam local invoke --event src/refund-payment/event.json --env-vars local-env-vars.json RefundPayment --profile ${PROFILE}
+invoke-refund-payment:
+	sam local invoke \
+		--event src/refund-payment/event.json \
+		--env-vars local-env-vars.json RefundPayment \
+		--parameter-overrides SharedLibsLayer=${SHARED_LIBS_LAYER} \
+		--profile ${PROFILE}
