@@ -36,10 +36,10 @@ delete: ##=> Delete services
 #	$(MAKE) delete.perftest
 
 delete.booking: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
+	$(MAKE) -C src/backend/booking delete
 
 delete.payment: ##=> Delete payment service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
+	$(MAKE) -C src/backend/payment delete
 
 delete.loyalty: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
@@ -51,37 +51,10 @@ delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
 	$(MAKE) -C src/backend/shared/libs delete
 
 deploy.booking: ##=> Deploy booking service using SAM
-	$(info [*] Packaging and deploying Booking service...)
-	cd src/backend/booking && \
-		sam package \
-			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--output-template-file packaged.yaml && \
-		sam deploy \
-			--template-file packaged.yaml \
-			--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM \
-			--parameter-overrides \
-				BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
-				FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
-				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
-				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
-				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
-				Stage=$${AWS_BRANCH} \
-				SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
+	$(MAKE) -C src/backend/booking deploy
 
 deploy.payment: ##=> Deploy payment service using SAM
-	$(info [*] Packaging and deploying Payment service...)
-	cd src/backend/payment && \
-		sam package \
-			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--output-template-file packaged.yaml && \
-		sam deploy \
-			--template-file packaged.yaml \
-			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides \
-				Stage=$${AWS_BRANCH} \
-				SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
+	$(MAKE) -C src/backend/payment deploy
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)

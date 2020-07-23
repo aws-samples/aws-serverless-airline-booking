@@ -50,3 +50,24 @@ invoke-reserve-booking:
 		--env-vars local-env-vars.json ReserveBooking \
 		--parameter-overrides SharedLibsLayer=${SHARED_LIBS_LAYER} \
 		--profile ${PROFILE}
+
+deploy: ##=> Deploy booking service using SAM
+	$(info [*] Packaging and deploying Booking service...)
+	sam package \
+		--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
+		--output-template-file packaged.yaml && \
+	sam deploy \
+		--template-file packaged.yaml \
+		--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
+		--capabilities CAPABILITY_IAM \
+		--parameter-overrides \
+			BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
+			FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
+			CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
+			RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
+			AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
+			Stage=$${AWS_BRANCH} \
+			SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
+
+delete: ##=> Delete booking service
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}

@@ -36,3 +36,19 @@ invoke-refund-payment:
 		--env-vars local-env-vars.json RefundPayment \
 		--parameter-overrides SharedLibsLayer=${SHARED_LIBS_LAYER} \
 		--profile ${PROFILE}
+
+deploy: ##=> Deploy payment service using SAM
+	$(info [*] Packaging and deploying Payment service...)
+	sam package \
+		--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
+		--output-template-file packaged.yaml && \
+	sam deploy \
+		--template-file packaged.yaml \
+		--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
+		--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+		--parameter-overrides \
+			Stage=$${AWS_BRANCH} \
+			SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
+
+delete.payment: ##=> Delete payment service
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
