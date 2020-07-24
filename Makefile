@@ -45,7 +45,7 @@ delete.loyalty: ##=> Delete loyalty service
 	$(MAKE) -C src/backend/loyalty delete
 
 delete.perftest:
-	cdk destroy $${PERF_TEST_STACK_NAME}
+	$(MAKE) -C src/perf-tests delete
 
 delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
 	$(MAKE) -C src/backend/shared/libs delete
@@ -60,13 +60,7 @@ deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(MAKE) -C src/backend/loyalty deploy
 
 deploy.perftest: ##=> Deploying Gatling components for performance testing
-	$(info [*] Deploying Gatling components for performance testing ...)
-	cd src/perf-tests/perftest-stack-airline && \
-		npm install && \
-		npm run build && \
-		cdk list && \
-		cdk bootstrap && \
-		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
+	$(MAKE) -C src/perf-tests deploy
 
 deploy.shared-lambda-layers: ##=> Deploy shared Lambda Layers using SAM
 	$(MAKE) -C src/backend/shared/libs deploy
