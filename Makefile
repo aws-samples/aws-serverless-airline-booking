@@ -41,8 +41,8 @@ delete.booking: ##=> Delete booking service
 delete.payment: ##=> Delete payment service
 	$(MAKE) -C src/backend/payment delete
 
-delete.loyalty: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
+delete.loyalty: ##=> Delete loyalty service
+	$(MAKE) -C src/backend/loyalty delete
 
 delete.perftest:
 	cdk destroy $${PERF_TEST_STACK_NAME}
@@ -57,21 +57,7 @@ deploy.payment: ##=> Deploy payment service using SAM
 	$(MAKE) -C src/backend/payment deploy
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
-	$(info [*] Packaging and deploying Loyalty service...)
-	cd src/backend/loyalty && \
-		npm install && \
-		npm run build && \
-		sam package \
-			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--output-template-file packaged.yaml && \
-		sam deploy \
-			--template-file packaged.yaml \
-			--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM \
-			--parameter-overrides \
-				BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
-				Stage=$${AWS_BRANCH} \
-				AppsyncApiId=$${GRAPHQL_API_ID}
+	$(MAKE) -C src/backend/loyalty deploy
 
 deploy.perftest: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
