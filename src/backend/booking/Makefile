@@ -52,11 +52,13 @@ invoke-reserve-booking:
 		--profile ${PROFILE}
 
 deploy: ##=> Deploy booking service using SAM
+# [24-07-2020] Changed from `sam deploy` to `aws cloudformation deploy`
+# known issue: https://github.com/awslabs/aws-sam-cli/issues/1698
 	$(info [*] Packaging and deploying Booking service...)
 	sam package \
 		--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
 		--output-template-file packaged.yaml && \
-	sam deploy \
+	aws cloudformation deploy \
 		--template-file packaged.yaml \
 		--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
 		--capabilities CAPABILITY_IAM \
