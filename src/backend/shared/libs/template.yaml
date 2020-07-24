@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Project level shared libraries as Lambda Layers
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Environment stage or git branch
+
+Resources:
+  ProjectSharedLibs:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: src/
+      CompatibleRuntimes:
+        - python3.7
+        - python3.8
+    Metadata:
+      BuildMethod: python3.7
+
+  ProjectSharedLibsParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Type: String
+      Name: !Sub /${Stage}/shared/lambda/layers/projectArn
+      Description: Shared Lambda Layer ARN that 80% of services use
+      Value: !Ref ProjectSharedLibs
+
+Outputs:
+  ProjectSharedLibs:
+    Value: !Ref ProjectSharedLibs
+    Description: Shared libraries Lambda Layer ARN

@@ -115,3 +115,4 @@ Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 State Machine for booking process | Primarily to illustrate Saga in practice including handling failed overall executions with a DLQ. This should be simplified after re:Invent 2019, specially booking confirmation. | During Twitch season (Apr-Aug '19)
 Drop Logging Stack | AWS Lambda Powertools Metrics utilize the new Amazon CloudWatch Embedded Metrics Format (EMF) making our custom implementation unnecessary. This also has the benefit of not requiring any additional stack. | July 22nd 2020
+Introduce Lambda Layers | Dependencies are now deployed separately as a Lambda Layer given it's shared with Payment too. This makes new changes to be deployed in seconds from ~2m. | July 24th 2020

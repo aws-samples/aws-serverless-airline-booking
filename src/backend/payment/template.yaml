@@ -11,9 +11,13 @@ Parameters:
     Default: 14
     Description: CloudWatch Logs retention period
 
+  SharedLibsLayer:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Project shared libraries Lambda Layer ARN
+
 Globals:
   Function:
-    Timeout: 5
+    Timeout: 10
     Tracing: Active
     MemorySize: 512
     Environment:
@@ -40,7 +44,8 @@ Resources:
       Handler: collect.lambda_handler
       Runtime: python3.7
       CodeUri: src/collect-payment
-      Timeout: 10
+      Layers:
+        - !Ref SharedLibsLayer
       Environment:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.CaptureApiUrl
@@ -53,7 +58,8 @@ Resources:
       Handler: refund.lambda_handler
       CodeUri: src/refund-payment
       Runtime: python3.7
-      Timeout: 10
+      Layers:
+        - !Ref SharedLibsLayer
       Environment:
         Variables:
           PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
@@ -107,7 +113,6 @@ Resources:
       Name: !Sub "/${Stage}/service/payment/api/refund/url"
       Type: String
       Value: !Sub ${StripePaymentApplication.Outputs.RefundApiUrl}
-
 
 Outputs:
   CollectPaymentFunction:

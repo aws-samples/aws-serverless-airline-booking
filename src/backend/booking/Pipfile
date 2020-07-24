@@ -21,8 +21,8 @@ flake8-variables-names = "*"
 isort = "*"
 
 [packages]
-boto3 = "*"
-lambda-python-powertools = {editable = true,path = "./../../backend/shared/lambda_python_powertools"}
+boto3 = "==1.14.16"
+aws-lambda-powertools = "==1.0.1"
 
 [requires]
 python_version = "3.7"

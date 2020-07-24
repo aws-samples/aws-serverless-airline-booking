@@ -20,6 +20,7 @@ init: ##=> Install OS deps and dev tools
 
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
+	$(MAKE) deploy.shared-lambda-layers
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
@@ -30,79 +31,40 @@ delete: ##=> Delete services
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
+	$(MAKE) delete.shared-lambda-layers
 ## Enable the delete.perftest if you need to delete the performance test stack
 #	$(MAKE) delete.perftest
 
 delete.booking: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
+	$(MAKE) -C src/backend/booking delete
 
 delete.payment: ##=> Delete payment service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
+	$(MAKE) -C src/backend/payment delete
 
-delete.loyalty: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
+delete.loyalty: ##=> Delete loyalty service
+	$(MAKE) -C src/backend/loyalty delete
 
 delete.perftest:
-	cdk destroy $${PERF_TEST_STACK_NAME}
+	$(MAKE) -C src/perf-tests delete
+
+delete.shared-lambda-layers: ##=> Delete shared Lambda layers stack
+	$(MAKE) -C src/backend/shared/libs delete
 
 deploy.booking: ##=> Deploy booking service using SAM
-	$(info [*] Packaging and deploying Booking service...)
-	cd src/backend/booking && \
-		sam build && \
-		sam package \
-			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--output-template-file packaged.yaml && \
-		sam deploy \
-			--template-file packaged.yaml \
-			--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM \
-			--parameter-overrides \
-				BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
-				FlightTable=/$${AWS_BRANCH}/service/amplify/storage/table/flight \
-				CollectPaymentFunction=/$${AWS_BRANCH}/service/payment/function/collect \
-				RefundPaymentFunction=/$${AWS_BRANCH}/service/payment/function/refund \
-				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
-				Stage=$${AWS_BRANCH}
+	$(MAKE) -C src/backend/booking deploy
 
 deploy.payment: ##=> Deploy payment service using SAM
-	$(info [*] Packaging and deploying Payment service...)
-	cd src/backend/payment && \
-		sam build && \
-		sam package \
-			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--output-template-file packaged.yaml && \
-		sam deploy \
-			--template-file packaged.yaml \
-			--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-			--parameter-overrides Stage=$${AWS_BRANCH}
+	$(MAKE) -C src/backend/payment deploy
 
 deploy.loyalty: ##=> Deploy loyalty service using SAM and TypeScript build
-	$(info [*] Packaging and deploying Loyalty service...)
-	cd src/backend/loyalty && \
-		npm install && \
-		npm run build && \
-		sam package \
-			--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-			--output-template-file packaged.yaml && \
-		sam deploy \
-			--template-file packaged.yaml \
-			--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
-			--capabilities CAPABILITY_IAM \
-			--parameter-overrides \
-				BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
-				Stage=$${AWS_BRANCH} \
-				AppsyncApiId=$${GRAPHQL_API_ID}
+	$(MAKE) -C src/backend/loyalty deploy
 
 deploy.perftest: ##=> Deploying Gatling components for performance testing
-	$(info [*] Deploying Gatling components for performance testing ...)
-	cd src/perf-tests/perftest-stack-airline && \
-		npm install && \
-		npm run build && \
-		cdk list && \
-		cdk bootstrap && \
-		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
-		
+	$(MAKE) -C src/perf-tests deploy
+
+deploy.shared-lambda-layers: ##=> Deploy shared Lambda Layers using SAM
+	$(MAKE) -C src/backend/shared/libs deploy
+
 export.parameter:
 	$(info [+] Adding new parameter named "${NAME}")
 	aws ssm put-parameter \

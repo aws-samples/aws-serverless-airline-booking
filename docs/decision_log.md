@@ -21,3 +21,19 @@ CloudWatch now allows metric creation asynchronously via [Metric Embedded Format
 [As we have recently open sourced Lambda Powertools](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/) originally created in this project as a shared lib, we have now replaced the log-processing stack with Powertools Metrics utility.
 
 **This reduces deployment time by 2m per build, and our metrics cost by approximately 90 USD per month.**
+
+## 2020-07-24
+
+### Introduce Lambda Layers for shared deps
+
+#### What 
+
+Shared dependencies that are used by more than one service within the project are now bundled as a Lambda Layer - This includes `Lambda Powertools`, `requests`, `boto3`, and a custom `process_booking` middleware.
+
+#### Why
+
+We fully migrated from the [original powertools](https://github.com/aws-samples/aws-serverless-airline-booking/commits/develop/src/backend/shared/lambda_python_powertools) to the [now public OSS version](https://github.com/awslabs/aws-lambda-powertools-python). 
+
+As part of this process, we ported custom logic for processing booking information as part of our ProcessBooking State Machine into a custom Powertools middleware.
+
+**This reduces nearly 4 minutes from our total deployment time improving developer productivity, and reducing a shy four cents per build**
