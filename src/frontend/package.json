@@ -40,6 +40,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-vue": "^6.2.2",
     "jsdoc": "^3.6.3",
+    "node-forge": "^0.10.0",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2",
     "vue-cli-plugin-quasar": "^0.17.1",
