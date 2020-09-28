@@ -1,4 +1,4 @@
-deploy.perftest: ##=> Deploying Gatling components for performance testing
+deploy: ##=> Deploying Gatling components for performance testing
 	$(info [*] Deploying Gatling components for performance testing ...)
 	cd perftest-stack-airline && \
 		npm install && \
@@ -7,5 +7,5 @@ deploy.perftest: ##=> Deploying Gatling components for performance testing
 		cdk bootstrap && \
 		cdk deploy $${PERF_TEST_STACK_NAME} --require-approval never
 
-delete.perftest: ##=> Delete performance testing stack
+delete: ##=> Delete performance testing stack
 	cdk destroy $${PERF_TEST_STACK_NAME}

@@ -1,6 +1,5 @@
 
-
-> **NOTICE**: AWS AppSync is not part of [Free tier](https://aws.amazon.com/free) and some AWS services used may not be covered by the [Free tier](https://aws.amazon.com/free) after 12 months.
+> **NOTICE**: Some AWS services used may not be covered by the [Free tier](https://aws.amazon.com/free) after 12 months.
 
 ## Requirements
 
