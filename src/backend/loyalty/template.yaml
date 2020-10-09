@@ -128,6 +128,31 @@ Resources:
       Type: String
       Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
+  #
+  # Uncomment the following resources + AccessLogSetting to enable API Gateway Logs
+  # [CAUTION] API Gateway can only have one IAM Role to push logs too, do not uncomment if you already have one
+  # 
+  # ApiGatewayCloudWatchRole:
+  #   Type: 'AWS::IAM::Role'
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service:
+  #               - apigateway.amazonaws.com
+  #           Action: 'sts:AssumeRole'
+  #     Path: /
+  #     ManagedPolicyArns:
+  #       - >-
+  #         arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  #
+  # ApiGatewayCloudWatchLogsConfig:
+  #   Type: 'AWS::ApiGateway::Account'
+  #   Properties:
+  #     CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchRole.Arn
+
   LoyaltyApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -138,9 +163,9 @@ Resources:
       #   AllowHeaders:
       #     "'Content-Type,Authorization,X-Amz-Date'"
       #   MaxAge: "'600'"
-      AccessLogSetting:
-        DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LoyaltyApiLogGroup}"
-        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "error": "$context.error.message", "user_arn": "$context.identity.userArn"}'
+      # AccessLogSetting:
+      #   DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LoyaltyApiLogGroup}"
+      #   Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "error": "$context.error.message", "user_arn": "$context.identity.userArn"}'
       MethodSettings:
         - MetricsEnabled: True
           ResourcePath: "/*"
