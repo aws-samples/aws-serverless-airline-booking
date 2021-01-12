@@ -1,6 +1,7 @@
 import { Context, SNSEvent } from 'aws-lambda';
 import { DefaultDocumentClient, DocumentClientInterface, PutInput } from './lib/document_client';
-import uuidv4 from 'uuid/v4';
+// import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 const client = DefaultDocumentClient;
 const table = process.env.TABLE_NAME
