@@ -7,5 +7,24 @@
  * @see {@link fetchBooking} for more info on action that calls SET_BOOKINGS
  */
 export const SET_BOOKINGS = (state, bookings) => {
-  state.bookings = bookings
+  if (state.bookings.length === 0) {
+    state.bookings = bookings
+  } else {
+    // flatten array of bookings and remove possible duplicates due to network issues
+    let dedup = new Set()
+    let allBookings = [...bookings, state.bookings].flat(5)
+
+    state.bookings = allBookings.filter((booking) => {
+      let dup = dedup.has(booking.id)
+      dedup.add(booking.id)
+      return !dup
+    })
+
+    console.log('Bookings')
+    console.table(state.bookings)
+  }
+}
+
+export const SET_BOOKING_PAGINATION = (state, paginationToken) => {
+  state.paginationToken = paginationToken
 }

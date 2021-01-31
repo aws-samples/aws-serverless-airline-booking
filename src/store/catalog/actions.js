@@ -1,10 +1,11 @@
 import Flight from '../../shared/models/FlightClass'
-
+import { SortPreference } from '../../shared/enums'
 // [Mock-Example]
 import axios from 'axios'
 // import { listFlightQuery, getFlightQuery } from './graphql.js'
 
-const catalogEndpoint = process.env.VUE_APP_CatalogEndpoint || 'no booking endpoint set'
+const catalogEndpoint =
+  process.env.VUE_APP_CatalogEndpoint || 'no booking endpoint set'
 
 /**
  *
@@ -22,7 +23,10 @@ const catalogEndpoint = process.env.VUE_APP_CatalogEndpoint || 'no booking endpo
  * @see {@link SET_FLIGHTS} for more info on mutation
  * @see {@link SET_LOADER} for more info on mutation
  */
-export async function fetchFlights ({ commit, rootGetters }, { date, departure, arrival }) {
+export async function fetchFlights(
+  { commit, rootGetters },
+  { date, departure, arrival }
+) {
   commit('SET_LOADER', true)
 
   const credentials = {
@@ -90,13 +94,14 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
 
     // [Mock-Example]
     const { data: flightData } = await axios.get('/mocks/flights.json')
-    const flights = flightData.map(flight => new Flight(flight))
+    const flights = flightData.map((flight) => new Flight(flight))
 
     console.info('Committing Flights to the store...')
     console.log(flights)
 
     commit('SET_FLIGHTS', flights)
     commit('SET_LOADER', false)
+    commit('SORT_FLIGHTS', SortPreference.EarliestDeparture)
     console.groupEnd()
   } catch (error) {
     console.error(error)
@@ -119,7 +124,7 @@ export async function fetchFlights ({ commit, rootGetters }, { date, departure, 
  * @returns {promise} - Promise representing flight from Catalog service.
  * @see {@link SET_LOADER} for more info on mutation
  */
-export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
+export async function fetchByFlightId({ commit, rootGetters }, { flightId }) {
   const credentials = {
     idToken: rootGetters['profile/idToken'],
     accessToken: rootGetters['profile/accessToken']
@@ -168,7 +173,7 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
     // [Mock-Example]
     var { data: flightData } = await axios.get('/mocks/flights.json')
 
-    flightData = flightData.find(flight => flight.id === flightId)
+    flightData = flightData.find((flight) => flight.id === flightId)
 
     console.info('Flight received from Catalog...')
     console.log(flightData)
@@ -183,4 +188,19 @@ export async function fetchByFlightId ({ commit, rootGetters }, { flightId }) {
     console.groupEnd()
     throw error
   }
+}
+
+/**
+ *
+ * Catalog [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - sortFlightsByPreference sorts flights in current state based on SortPreference given.
+ *
+ * Similarly to fetchFlights, it also controls Flight Loader when fetching data from Catalog service.
+ *
+ * **NOTE**: It doesn't mutate the store
+ * @param {object} context - Vuex action context (context.commit, context.getters, context.state, context.dispatch)
+ * @param {SortPreference} preference - Sorting preferences
+ * @see {@link SORT_FLIGHTS} for more info on mutation
+ */
+export function sortFlightsByPreference({ commit }, preference) {
+  commit('SORT_FLIGHTS', preference)
 }

@@ -10,10 +10,11 @@ export default class Loyalty {
    * let loyalty = new Loyalty({
    *    level: "purple",
    *    points: 324567,
-   *    remainingPoints: 32456
+   *    remainingPoints: 32456,
+   *    customer: "3fe22b2c-2b52-4a75-9db7-6cfc36a0cfcd"
    * })
    */
-  constructor ({ level, points, remainingPoints }) {
+  constructor({ level, points, remainingPoints }) {
     this.level = level
     this.points = points
     this.remainingPoints = remainingPoints

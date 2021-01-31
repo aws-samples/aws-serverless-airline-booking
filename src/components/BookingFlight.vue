@@ -7,6 +7,7 @@
       ref="card"
       :reference="bookingID"
       :name="fullName"
+      :flightNumber="flight.flightNumber"
       :departureDate="flight.departureDate"
       :departureAirportName="flight.departureAirportName"
       :departureIata="flight.departureAirportCode"
@@ -19,11 +20,11 @@
 
 <script>
 // @ts-ignore
-import FlightCard from './FlightCard';
+import FlightCard from './FlightCard'
 // @ts-ignore
-import BookingCard from './BookingCard';
+import BookingCard from './BookingCard'
 
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   /**
@@ -50,17 +51,14 @@ export default {
   },
   computed: {
     ...mapState({
-      user: state => state.profile.user
+      user: (state) => state.profile.user
     }),
-    fullName () {
-      const firstName =
-        (this.user.attributes && this.user.attributes.given_name) || 'First';
-
-      const lastName =
-        (this.user.attributes && this.user.attributes.family_name) ||
-        'Last Name';
-
-      return `${firstName} ${lastName}`
+    ...mapGetters({
+      firstName: 'profile/firstName',
+      lastName: 'profile/lastName'
+    }),
+    fullName() {
+      return `${this.firstName} ${this.lastName}`
     }
   },
   props: {
@@ -87,8 +85,10 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
+<style lang="sass" scoped>
+@import '../css/app'
+
 .booking_flight
   &:hover
-    cursor pointer
+    cursor: pointer
 </style>

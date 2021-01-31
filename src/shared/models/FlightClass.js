@@ -19,6 +19,9 @@ export default class Flight {
    * @param {number} Flight.ticketPrice - Flight Ticket price
    * @param {string} Flight.ticketCurrency - Monetary currency name for flight ticket (e.g EUR)
    * @param {number} Flight.flightNumber - Flight number
+   * @param {string} Flight.seatAllocation - Deprecated: use seatCapacity instead
+   * @param {number} Flight.seatCapacity - Flight's passenger capacity (e.g. 200)
+  
    * @example
    * let flight = new Flight({
    *    id: "173ec46b-0e12-45fe-9ba1-511abde3d318",
@@ -37,7 +40,7 @@ export default class Flight {
    *    flightNumber: 1812
    * })
    */
-  constructor ({
+  constructor({
     id,
     departureCity,
     departureDate,
@@ -68,21 +71,20 @@ export default class Flight {
     this.ticketCurrency = ticketCurrency
     this.flightNumber = flightNumber
   }
-
   /**
    * Get the flight duration between departure and arrival
    * @type {string}
    * @readonly
    * @return {string} Flight duration (e.g. 2h15m)
    */
-  get flightDuration () {
-    const unit = 'minutes'
-    const timeDiffInMinutes = Math.abs(
+  get flightDuration() {
+    let unit = 'minutes'
+    let timeDiffInMinutes = Math.abs(
       date.getDateDiff(this.departureDate, this.arrivalDate, unit)
     )
 
-    const hours = Math.floor(timeDiffInMinutes / 60)
-    const minutes = timeDiffInMinutes - hours * 60
+    let hours = Math.floor(timeDiffInMinutes / 60)
+    let minutes = timeDiffInMinutes - hours * 60
 
     return `${hours}h${minutes}m`
   }
@@ -93,14 +95,14 @@ export default class Flight {
    * @readonly
    * @return {string} Formatted 24h time (e.g 08:00)
    */
-  get departureTime () {
+  get departureTime() {
     var options = {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: this.departureLocale
     }
 
-    const departureTime = this.departureDate.toLocaleString('en-GB', options)
+    let departureTime = this.departureDate.toLocaleString('en-GB', options)
 
     return departureTime
   }
@@ -111,29 +113,15 @@ export default class Flight {
    * @readonly
    * @return {string} Formatted 24h time (e.g 08:00)
    */
-  get arrivalTime () {
+  get arrivalTime() {
     var options = {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: this.arrivalLocale
     }
 
-    const arrivalTime = this.arrivalDate.toLocaleString('en-GB', options)
+    let arrivalTime = this.arrivalDate.toLocaleString('en-GB', options)
 
     return arrivalTime
-  }
-
-  /**
-   * Get departure day, month and year
-   * @type {string}
-   * @readonly
-   * @return {string} Formatted departure day (e.g 16 JAN 2019)
-   */
-  get departureDayMonthYear () {
-    const departureDayMonthYear = date.formatDate(
-      this.departureDate,
-      'DD MMM YYYY'
-    )
-    return departureDayMonthYear
   }
 }

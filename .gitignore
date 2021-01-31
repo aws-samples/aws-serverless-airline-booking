@@ -626,3 +626,4 @@ awsconfiguration.json
 src/frontend/graphql
 src/backend
 datasources.json
+.quasar
