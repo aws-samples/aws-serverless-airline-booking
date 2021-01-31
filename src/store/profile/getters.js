@@ -4,29 +4,18 @@
  * @returns {boolean} - Whether current user is authenticated
  * @see {@link getSession} for more information on action that calls isAuthenticated
  */
-export const isAuthenticated = state => {
+export const isAuthenticated = (state) => {
   return !!state.user
-  // [Mock-Example]
-  // Disables route guard when auth isn't setup
-  // return true
 }
 
-export const idToken = state => {
-  const session = (state.user && state.user.signInUserSession) || 'no user session'
-  const idToken = (session && session.idToken && session.idToken.jwtToken) || 'not auth'
-
-  return idToken
+export const firstName = (state) => {
+  return state.user.attributes?.given_name ?? 'First'
 }
 
-export const accessToken = state => {
-  const session = (state.user && state.user.signInUserSession) || 'no user session'
-  const accessToken = (session && session.accessToken && session.accessToken.jwtToken) || 'not auth'
-
-  return accessToken
+export const lastName = (state) => {
+  return state.user.attributes?.family_name ?? 'Last Name'
 }
 
-export const email = state => {
-  const email = (state.user && state.user.attributes && state.user.attributes.email) || 'email'
-
-  return email
+export const userAttributes = (state) => {
+  return state.user.attributes ?? 'no attributes'
 }

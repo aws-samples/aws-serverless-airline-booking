@@ -1,0 +1,53 @@
+@import 'quasar.variables'
+
+@font-face
+    font-family: 'Raleway'
+    src: url('~assets/fonts/raleway-v18-latin.woff2') format('woff2')
+    src: url('~assets/fonts/raleway-v18-latin.woff') format('woff')
+
+.heading
+    margin-top: 2em
+    margin-bottom: 2em
+    color: $primary
+
+.wrapper
+    text-align: center
+    margin: 1rem 0
+
+.cta__button
+    text-transform: uppercase
+    list-style-type: none
+    font-size: 1.2rem
+    margin: 1rem 0
+    color: $primary
+    justify-content: center
+    font-weight: 500
+
+a
+    text-decoration: none
+
+.field-icon
+    font-size: 43px
+    margin-top: 25px
+
+.q-field__label
+    font-size: 1.15rem !important
+
+.q-field__native
+    font-size: $input-font-size
+    padding-bottom: 0 !important
+    padding-top: 0.3em !important
+
+amplify-sign-out,amplify-authenticator
+    font-family: 'Raleway', 'Open Sans', sans-serif
+    --amplify-font-family: $typography-font-family
+    --amplify-primary-color: #FA3336
+
+amplify-authenticator
+    --container-height: 50vh
+    margin: 0 auto
+    padding: 20vmin 5vmin
+
+.search__options
+    &--suggestion:hover
+        border-bottom: 1.5px solid $secondary

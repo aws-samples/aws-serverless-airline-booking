@@ -1,0 +1,56 @@
+{
+  "name": "serverless_airline",
+  "version": "0.0.1",
+  "description": "Serverless Airline Booking is a complete web application that provides Flight Search, Payment, Booking and Loyalty points including end-to-end testing, GraphQL and CI/CD",
+  "productName": "Serverless Airline",
+  "author": "Amazon Web Services",
+  "private": true,
+  "scripts": {
+    "serve": "quasar dev",
+    "build": "quasar build",
+    "lint": "eslint --ext .js,.vue ./",
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "@aws-amplify/ui-vue": "^0.2.27",
+    "@quasar/extras": "^1.9.15",
+    "aws-amplify": "^3.3.8",
+    "axios": "^0.21.1",
+    "core-js": "^3.7.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "fuse.js": "^6.4.3",
+    "prettier": "^2.1.2",
+    "quasar": "^1.15.1",
+    "vue-content-loader": "^0.2.3",
+    "vuelidate": "^0.7.6"
+  },
+  "devDependencies": {
+    "@quasar/app": "^2.1.14",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-loader": "^3.0.3",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "eslint-plugin-vue": "^6.1.2"
+  },
+  "browserslist": [
+    "last 10 Chrome versions",
+    "last 10 Firefox versions",
+    "last 4 Edge versions",
+    "last 7 Safari versions",
+    "last 8 Android versions",
+    "last 8 ChromeAndroid versions",
+    "last 8 FirefoxAndroid versions",
+    "last 10 iOS versions",
+    "last 5 Opera versions"
+  ],
+  "engines": {
+    "node": ">= 10.18.1",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}

@@ -13,22 +13,49 @@ import { Auth } from 'aws-amplify'
  * @see {@link isAuthenticated} for more info on getter
  * @see {@link SET_USER} for more info on mutation
  * @returns {promise} - Promise representing updated profile information in the store
+ * @example
+ * // exerpt from src/pages/Profile.vue
+ * onAuthUIStateChange((authState, authData) => {
+ *   if (authState === AuthState.SignedOut) {
+ *     this.$store
+ *       .dispatch('profile/getSession')
+ *       .catch(
+ *         this.$router.push({ name: 'auth', query: { redirectTo: 'home' } })
+ *       )
+ *   }
+ * })
+ *
+ * // exerpt from src/router/index.js as a Route Guard
+ * Router.beforeEach(async (to, from, next) => {
+ *   const isProtected = to.matched.some((record) => record.meta.requiresAuth)
+ *   if (isProtected) {
+ *     console.info(`Page ${to.fullPath} requires Auth!`)
+ *     if (!store.getters['profile/isAuthenticated']) {
+ *       try {
+ *         await store.dispatch('profile/getSession')
+ *         next()
+ *       } catch (err) {
+ *         next({ name: 'auth', query: { redirectTo: to.name } })
+ *       }
+ *     }
+ *   }
+ *   next()
+ * })
  */
-export function getSession ({ commit, getters }) {
-  return new Promise((resolve, reject) => {
-    Auth.currentAuthenticatedUser()
-      .then(user => {
-        if (!getters.isAuthenticated) {
-          commit('SET_USER', user)
-        }
-        resolve()
-      })
-      .catch(err => {
-        console.log(err)
-        if (getters.isAuthenticated) {
-          commit('SET_USER')
-        }
-        reject(err)
-      })
-  })
+export async function getSession({ commit, getters }) {
+  console.group('store/profile/actions/getSession')
+  console.log('Fetching current session')
+  try {
+    const user = await Auth.currentAuthenticatedUser()
+    if (!getters.isAuthenticated) {
+      commit('SET_USER', user)
+    }
+  } catch (err) {
+    console.log(err)
+    if (getters.isAuthenticated) {
+      commit('SET_USER')
+    }
+    throw new Error(err)
+  }
+  console.groupEnd()
 }

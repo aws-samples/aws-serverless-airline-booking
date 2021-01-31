@@ -1,9 +1,19 @@
 // @ts-nocheck
+
+import Flight from 'src/shared/models/FlightClass'
+import { SortPreference } from '../../shared/enums'
+import {
+  sortByLowestPrice,
+  sortByHighestPrice,
+  sortByEarliestDeparture,
+  sortByLatestDeparture
+} from '../../shared/sorters'
+
 /**
  *
  * Catalog [Vuex Module Mutation](https://vuex.vuejs.org/guide/mutations.html) - SET_FLIGHT mutates Catalog state with an array of Flights as payload.
  * @param {object} state - Vuex Catalog Module State
- * @param {Flight[]} flights - Array of Flights as payload
+ * @param {Flight[]} flights - Array of Flights
  * @see {@link fetchFlights} for more info on action that calls SET_FLIGHTS
  * @see {@link fetchByFlightNumber} for more info on action that calls SET_FLIGHTS
  */
@@ -21,4 +31,34 @@ export const SET_FLIGHTS = async (state, flights) => {
  */
 export const SET_LOADER = (state, isLoading) => {
   state.loading = isLoading
+}
+
+/**
+ * Catalog [Vuex Module Mutation](https://vuex.vuejs.org/guide/mutations.html) - SORT_FLIGHTS mutates Catalog flights state to sort flights with a given preference.
+ * @param {object} state - Vuex Catalog Module State
+ * @param {Flight[]} state.flights - Array of Flights
+ * @param {SortPreference} preference - Sorting preference
+ */
+export const SORT_FLIGHTS = (state, preference) => {
+  switch (preference) {
+    case SortPreference.LowestPrice:
+      state.flights = sortByLowestPrice(state.flights)
+      break
+
+    case SortPreference.HighestPrice:
+      state.flights = sortByHighestPrice(state.flights)
+      break
+
+    case SortPreference.EarliestDeparture:
+      state.flights = sortByEarliestDeparture(state.flights)
+      break
+
+    case SortPreference.LatestDeparture:
+      state.flights = sortByLatestDeparture(state.flights)
+      break
+
+    default:
+      console.warn(`Unknown sorting preference: ${preference}, skipping...`)
+      break
+  }
 }
