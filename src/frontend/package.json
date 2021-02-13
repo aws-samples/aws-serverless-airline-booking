@@ -1,7 +1,7 @@
 {
-  "name": "serverless_airline",
+  "name": "aws-serverless-airline-booking",
   "version": "0.0.1",
-  "description": "Serverless Airline Booking is a complete web application that provides Flight Search, Payment, Booking and Loyalty points including end-to-end testing, GraphQL and CI/CD",
+  "description": "Serverless Airline Booking is a sample web application that provides Flight Search, Payment, Booking and Loyalty points",
   "productName": "Serverless Airline",
   "author": "Amazon Web Services",
   "private": true,
