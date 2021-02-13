@@ -12,7 +12,7 @@
   "dependencies": {
     "aws-amplify": "^2.2.6",
     "aws-amplify-vue": "^1.1.4",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "fuse.js": "^3.6.1",
     "quasar-extras": "^2.0.9",
     "quasar-framework": "^0.17.20",
