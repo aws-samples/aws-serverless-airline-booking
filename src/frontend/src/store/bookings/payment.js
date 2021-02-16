@@ -3,7 +3,9 @@ import { Loading } from 'quasar'
 import axios from 'axios'
 
 const paymentEndpoint =
-  process.env.PaymentChargeUrl || 'no payment gateway endpoint set'
+  process.env.PaymentChargeUrl ||
+  process.env.VUE_APP_PaymentChargeUrl ||
+  'no payment gateway endpoint set'
 
 /**
  *

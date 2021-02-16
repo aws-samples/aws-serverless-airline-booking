@@ -261,7 +261,10 @@ export default {
         details: '',
         error: ''
       },
-      stripeKey: process.env.StripePublicKey || 'no Stripe public key',
+      stripeKey:
+        process.env.StripePublicKey ||
+        process.env.VUE_APP_StripePublicKey ||
+        'no Stripe public key',
       form: {
         name: '',
         country: '',
