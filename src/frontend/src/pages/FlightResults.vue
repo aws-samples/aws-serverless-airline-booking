@@ -43,6 +43,25 @@
         <flight-card :details="flight" />
       </router-link>
     </div>
+    <div class="wrapper">
+      <q-btn
+        v-if="paginationToken"
+        @click="loadFlights"
+        class="cta__button"
+        color="secondary"
+        size="1rem"
+        label="Load more flights?"
+        data-test="flight-pagination"
+      />
+    </div>
+    <q-page-scroller
+      expand
+      position="bottom-right"
+      :scroll-offset="150"
+      :offset="[18, 18]"
+    >
+      <q-btn fab-mini icon="keyboard_arrow_up" color="accent" />
+    </q-page-scroller>
   </q-page>
 </template>
 
@@ -73,31 +92,51 @@ export default {
     departure: { type: String, required: true },
     arrival: { type: String, required: true }
   },
-  async mounted() {
+  mounted() {
     /** authentication guards prevent authenticated users to view Flights
      * however, the component doesn't stop from rendering asynchronously
      * this guarantees we attempt talking to Catalog service
      * if our authentication guards && profile module have an user in place
      */
     if (this.isAuthenticated) {
-      await this.$store.dispatch('catalog/fetchFlights', {
-        date: this.date,
-        departure: this.departure,
-        arrival: this.arrival
-      })
+      this.loadFlights()
     }
   },
   /**
    * @param {Flight} flights - Flights state from Flights module
    * @param {boolean} loading - Loader state used to control Flight Loader when fetching flights
    * @param {boolean} isAuthenticated - Getter from Profile module
+   * @param {boolean} paginationToken - Flights pagination token
    */
   computed: {
     ...mapState({
       flights: (state) => state.catalog.flights,
-      loading: (state) => state.catalog.loading
+      loading: (state) => state.catalog.loading,
+      paginationToken: (state) => state.catalog.paginationToken
     }),
     ...mapGetters('profile', ['isAuthenticated'])
+  },
+  methods: {
+    /**
+     * loadFlights method fetches all flights via catalog API
+     */
+    async loadFlights() {
+      try {
+        if (this.isAuthenticated) {
+          await this.$store.dispatch('catalog/fetchFlights', {
+            date: this.date,
+            departure: this.departure,
+            arrival: this.arrival,
+            paginationToken: this.paginationToken
+          })
+        }
+      } catch (error) {
+        console.error(error)
+        this.$q.notify(
+          `Error while fetching Flight results - Check browser console messages`
+        )
+      }
+    }
   }
 }
 </script>

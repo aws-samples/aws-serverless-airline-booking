@@ -18,7 +18,13 @@ import {
  * @see {@link fetchByFlightNumber} for more info on action that calls SET_FLIGHTS
  */
 export const SET_FLIGHTS = async (state, flights) => {
-  state.flights = flights
+  if (state.flights.length === 0) {
+    state.flights = flights
+  } else {
+    // flatten array of flights and remove possible duplicates due to network issues
+    let newFlights = [...flights, state.flights].flat(5)
+    state.flights = [...new Set(newFlights)]
+  }
 }
 
 /**
@@ -31,6 +37,10 @@ export const SET_FLIGHTS = async (state, flights) => {
  */
 export const SET_LOADER = (state, isLoading) => {
   state.loading = isLoading
+}
+
+export const SET_FLIGHT_PAGINATION = (state, paginationToken) => {
+  state.paginationToken = paginationToken
 }
 
 /**

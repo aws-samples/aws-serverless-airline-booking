@@ -5,6 +5,7 @@ import Flight from 'src/shared/models/FlightClass'
  *
  * @param {Flight[]} flights - array of flights
  * @param {boolean} loading - toggle for flight loading
+ * @param {string} paginationToken - pagination token for flight retrieval
  * @see {@link SET_FLIGHTS} for more info on mutation
  * @see {@link SET_LOADER} for more info on mutation
  * @see {@link fetchFlights} for more info on a module action
@@ -12,5 +13,6 @@ import Flight from 'src/shared/models/FlightClass'
  */
 export default {
   flights: [],
-  loading: false
+  loading: false,
+  paginationToken: ''
 }

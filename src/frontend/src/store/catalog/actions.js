@@ -1,8 +1,8 @@
 import Flight from '../../shared/models/FlightClass'
 import { SortPreference } from '../../shared/enums'
-// [Mock-Example]
-import axios from 'axios'
-// import { listFlightQuery, getFlightQuery } from './graphql.js'
+
+import { API, graphqlOperation } from 'aws-amplify'
+import { getFlightBySchedule, getFlight } from './graphql'
 
 const catalogEndpoint =
   process.env.VUE_APP_CatalogEndpoint || 'no booking endpoint set'
@@ -19,95 +19,73 @@ const catalogEndpoint =
  * @param {Date} obj.date - Date in DD-MM-YYYY format
  * @param {string} obj.departure - Airport IATA to be filtered as departure
  * @param {string} obj.arrival - Airport IATA to be filtered as arrival
+ * @param {string} obj.paginationToken - pagination token for loading additional flights
  * @returns {promise} - Promise representing whether flights from Catalog have been updated in the store
  * @see {@link SET_FLIGHTS} for more info on mutation
  * @see {@link SET_LOADER} for more info on mutation
+ *  * @example
+ * // exerpt from src/pages/FlightResults.vue
+ * async mounted() {
+ * // @ts-ignore
+ * if (this.isAuthenticated) {
+ *    await this.$store.dispatch("catalog/fetchFlights", {
+ *       date: this.date,
+ *       departure: this.departure,
+ *       arrival: this.arrival
+ *    });
+ *
+ *    this.filteredFlights = this.sortByDeparture(this.flights);
+ * }
  */
 export async function fetchFlights(
-  { commit, rootGetters },
-  { date, departure, arrival }
+  { commit },
+  { date, departure, arrival, paginationToken = '' }
 ) {
+  console.group('store/booking/actions/fetchFlights')
   commit('SET_LOADER', true)
 
-  const credentials = {
-    idToken: rootGetters['profile/idToken'],
-    accessToken: rootGetters['profile/accessToken']
-  }
-
-  console.group('store/booking/actions/fetchFlights')
-  console.log('Credentials retrieved')
-  console.log(credentials)
+  var nextToken = paginationToken || null
 
   try {
-    // [GraphQL-Example]
-    // listFlights query filter
-    // const flightFilter = {
-    //   filter: {
-    //     departureDate: {
-    //       beginsWith: date
-    //     },
-    //     departureAirportCode: {
-    //       eq: departure
-    //     },
-    //     arrivalAirportCode: {
-    //       eq: arrival
-    //     },
-    //     seatAllocation: {
-    //       gt: 0
-    //     }
-    //   }
-    // };
+    const flightOpts = {
+      departureAirportCode: departure,
+      arrivalAirportCodeDepartureDate: {
+        beginsWith: {
+          arrivalAirportCode: arrival,
+          departureDate: date
+        }
+      },
+      filter: { seatCapacity: { gt: 0 } },
+      limit: 5,
+      nextToken: nextToken
+    }
 
-    // const result = await axios({
-    //   url: catalogEndpoint,
-    //   method: 'post',
-    //   data: {
-    //     query: listFlightsQuery,
-    //     variables: {
-    //       filter: flightFilter
-    //     }
-    //   },
-    //   headers: {
-    //     Authorization: credentials.accessToken,
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
+    console.log('Fetching flight data')
+    console.log(flightOpts)
 
-    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
-    // const {
-    //   data: {
-    //     data: { listFlights: flightData }
-    //   }
-    // } = result
+    const {
+      // @ts-ignore
+      data: {
+        getFlightBySchedule: { items: flightData, nextToken: paginationToken }
+      }
+    } = await API.graphql(graphqlOperation(getFlightBySchedule, flightOpts))
 
-    // [REST-Example]
-    // const { data: flightData } = await axios.get(catalogEndpoint, {
-    //   params: {
-    //     arrival: arrival,
-    //     departure: departure,
-    //     date: date
-    //   },
-    //  headers: {
-    //     Authorization: credentials.idToken // API Gateway only accepts ID Token
-    //   }
-    // })
-
-    // [Mock-Example]
-    const { data: flightData } = await axios.get('/mocks/flights.json')
+    // data mutations happen within a Flight class
+    // here we convert graphQL results into an array of Flights
+    // before committing to Vuex State Management
     const flights = flightData.map((flight) => new Flight(flight))
 
-    console.info('Committing Flights to the store...')
     console.log(flights)
-
     commit('SET_FLIGHTS', flights)
+    commit('SET_FLIGHT_PAGINATION', paginationToken)
     commit('SET_LOADER', false)
     commit('SORT_FLIGHTS', SortPreference.EarliestDeparture)
     console.groupEnd()
   } catch (error) {
-    console.error(error)
     commit('SET_LOADER', false)
+    console.error(error)
     console.groupEnd()
-    throw error
+    throw new Error(error)
   }
 }
 
@@ -123,62 +101,31 @@ export async function fetchFlights(
  * @param {string} obj.flightId - Flight Unique Identifier
  * @returns {promise} - Promise representing flight from Catalog service.
  * @see {@link SET_LOADER} for more info on mutation
+ * @example
+ * // excerpt from src/pages/FlightSelection.vue
+ * async beforeMount() {
+ *    if (this.isAuthenticated) {
+ *        if (!this.flight) {
+ *            this.selectedFlight = await this.$store.dispatch("catalog/fetchByFlightId", {
+ *              flightId: this.flightId
+ *            });
+ *        }
+ *    }
+ * },
  */
-export async function fetchByFlightId({ commit, rootGetters }, { flightId }) {
-  const credentials = {
-    idToken: rootGetters['profile/idToken'],
-    accessToken: rootGetters['profile/accessToken']
-  }
-
+export async function fetchByFlightId({ commit }, { flightId }) {
   console.group('store/booking/actions/fetchByFlightId')
-  console.log('Credentials retrieved')
-  console.log(credentials)
 
   try {
     commit('SET_LOADER', true)
-
-    // [GraphQL-Example]
-    // const result = await axios({
-    //   url: catalogEndpoint,
-    //   method: 'post',
-    //   data: {
-    //     query: getFlightQuery,
-    //     variables: {
-    //       id: flightId
-    //     }
-    //   },
-    //   headers: {
-    //     Authorization: credentials.accessToken,
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
-
-    // Deconstructing JSON response: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring
-    // const {
-    //   data: {
-    //     data: { listFlights: flightData }
-    //   }
-    // } = result
-
-    // [REST Example]
-    // var { data: flightData } = await axios.get(catalogEndpoint, {
-    //   params: {
-    //     id: flightId
-    //   },
-    //  headers: {
-    //     Authorization: credentials.idToken // API Gateway only accepts ID Token
-    //   }
-    // })
-
-    // [Mock-Example]
-    var { data: flightData } = await axios.get('/mocks/flights.json')
-
-    flightData = flightData.find((flight) => flight.id === flightId)
-
-    console.info('Flight received from Catalog...')
-    console.log(flightData)
+    const {
+      // @ts-ignore
+      data: { getFlight: flightData }
+    } = await API.graphql(graphqlOperation(getFlight, { id: flightId }))
 
     const flight = new Flight(flightData)
+
+    console.log(flight)
     commit('SET_LOADER', false)
     console.groupEnd()
     return flight
@@ -186,7 +133,7 @@ export async function fetchByFlightId({ commit, rootGetters }, { flightId }) {
     console.error(error)
     commit('SET_LOADER', false)
     console.groupEnd()
-    throw error
+    throw new Error(error)
   }
 }
 
