@@ -2,10 +2,8 @@ import Loyalty from '../../shared/models/LoyaltyClass'
 // @ts-ignore
 import { Loading } from 'quasar'
 
-// import { API, graphqlOperation } from 'aws-amplify'
-// import { getLoyalty } from './graphql'
-
-import axios from 'axios'
+import { API, graphqlOperation } from 'aws-amplify'
+import { getLoyalty } from './graphql'
 
 /**
  * Loyalty [Vuex Module Action](https://vuex.vuejs.org/guide/actions.html) - fetchLoyalty retrieves current authenticated user loyalty info from Loyalty service.
@@ -18,7 +16,7 @@ import axios from 'axios'
  * @returns {promise} - Promise representing updated whether loyalty information has been updated in the store
  * @see {@link SET_LOYALTY} for more info on mutation
  * @example
- * // exerpt from src/pages/Profile.vuw
+ * // excerpt from src/pages/Profile.vuw
  * async mounted() {
  *    if (this.isAuthenticated) {
  *        await this.$store.dispatch("loyalty/fetchLoyalty");
@@ -33,11 +31,10 @@ export async function fetchLoyalty({ commit }) {
   console.group('store/loyalty/actions/fetchLoyalty')
   try {
     console.log('Fetching loyalty data')
-    // const {
-    //   // @ts-ignore
-    //   data: { getLoyalty: loyaltyData }
-    // } = await API.graphql(graphqlOperation(getLoyalty))
-    const { data: loyaltyData } = await axios.get('/mocks/loyalty.json')
+    const {
+      // @ts-ignore
+      data: { getLoyalty: loyaltyData }
+    } = await API.graphql(graphqlOperation(getLoyalty))
     const loyalty = new Loyalty(loyaltyData)
 
     console.log(loyalty)
