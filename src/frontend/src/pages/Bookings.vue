@@ -8,8 +8,11 @@
         Bookings
       </div>
     </div>
-    <div class="bookings">
-      <q-timeline color="secondary" class="q-pl-md">
+    <div class="bookings q-mt-xl">
+      <h5 class="text-center" v-if="!bookings || !bookings.length">
+        No bookings available
+      </h5>
+      <q-timeline color="secondary" class="q-pl-md" v-else>
         <div class="booking" v-for="booking in bookings" :key="booking.id">
           <q-timeline-entry
             :subtitle="bookingDestination(booking)"
@@ -37,6 +40,14 @@
         />
       </div>
     </div>
+    <q-page-scroller
+      expand
+      position="bottom-right"
+      :scroll-offset="150"
+      :offset="[18, 18]"
+    >
+      <q-btn fab-mini icon="keyboard_arrow_up" color="accent" />
+    </q-page-scroller>
   </q-page>
 </template>
 

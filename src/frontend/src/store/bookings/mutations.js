@@ -19,9 +19,6 @@ export const SET_BOOKINGS = (state, bookings) => {
       dedup.add(booking.id)
       return !dup
     })
-
-    console.log('Bookings')
-    console.table(state.bookings)
   }
 }
 

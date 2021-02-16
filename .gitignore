@@ -305,6 +305,8 @@ dist/
 # local env files
 .env.local
 .env.*.local
+.dev.env
+.prod.env
 
 # Custom
 TEMPORARY/

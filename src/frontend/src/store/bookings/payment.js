@@ -3,7 +3,7 @@ import { Loading } from 'quasar'
 import axios from 'axios'
 
 const paymentEndpoint =
-  process.env.VUE_APP_PaymentChargeUrl || 'no payment gateway endpoint set'
+  process.env.PaymentChargeUrl || 'no payment gateway endpoint set'
 
 /**
  *
@@ -61,6 +61,6 @@ export async function processPayment({
     return chargeId
   } catch (err) {
     console.error(err)
-    throw err
+    throw new Error(err)
   }
 }

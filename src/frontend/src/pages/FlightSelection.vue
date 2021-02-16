@@ -28,7 +28,7 @@
         >
           Payment details
         </div>
-        <div class="form">
+        <div class="form items-baseline">
           <form>
             <input type="hidden" name="token" />
             <div class="group">
@@ -49,14 +49,36 @@
                 <div class="form__payment--country field">
                   <q-select
                     v-model="form.country"
-                    class="q-pt-sm form__select form__country"
-                    filter
-                    filter-placeholder="Country"
-                    placeholder="Country"
+                    class="form__input form__input--select form__country"
+                    @filter="filterFn"
                     :options="form.countryOptions"
+                    option-value="label"
                     borderless
+                    use-input
+                    fill-input
                     data-test="form-country"
-                  />
+                    clearable
+                    hide-selected
+                    behaviour="menu"
+                    item-aligned
+                    emit-value
+                  >
+                    <template v-slot:option="scope">
+                      <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
+                        <q-item-section avatar>
+                          <q-icon name="location_on" />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label
+                            class="text-subtitle1 search__options--suggestion"
+                            >{{ scope.opt.label }} ({{
+                              scope.opt.value
+                            }})</q-item-label
+                          >
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
                 </div>
               </label>
               <label for="postcode">
@@ -128,8 +150,23 @@ import { validationMixin } from 'vuelidate'
 import { required, minLength } from 'vuelidate/lib/validators'
 import { mapState, mapGetters } from 'vuex'
 import { Logger } from 'aws-amplify'
+import { Loading } from 'quasar'
 
 const logger = new Logger('FlightSelection')
+const countryList = [
+  {
+    label: 'Brazil',
+    value: 'BR'
+  },
+  {
+    label: 'United Kingdom',
+    value: 'UK'
+  },
+  {
+    label: 'United States',
+    value: 'US'
+  }
+]
 
 var stripe, card
 
@@ -224,25 +261,12 @@ export default {
         details: '',
         error: ''
       },
-      stripeKey: process.env.VUE_APP_StripePublicKey || 'no Stripe public key',
+      stripeKey: process.env.StripePublicKey || 'no Stripe public key',
       form: {
         name: '',
         country: '',
         postcode: '',
-        countryOptions: [
-          {
-            label: 'Brazil',
-            value: 'BR'
-          },
-          {
-            label: 'United Kingdom',
-            value: 'UK'
-          },
-          {
-            label: 'United States',
-            value: 'US'
-          }
-        ],
+        countryOptions: countryList,
         isCardInvalid: true
       },
       selectedFlight: this.flight
@@ -274,16 +298,16 @@ export default {
         })
 
         // eslint-disable-next-line
-        this.$q.loading.show({
+        Loading.show({
           message: `Your booking is being processed - We'll soon contact you via ${this.customer.email}.`
         })
         setTimeout(() => {
-          this.$q.loading.hide()
+          Loading.hide()
           this.$router.push({ name: 'bookings' })
         }, 3000)
       } catch (err) {
         logger.error('Error while creating a new booking: ', err)
-        this.$q.loading.hide()
+        Loading.hide()
         this.$q.notify(
           `Error while creating your Booking - Check browser console messages`
         )
@@ -292,6 +316,30 @@ export default {
     /**
      * Provides customer feedback upon Stripe Elements card data validation
      */
+    filterFn(val, update) {
+      if (val === '' || val.length < 2) {
+        update(() => {
+          this.form.countryOptions = countryList
+        })
+        return
+      }
+
+      update(
+        () => {
+          const needle = val.toLowerCase()
+          this.form.countryOptions = countryList.filter(
+            (v) => v.label.toLowerCase().indexOf(needle) !== -1
+          )
+        },
+        (ref) => {
+          // auto-select first option
+          if (val !== '' && ref.options.length > 0 && ref.optionIndex === -1) {
+            ref.moveOptionSelection(1, true)
+            ref.toggleOption(ref.options[ref.optionIndex], true)
+          }
+        }
+      )
+    },
     updateCardFeedback(result) {
       this.token.error = result.error
       this.form.isCardInvalid = !result.complete
@@ -392,7 +440,6 @@ label > span
   outline: none
   flex: 1
   padding-right: 10px
-  padding-left: 10px
   cursor: text
   font-size: 16px
   @media only screen and (min-device-width : 360px) and (max-device-width : 667px)
@@ -410,6 +457,14 @@ label > span
   color: #CFD7E0
   font-weight: 700
   font-size: 16px
+
+::placeholder,
+.q-placeholder::placeholder
+  color: #CFD7E0 !important
+  font-size: 16px
+  font-weight: 400 !important
+  opacity: 1 !important
+  position: relative
 
 .outcome
   float: left
@@ -432,4 +487,7 @@ label > span
 
 .cta__button
   width: 90%
+
+.form__input
+  padding: 3px
 </style>

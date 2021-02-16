@@ -349,7 +349,7 @@ export default {
 .flight__toolbar
   padding: 0 0.8rem
   @media only screen and (min-device-width: 700px)
-      padding: 0 17vw
+      padding: 0 14vw
       margin: 0 20px
 
 .q-field__native

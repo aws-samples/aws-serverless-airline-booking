@@ -2342,6 +2342,15 @@
   resolved "https://registry.yarnpkg.com/@quasar/fastclick/-/fastclick-1.1.4.tgz#21ed3e9a4387dcb43022a08af4ef08a5f1abf159"
   integrity sha512-i9wbyV4iT+v4KhtHJynUFhH5LiEPvAEgSnwMqPN4hf/8uRe82nDl5qP5agrp2el1h0HzyBpbvHaW7NB0BPrtvA==
 
+"@quasar/quasar-app-extension-dotenv@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@quasar/quasar-app-extension-dotenv/-/quasar-app-extension-dotenv-1.0.6.tgz#d01b53262cec5c85fa95bb988230157d7d8b89d2"
+  integrity sha512-F4aDGtuxtOq8dUof5zaXtibBu5RWJtxld5x8yfNn5Art9bKLrRDXkBcS+Am7vOLaisid1W+JBysWWuXT4H8anQ==
+  dependencies:
+    dotenv "^8.2.0"
+    dotenv-parse-variables "^1.0.1"
+    fs "^0.0.2"
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -4661,6 +4670,19 @@ dot-prop@5.3.0, dot-prop@^5.2.0:
   dependencies:
     is-obj "^2.0.0"
 
+dotenv-parse-variables@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/dotenv-parse-variables/-/dotenv-parse-variables-1.0.1.tgz#1554f1037c6aa8026accadf8b6292e2aa2c976cd"
+  integrity sha512-iXtYI+fSzUwhaItRAYK/3hfJIUotXCIAJ2TenOdU6SIQbuTH/G4BTUF4ifiwyy7jXQ0TQTYLVytT+L7t23xeGA==
+  dependencies:
+    debug "^4.1.1"
+    is-string-and-not-blank "^0.0.2"
+
+dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
+
 duplexer3@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
@@ -5596,6 +5618,11 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
+fs@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/fs/-/fs-0.0.2.tgz#e1f244ef3933c1b2a64bd4799136060d0f5914f8"
+  integrity sha1-4fJE7zkzwbKmS9R5kTYGDQ9ZFPg=
+
 fsevents@^1.2.7:
   version "1.2.13"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.13.tgz#f325cb0455592428bcf11b383370ef70e3bfcc38"
@@ -6477,6 +6504,18 @@ is-stream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
   integrity sha1-EtSj3U5o4Lec6428hBc66A2RykQ=
+
+is-string-and-not-blank@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/is-string-and-not-blank/-/is-string-and-not-blank-0.0.2.tgz#cd19eded2ca4a514f79ca528915f1fb28e5dd38a"
+  integrity sha512-FyPGAbNVyZpTeDCTXnzuwbu9/WpNXbCfbHXLpCRpN4GANhS00eEIP5Ef+k5HYSNIzIhdN9zRDoBj6unscECvtQ==
+  dependencies:
+    is-string-blank "^1.0.1"
+
+is-string-blank@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-string-blank/-/is-string-blank-1.0.1.tgz#866dca066d41d2894ebdfd2d8fe93e586e583a03"
+  integrity sha512-9H+ZBCVs3L9OYqv8nuUAzpcT9OTgMD1yAWrG7ihlnibdkbtB850heAmYWxHuXc4CHy4lKeK69tN+ny1K7gBIrw==
 
 is-string@^1.0.5:
   version "1.0.5"
