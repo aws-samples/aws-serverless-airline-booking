@@ -46,11 +46,11 @@ deploy: ##=> Deploy payment service using SAM
 		--output-template-file packaged.yaml && \
 	aws cloudformation deploy \
 		--template-file packaged.yaml \
-		--stack-name $${STACK_NAME}-payment-$${AWS_BRANCH} \
+		--stack-name $${STACK_NAME}-payment \
 		--capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
 		--parameter-overrides \
 			Stage=$${AWS_BRANCH} \
 			SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
 
 delete.payment: ##=> Delete payment service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment

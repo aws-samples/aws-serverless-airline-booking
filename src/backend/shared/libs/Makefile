@@ -6,9 +6,9 @@ deploy: ##=> Deploy shared Lambda Layers using SAM
 		--output-template-file packaged.yaml && \
 	sam deploy \
 		--template-file packaged.yaml \
-		--stack-name $${STACK_NAME}-shared-layers-$${AWS_BRANCH} \
+		--stack-name $${STACK_NAME}-shared-layers \
 		--parameter-overrides Stage=$${AWS_BRANCH} \
 		--capabilities CAPABILITY_IAM
 
 delete: ##=> Delete shared Lambda layers stack
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-shared-layers-$${AWS_BRANCH}
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-shared-layers

@@ -60,7 +60,7 @@ deploy: ##=> Deploy booking service using SAM
 		--output-template-file packaged.yaml && \
 	aws cloudformation deploy \
 		--template-file packaged.yaml \
-		--stack-name $${STACK_NAME}-booking-$${AWS_BRANCH} \
+		--stack-name $${STACK_NAME}-booking \
 		--capabilities CAPABILITY_IAM \
 		--parameter-overrides \
 			BookingTable=/$${AWS_BRANCH}/service/amplify/storage/table/booking \
@@ -72,4 +72,4 @@ deploy: ##=> Deploy booking service using SAM
 			SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
 
 delete: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking
