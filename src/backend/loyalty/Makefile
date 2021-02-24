@@ -7,7 +7,7 @@ deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 		--output-template-file packaged.yaml && \
 	sam deploy \
 		--template-file packaged.yaml \
-		--stack-name $${STACK_NAME}-loyalty \
+		--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
 		--capabilities CAPABILITY_IAM \
 		--parameter-overrides \
 			BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
@@ -15,4 +15,4 @@ deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 			AppsyncApiId=$${GRAPHQL_API_ID}
 
 delete: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty
+	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
