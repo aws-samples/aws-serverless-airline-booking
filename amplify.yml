@@ -12,6 +12,7 @@ backend:
       commands:
         - "# Execute Amplify CLI with the helper script"
         - amplifyPush --simple
+        - cp aws-exports.js src/frontend
         ##
         # Extract Environment data
         ##
