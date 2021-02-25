@@ -64,7 +64,9 @@ frontend:
         ## 
         - export VUE_APP_StripePublicKey=${STRIPE_PUBLIC_KEY:-UNDEFINED}
         - export VUE_APP_PaymentChargeUrl=$(aws ssm get-parameter --name /${AWS_BRANCH}/service/payment/api/charge/url --query 'Parameter.Value' --output text)
+        - echo "Payment Charge URL: ${VUE_APP_PaymentChargeUrl}"
         - npm run build
+        - ls -l dist/
   artifacts:
     baseDirectory: src/frontend/dist
     files:
