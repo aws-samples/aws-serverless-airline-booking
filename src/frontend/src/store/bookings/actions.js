@@ -4,7 +4,7 @@ import Flight from '../../shared/models/FlightClass' // eslint-disable-line
 import { Loading } from 'quasar'
 import { processPayment } from './payment'
 
-import { API, graphqlOperation } from 'aws-amplify'
+import { API, graphqlOperation } from '@aws-amplify/api'
 import {
   processBooking as processBookingMutation,
   getBookingByStatus

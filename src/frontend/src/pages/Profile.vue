@@ -52,7 +52,7 @@
 // @ts-nocheck
 import { mapState, mapGetters } from 'vuex'
 import { onAuthUIStateChange, AuthState } from '@aws-amplify/ui-components'
-import { Logger } from 'aws-amplify'
+import { Logger } from '@aws-amplify/core'
 
 const logger = new Logger('Profile')
 

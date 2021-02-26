@@ -149,7 +149,7 @@ import FlightLoader from '../components/FlightLoader'
 import { validationMixin } from 'vuelidate'
 import { required, minLength } from 'vuelidate/lib/validators'
 import { mapState, mapGetters } from 'vuex'
-import { Logger } from 'aws-amplify'
+import { Logger } from '@aws-amplify/core'
 import { Loading } from 'quasar'
 
 const logger = new Logger('FlightSelection')

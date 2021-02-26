@@ -2,7 +2,7 @@ import Loyalty from '../../shared/models/LoyaltyClass'
 // @ts-ignore
 import { Loading } from 'quasar'
 
-import { API, graphqlOperation } from 'aws-amplify'
+import { API, graphqlOperation } from '@aws-amplify/api'
 import { getLoyalty } from './graphql'
 
 /**

@@ -229,7 +229,7 @@ import { date } from 'quasar'
 import FlightToolbarFilters from './FlightToolbarFilters.vue'
 import { SortPreference } from '../shared/enums'
 import { airportSearchMixin } from '../shared/mixins/'
-import { Logger } from 'aws-amplify'
+import { Logger } from '@aws-amplify/core'
 
 const logger = new Logger('Toolbar')
 

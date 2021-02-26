@@ -55,7 +55,7 @@
 // @ts-nocheck
 import BookingFlight from '../components/BookingFlight'
 import { mapState, mapGetters } from 'vuex'
-import { Logger } from 'aws-amplify'
+import { Logger } from '@aws-amplify/core'
 
 const logger = new Logger('Bookings')
 

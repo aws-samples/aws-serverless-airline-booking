@@ -1,7 +1,7 @@
 import Flight from '../../shared/models/FlightClass'
 import { SortPreference } from '../../shared/enums'
 
-import { API, graphqlOperation } from 'aws-amplify'
+import { API, graphqlOperation } from '@aws-amplify/api'
 import { getFlightBySchedule, getFlight } from './graphql'
 
 const catalogEndpoint =

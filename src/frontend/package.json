@@ -13,9 +13,11 @@
     "docs": "esdoc"
   },
   "dependencies": {
+    "@aws-amplify/api": "^3.2.24",
+    "@aws-amplify/auth": "^3.4.24",
+    "@aws-amplify/core": "^3.8.16",
     "@aws-amplify/ui-vue": "^0.2.27",
     "@quasar/extras": "^1.9.15",
-    "aws-amplify": "^3.3.8",
     "axios": "^0.21.1",
     "core-js": "^3.7.0",
     "eslint-config-prettier": "^6.15.0",

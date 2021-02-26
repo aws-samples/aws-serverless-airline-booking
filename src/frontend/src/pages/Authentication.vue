@@ -22,8 +22,7 @@
 <script>
 // @ts-ignore
 import { onAuthUIStateChange, AuthState } from '@aws-amplify/ui-components'
-import { Hub } from 'aws-amplify'
-import { Logger } from 'aws-amplify'
+import { Hub, Logger } from '@aws-amplify/core'
 
 const logger = new Logger('Authentication')
 const noAuthMessage = 'user is undefined'

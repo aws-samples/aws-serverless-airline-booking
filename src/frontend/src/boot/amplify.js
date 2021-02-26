@@ -1,8 +1,9 @@
-import Amplify from 'aws-amplify'
+import Amplify from '@aws-amplify/core'
+import { Auth } from '@aws-amplify/auth'
 import awsconfig from '../../aws-exports'
 import '@aws-amplify/ui-vue'
 
-const logLevel = process.env.LOG_LEVEL || 'INFO'
 Amplify.configure(awsconfig)
+Auth.configure(awsconfig)
 
-Amplify.Logger.LOG_LEVEL = logLevel
+Amplify.Logger.LOG_LEVEL = process.env.LOG_LEVEL || 'INFO'
