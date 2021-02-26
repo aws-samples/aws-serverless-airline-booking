@@ -9,9 +9,9 @@ backend:
         - export AWS_BRANCH=$(echo ${AWS_BRANCH} | tr "/" "-" | cut -c1-20) # prevent common and long git branch names (feat/something) to create an invalid stack/resource name
     build:
       commands:
+        - cat src/frontend/aws-exports.js
         - "# Execute Amplify CLI with the helper script"
         - amplifyPush --simple
-        - cp aws-exports.js src/frontend
         ##
         # Extract Environment data
         ##
@@ -56,6 +56,7 @@ frontend:
       commands:
         - cd src/frontend
         - npm install
+        - cat src/frontend/aws-exports.js
     build:
       commands:
         ## 
