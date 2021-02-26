@@ -3,12 +3,13 @@ backend:
   phases:
     preBuild:
       commands:
-        - cat <<-EOF > .prod.env
-        PATH=${PATH}
-        BRANCH=${AWS_BRANCH}
-        COMMIT=${AWS_COMMIT_ID}
-        OVERRIDES=${_LIVE_UPDATES:-UNDEFINED}
-        EOF
+        - >
+          cat <<-EOF > .prod.env
+            PATH=${PATH}
+            BRANCH=${AWS_BRANCH}
+            COMMIT=${AWS_COMMIT_ID}
+            OVERRIDES=${_LIVE_UPDATES:-UNDEFINED}
+          EOF
         - cat .prod.env
         - exit 1
         - npm install -g @aws-amplify/cli@4.13.1 yarn # pinned known working version
