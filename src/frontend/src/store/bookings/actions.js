@@ -135,7 +135,7 @@ export async function createBooking(
     })
 
     console.info(
-      `Creating booking with token ${chargeToken} for flight ${outboundFlight}`
+      `Creating booking with token ${chargeToken} for flight ${outboundFlight.id}`
     )
 
     Loading.show({ message: 'Creating a new booking...' })
