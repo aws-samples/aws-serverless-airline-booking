@@ -30,6 +30,8 @@
     "@quasar/app": "^2.1.14",
     "@quasar/quasar-app-extension-dotenv": "^1.0.6",
     "babel-eslint": "^10.0.1",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-loader": "^3.0.3",
