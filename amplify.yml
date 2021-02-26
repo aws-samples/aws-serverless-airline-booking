@@ -55,8 +55,8 @@ frontend:
     preBuild:
       commands:
         - cd src/frontend
+        - cat aws-exports.js
         - npm install
-        - cat src/frontend/aws-exports.js
     build:
       commands:
         ## 
