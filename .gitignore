@@ -620,7 +620,6 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/node,linux,macos,python,windows,visualstudiocode
 amplify/mock-data
 
-src/frontend/.quasar/*
 
 #amplify
 amplify/\#current-cloud-backend
@@ -640,3 +639,9 @@ amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
+
+
+# Quasar/dev
+
+.quasar/
+TODO.md
