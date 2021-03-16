@@ -35,10 +35,9 @@ Follow these instructions to deploy the Serverless Airline application:
 7) Under **Edit backend**, copy the `amplify pull` command displayed
 8) Within your forked repository locally, run the command you copied and follow the instructions
     - This command synchronizes what's deployed to your local Amplify environment
+    - It also generates `src/frontend/aws-exports.js` file containing your recently deployed infrastructure for Auth and API
 
 Within Amplify Console, you should see an auto-generated URL under **Frontend environment** - You can now sign-up for a new user, and add your first flight
-
-> **NOTE**: We're currently working on an ETL feature to automatically add flights as part of CI.
 
 ### Adding your first flight
 
@@ -49,16 +48,16 @@ Provided you have followed deployment instructions and signed up your first user
 3. Go to `Queries` on the left menu, and select `Login with User Pools`
 4. Within `ClientId` use the value you took note in `Step 1`, and use the credentials of your newly created Cognito user
 5. Within your fork, copy any of the `createFlight` mutations provided in **`sample-queries-mutations.gql`**
-6. Open up the front-end, and search for a flight from **`LGW`** to **`MAD`** for **December 2nd, 2019**
+6. Open up the front-end, and search for a flight from **`LGW`** to **`MAD`** for **March 8th, 2021**
 
 ## Cleaning up
 
-To delete the Serverless Airline from your AWS Account, you need: 
+To delete the Serverless Airline from your AWS Account, you need:
 
 * **Git branch name** - Branch you connected in Amplify Console (e.g. twitch)
 * **Root Stack name** - Root CloudFormation Stack name, available in System Manager Parameter Store (e.g. /twitch/stackName)
 
-By running the commands below within the project source code, you will
+By running the commands below within the project source code, you will:
 
 1. Fetch the root stack name into STACK_NAME environment variable
 2. Export the `git branch name` used in Amplify Console - **you need to replace with the correct value**

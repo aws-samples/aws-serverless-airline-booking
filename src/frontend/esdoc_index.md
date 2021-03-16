@@ -34,8 +34,8 @@ If you followed the deployment instructions, you should have  `src/frontend/aws-
 
 Once you're all set, install front-end dependencies and run a local copy:
 
-1. `npm install`
-2. `npm run serve`
+1. `yarn`
+2. `yarn serve`
 
 ### I don't have aws-exports, or deleted accidentally
 
