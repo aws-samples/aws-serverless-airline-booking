@@ -1,3 +1,6 @@
+
 module.exports = {
-  presets: ["@vue/cli-plugin-babel/preset"]
-};
+  presets: [
+    '@quasar/babel-preset-app'
+  ]
+}

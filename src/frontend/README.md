@@ -24,15 +24,15 @@ We use `component` and `view` terminologies to separate what's a reusable Vue co
 * **[BookingCard](./components/BookingCard.vue)** - Component to render modal that provides more details about a booking
 * **[BookingFlight](./components/BookingFlight.vue)** - Component to filter and sort flight results
 
-## Views
+## Pages
 
-`Views` map to pages customers interact with, and integrate with their respective modules to fetch and manipulate data from back-ends - [See more details for each view component](./views/README.md)
+`Pages` map to pages customers interact with, and integrate with their respective modules to fetch and manipulate data from back-ends - [See more details for each view component](./pages/README.md)
 
 ### Router
 
 We use [Navigation Guards](https://router.vuejs.org/guide/advanced/navigation-guards.html) to enforce authentication for routes that contain `requiresAuth` metadata.
 
-Route | View | Query strings
+Route | Page | Query strings
 -------------------------------------- | ------------------------------------------ | ------------------------------------------
 /auth | Authentication | None
 /, /search | Search | None
@@ -57,10 +57,20 @@ You can run the front-end locally while targeting the back-end and auth deployed
 
 If you followed [the deployment instructions](../../docs/getting_started.md), you should have  `src/frontend/aws-exports.js` file.
 
-Once you're all set, install front-end dependencies and run a local copy:
+Once you're all set, install front-end dependencies, create/update `.dev.env`, and run a local copy:
 
 1. `npm install`
-2. `npm run serve`
+2. Create or update `src/frontend/.dev.env` file with Payment Charge URL and Stripe public key, for example:
+   1. PaymentChargeUrl="https://ct21smx12c.execute-api.eu-west-1.amazonaws.com/prod/charge"
+   2. StripePublicKey="pk_test_BpxANYCOZO7waMV3TrPQHjXa"
+   3. LOG_LEVEL="DEBUG"
+3. `npm run serve`
+
+> **NOTE**: If you haven't browsed around the deployment stacks yet for Payment and Stripe values up there, you can get them from System Manager Parameter Store, where `AWS_BRANCH` is the branch you connected with Amplify:
+> 
+> `aws ssm get-parameter --name /${AWS_BRANCH}/service/payment/stripe/publicKey --query 'Parameter.Value' --output text`
+> `aws ssm get-parameter --name /${AWS_BRANCH}/service/payment/api/charge/url --query 'Parameter.Value' --output text`
+
 
 ### I don't have aws-exports, or deleted accidentally
 
@@ -70,9 +80,9 @@ Once you're all set, install front-end dependencies and run a local copy:
 
 > NOTE: **Aws-exports** is a configuration file for AWS Amplify library containing Cognito User Pools, AppSync  API, and what authentication mechanism it should use along with its region.
 
-## Generating code documentation
+<!-- ## Generating code documentation
 
 For more detailed information on methods, constructor, and examples you can generate documentation locally:
 
 1. Run `npm run docs`
-2. Open `html/index.html`
+2. Open `html/index.html` -->
