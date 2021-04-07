@@ -3,12 +3,12 @@
 
 mutation flight1 {
     createFlight(input:{
-        departureDate: "2021-03-08T08:00+0000",
+        departureDate: "2021-04-10T08:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2021-03-08T10:15+0000",
+        arrivalDate: "2021-04-10T10:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -24,12 +24,12 @@ mutation flight1 {
 
 mutation flight2 {
     createFlight(input:{
-        departureDate: "2021-03-08T10:30+0000",
+        departureDate: "2021-04-10T10:30+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2021-03-08T12:45+0000",
+        arrivalDate: "2021-04-10T12:45+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -45,12 +45,12 @@ mutation flight2 {
 
 mutation flight3 {
     createFlight(input:{
-        departureDate: "2021-03-08T12:00+0000",
+        departureDate: "2021-04-10T12:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2021-03-08T14:15+0000",
+        arrivalDate: "2021-04-10T14:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -66,12 +66,12 @@ mutation flight3 {
 
 mutation flight4 {
     createFlight(input:{
-        departureDate: "2021-03-08T17:00+0000",
+        departureDate: "2021-04-10T17:00+0000",
         departureAirportCode: "LGW",
         departureAirportName: "London Gatwick",
         departureCity: "London",
         departureLocale: "Europe/London",
-        arrivalDate: "2021-03-08T19:15+0000",
+        arrivalDate: "2021-04-10T19:15+0000",
         arrivalAirportCode: "MAD",
         arrivalAirportName: "Madrid Barajas",
         arrivalCity: "Madrid",
@@ -90,7 +90,7 @@ mutation flight4 {
 query {
   listFlights(limit:2, filter: {
     departureDate: {
-      beginsWith: "2021-03-08T10"
+      beginsWith: "2021-04-10T10"
     }
   }){
     items {

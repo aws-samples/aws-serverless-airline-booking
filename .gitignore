@@ -627,6 +627,8 @@ amplify/mock-data
 .quasar/
 TODO.md
 
+src/frontend/aws-exports.js
+
 #amplify
 amplify/\#current-cloud-backend
 amplify/.config/local-*
@@ -645,5 +647,3 @@ amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
-
-src/frontend/aws-exports.js
