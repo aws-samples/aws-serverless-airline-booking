@@ -37,6 +37,16 @@ Follow these instructions to deploy the Serverless Airline application:
 9) Within your forked repository locally, run the command you copied and follow the instructions
     - This command synchronizes what's deployed to your local Amplify environment
     - It also generates `src/frontend/aws-exports.js` file containing your recently deployed infrastructure for Auth and API
+10) When answering the prompt, there will be questions on `Source Directory Path`, use se the following custom answers:
+
+```bash
+...
+? Source Directory Path:  src/frontend
+? Distribution Directory Path: src/frontend/dist
+? Build Command:  npm run-script build --prefix src/frontend
+? Start Command: npm run-script serve --prefix src/frontend
+? Do you plan on modifying this backend? Yes
+```
 
 Within Amplify Console, you should see an auto-generated URL under **Frontend environment** - You can now sign-up for a new user, and add your first flight.
 
