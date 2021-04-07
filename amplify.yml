@@ -9,11 +9,8 @@ backend:
         - export AWS_BRANCH=$(echo ${AWS_BRANCH} | tr "/" "-" | cut -c1-20) # prevent common and long git branch names (feat/something) to create an invalid stack/resource name
     build:
       commands:
-        - ls -l
         - "# Execute Amplify CLI with the helper script"
         - amplifyPush --simple
-        - ls -l
-        - ls -l src/frontend
         ##
         # Extract Environment data
         ##
@@ -26,6 +23,7 @@ backend:
         - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${COGNITO_USER_POOL_ID} --query 'UserPool.Arn' --output text)
         - export COGNITO_USER_POOL_CLIENT_ID=$(jq -r '.auth[(.auth | keys)[0]].output.AppClientIDWeb' ./amplify/#current-cloud-backend/amplify-meta.json)
         - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
+        - cat datasources.json
         - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
         - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
@@ -57,6 +55,8 @@ frontend:
     preBuild:
       commands:
         - cd src/frontend
+        - ls -l
+        - test -f aws-exports.js && cat aws-exports.js
         - yarn
         ## 
         # Expose Stripe public key and Payment Charge URL as a VueJS runtime env
