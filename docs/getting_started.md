@@ -50,6 +50,7 @@ Provided you have followed deployment instructions and signed up your first user
 2. Go to the [AWS AppSync Console](https://console.aws.amazon.com/appsync/home), and select the `Serverless Airline API`
 3. Go to `Queries` on the left menu, and select `Login with User Pools`
 4. Within the dropdown, choose the `ClientId` you took note in `Step 1`, and use the credentials of your newly created Cognito user
+   1. Tip: It will be one roughly named `app_clientWeb`
 5. Within your fork, copy any of the `createFlight` mutations provided in **`sample-queries-mutations.gql`**
 6. Open up the front-end, and search for a flight from **`LGW`** to **`MAD`** for **April 10th, 2021**
 
