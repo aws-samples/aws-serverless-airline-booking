@@ -148,10 +148,16 @@ Resources:
   #       - >-
   #         arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
   #
-  # ApiGatewayCloudWatchLogsConfig:
-  #   Type: 'AWS::ApiGateway::Account'
-  #   Properties:
-  #     CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchRole.Arn
+#   ApiGatewayCloudWatchLogsConfig:
+#     Type: 'AWS::ApiGateway::Account'
+#     Properties:
+#       CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchRole.Arn
+#
+#   LoyaltyApiLogGroup:
+#     Type: AWS::Logs::LogGroup
+#     Properties:
+#       LogGroupName: !Sub /aws/apigateway/ServerlessAirline-Loyalty-${LoyaltyApi}-${Stage}
+#       RetentionInDays: !Ref LogRetentionInDays
 
   LoyaltyApi:
     Type: AWS::Serverless::Api
@@ -166,13 +172,13 @@ Resources:
       # AccessLogSetting:
       #   DestinationArn: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LoyaltyApiLogGroup}"
       #   Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "caller":"$context.identity.caller", "user":"$context.identity.user","requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath", "status":"$context.status","protocol":"$context.protocol", "responseLength":"$context.responseLength", "error": "$context.error.message", "user_arn": "$context.identity.userArn"}'
-      MethodSettings:
-        - MetricsEnabled: True
-          ResourcePath: "/*"
-          HttpMethod: "*"
-          ThrottlingRateLimit: 100
-          ThrottlingBurstLimit: 50
-          LoggingLevel: INFO
+#       MethodSettings:
+#         - MetricsEnabled: True
+#           ResourcePath: "/*"
+#           HttpMethod: "*"
+#           ThrottlingRateLimit: 100
+#           ThrottlingBurstLimit: 50
+#           LoggingLevel: INFO
       Auth:
         DefaultAuthorizer: AWS_IAM
       DefinitionBody:
@@ -198,12 +204,6 @@ Resources:
                 type: aws_proxy
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFunc.Arn}/invocations
-
-  LoyaltyApiLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub /aws/apigateway/ServerlessAirline-Loyalty-${LoyaltyApi}-${Stage}
-      RetentionInDays: !Ref LogRetentionInDays
 
   # Resources for API Gateway integration with AppSync
 
