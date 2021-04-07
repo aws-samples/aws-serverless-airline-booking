@@ -9,8 +9,11 @@ backend:
         - export AWS_BRANCH=$(echo ${AWS_BRANCH} | tr "/" "-" | cut -c1-20) # prevent common and long git branch names (feat/something) to create an invalid stack/resource name
     build:
       commands:
+        - ls -l
         - "# Execute Amplify CLI with the helper script"
         - amplifyPush --simple
+        - ls -l
+        - ls -l src/frontend
         ##
         # Extract Environment data
         ##
