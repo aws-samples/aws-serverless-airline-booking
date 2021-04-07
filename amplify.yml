@@ -53,7 +53,6 @@ frontend:
     preBuild:
       commands:
         - cd src/frontend
-        - ls -l
         - test -f aws-exports.js && cat aws-exports.js
         - yarn
         ## 
