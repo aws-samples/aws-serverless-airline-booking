@@ -22,10 +22,8 @@ backend:
         - export COGNITO_USER_POOL_ID=$(jq -r '.auth[(.auth | keys)[0]].output.UserPoolId' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${COGNITO_USER_POOL_ID} --query 'UserPool.Arn' --output text)
         - export COGNITO_USER_POOL_CLIENT_ID=$(jq -r '.auth[(.auth | keys)[0]].output.AppClientIDWeb' ./amplify/#current-cloud-backend/amplify-meta.json)
-        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
-        - cat datasources.json
-        - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
-        - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
+        - export FLIGHT_TABLE_NAME=$(aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --query "dataSources[?name=='FlightTable'].dynamodbConfig.tableName" --output text)
+        - export BOOKING_TABLE_NAME=$(aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --query "dataSources[?name=='BookingTable'].dynamodbConfig.tableName" --output text)
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
         - export STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY:-UNDEFINED}
         ##
