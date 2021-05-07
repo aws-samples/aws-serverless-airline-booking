@@ -59,7 +59,7 @@ Resources:
       FunctionName: !Sub Airline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs14.x
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
@@ -87,7 +87,7 @@ Resources:
       FunctionName: !Sub Airline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs14.x
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref LoyaltyDataTable
