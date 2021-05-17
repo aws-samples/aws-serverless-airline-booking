@@ -63,9 +63,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ServerlessAirline-IngestLoyalty-${Stage}
-      CodeUri: build/ingest
-      Handler: index.handler
-      Runtime: nodejs10.x
+      CodeUri: src/ingest
+      Handler: app.lambda_handler
+      Runtime: python3.8
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
@@ -91,9 +91,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ServerlessAirline-GetLoyalty-${Stage}
-      CodeUri: build/get
-      Handler: index.handler
-      Runtime: nodejs10.x
+      CodeUri: src/get
+      Handler: app.lambda_handler
+      Runtime: python3.8
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref LoyaltyDataTable

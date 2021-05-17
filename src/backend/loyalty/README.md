@@ -5,7 +5,7 @@ Loyalty service provides a REST API for fetching loyalty points and calculates t
 
 ![Loyalty Infrastructure Architecture](../../../media/loyalty-infra-architecture.png)
 
-Loyalty is comprised of a REST API implemented using API Gateway, SNS Topic, Typescript Lambda functions and DynamoDB as a database.
+Loyalty is comprised of a REST API implemented using API Gateway, SNS Topic, Python Lambda functions and DynamoDB as a database.
 
 ### Loyalty API
 
@@ -55,4 +55,4 @@ Upon a successful booking confirmation, Booking sends booking data to Loyalty SN
 Decision | Description | Timeframe
 ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------
 Typescript as an additional language | There weren't many Typescript examples out there for SAM including VSCode step-through debugging. | During Twitch season (Apr-Aug '19)
-
+Replace Typescript with Python | Maintaining NPM security patches for transitive dependencies took a toll for those that couldn't be automatically addressed by dependabot. Combined with the lack of Lambda Powertools, Python in this context for the sake of completion and maintenance is more sensible moving forward. | May 17th 2021

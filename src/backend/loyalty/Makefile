@@ -1,7 +1,6 @@
 deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)
-	npm install && \
-	npm run build && \
+	sam build --cached --parallel && \
 	sam package \
 		--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
 		--output-template-file packaged.yaml && \
