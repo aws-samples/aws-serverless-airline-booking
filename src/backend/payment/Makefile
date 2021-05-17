@@ -52,5 +52,5 @@ deploy: ##=> Deploy payment service using SAM
 			Stage=$${AWS_BRANCH} \
 			SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn
 
-delete.payment: ##=> Delete payment service
+delete: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}

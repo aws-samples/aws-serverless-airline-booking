@@ -22,29 +22,29 @@ backend:
         - export COGNITO_USER_POOL_ID=$(jq -r '.auth[(.auth | keys)[0]].output.UserPoolId' ./amplify/#current-cloud-backend/amplify-meta.json)
         - export COGNITO_USER_POOL_ARN=$(aws cognito-idp describe-user-pool --user-pool-id ${COGNITO_USER_POOL_ID} --query 'UserPool.Arn' --output text)
         - export COGNITO_USER_POOL_CLIENT_ID=$(jq -r '.auth[(.auth | keys)[0]].output.AppClientIDWeb' ./amplify/#current-cloud-backend/amplify-meta.json)
-        - aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} > datasources.json
-        - export FLIGHT_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "FlightTable") | .dynamodbConfig.tableName' datasources.json)
-        - export BOOKING_TABLE_NAME=$(jq -r '.dataSources[] | select(.name == "BookingTable") | .dynamodbConfig.tableName' datasources.json)
+        - export FLIGHT_TABLE_NAME=$(aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --query "dataSources[?name=='FlightTable'].dynamodbConfig.tableName" --output text)
+        - export BOOKING_TABLE_NAME=$(aws appsync list-data-sources --api-id ${GRAPHQL_API_ID} --query "dataSources[?name=='BookingTable'].dynamodbConfig.tableName" --output text)
         - export STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-UNDEFINED}
         - export STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY:-UNDEFINED}
         ##
         # Export key deployed resources to System Manager Parameter Store
         ##
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/stackName" VALUE=${STACK_NAME}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/deploymentBucket" VALUE=${DEPLOYMENT_BUCKET_NAME}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/id" VALUE=${COGNITO_USER_POOL_ID}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/arn" VALUE=${COGNITO_USER_POOL_ARN}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/clientId" VALUE=${COGNITO_USER_POOL_CLIENT_ID}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/id" VALUE=${GRAPHQL_API_ID}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/url" VALUE=${APPSYNC_URL}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY}
-        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/publicKey" VALUE=${STRIPE_PUBLIC_KEY}
-        - make export.parameter NAME=" /${AWS_BRANCH}/service/auth/userpool/url" VALUE=https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/ 
-        - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/usercount" VALUE=5
-        - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/csv/token" VALUE=user-with-token.csv
-        - make export.parameter NAME=" /${AWS_BRANCH}/service/loadtest/csv/user" VALUE=user.csv
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/stackName" VALUE=${STACK_NAME} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/deployment/deploymentBucket" VALUE=${DEPLOYMENT_BUCKET_NAME} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/id" VALUE=${COGNITO_USER_POOL_ID} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/arn" VALUE=${COGNITO_USER_POOL_ARN} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/auth/userpool/clientId" VALUE=${COGNITO_USER_POOL_CLIENT_ID} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/id" VALUE=${GRAPHQL_API_ID} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/api/url" VALUE=${APPSYNC_URL} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/flight" VALUE=${FLIGHT_TABLE_NAME} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/amplify/storage/table/booking" VALUE=${BOOKING_TABLE_NAME} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/secretKey" VALUE=${STRIPE_SECRET_KEY} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/payment/stripe/publicKey" VALUE=${STRIPE_PUBLIC_KEY} &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/auth/userpool/url" VALUE=https://cognito-idp.${AWS_DEFAULT_REGION}.amazonaws.com/  &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/loadtest/usercount" VALUE=5 &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/loadtest/csv/token" VALUE=user-with-token.csv &
+        - make export.parameter NAME="/${AWS_BRANCH}/service/loadtest/csv/user" VALUE=user.csv &
+        - wait
         ##
         # Deploy SAM based back-end
         ##
@@ -54,6 +54,7 @@ frontend:
     preBuild:
       commands:
         - cd src/frontend
+        - test -f aws-exports.js && cat aws-exports.js
         - yarn
         ## 
         # Expose Stripe public key and Payment Charge URL as a VueJS runtime env
