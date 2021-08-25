@@ -72,7 +72,7 @@ def reserve_booking(booking):
             "customer": customer_id,
             "paymentToken": payment_token,
             "status": "UNCONFIRMED",
-            "createdAt": str(datetime.datetime.now()),
+            "createdAt": str(datetime.datetime.utcnow()),
         }
 
         logger.debug(

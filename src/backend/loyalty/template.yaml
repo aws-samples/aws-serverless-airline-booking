@@ -32,6 +32,30 @@ Parameters:
 
 
 Resources:
+  LoyaltyTransactionsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 35 # Fn timeout * 6 + Fn Batch Window
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt UnhandledLoyaltyTransactionsQueue.Arn
+        maxReceiveCount: 2
+
+  UnhandledLoyaltyTransactionsQueue:
+    Type: AWS::SQS::Queue
+
+
+  BookingLoyaltySubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt LoyaltyTransactionsQueue.Arn
+      TopicArn: !Ref BookingSNSTopic
+      RawMessageDelivery: true
+      FilterPolicy:
+        # Maintenance: Change to Check-in after we migrate to Vue3 and complete front-end
+        Booking.Status:
+          - confirmed
+
   LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -58,8 +82,6 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.9
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref LoyaltyDataTable
         - Version: '2012-10-17'
           Statement:
             Action: dynamodb:PutItem
@@ -71,12 +93,10 @@ Resources:
           STAGE: !Ref Stage
       Events:
         Listener:
-          Type: SNS
+          Type: SQS
           Properties:
-            Topic: !Ref BookingSNSTopic
-            FilterPolicy:
-              Booking.Status:
-                - confirmed
+            Queue: !GetAtt LoyaltyTransactionsQueue.Arn
+            MaximumBatchingWindowInSeconds: 5
 
   GetFunc:
     Type: AWS::Serverless::Function
@@ -122,7 +142,7 @@ Resources:
   #
   # Uncomment the following resources + AccessLogSetting to enable API Gateway Logs
   # [CAUTION] API Gateway can only have one IAM Role to push logs too, do not uncomment if you already have one
-  # 
+  #
   # ApiGatewayCloudWatchRole:
   #   Type: 'AWS::IAM::Role'
   #   Properties:
