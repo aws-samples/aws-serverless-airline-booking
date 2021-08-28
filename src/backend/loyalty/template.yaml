@@ -87,9 +87,12 @@ Resources:
             Action: dynamodb:PutItem
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
+        - SQSPollerPolicy:
+            QueueName:
+                !GetAtt LoyaltyTransactionsQueue.QueueName
       Environment:
         Variables:
-          TABLE_NAME: !Ref LoyaltyDataTable
+          LOYALTY_TABLE_NAME: !Ref LoyaltyDataTable
           STAGE: !Ref Stage
       Events:
         Listener:
