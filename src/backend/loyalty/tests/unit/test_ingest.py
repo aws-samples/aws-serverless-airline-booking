@@ -1,40 +1,27 @@
-from pathlib import Path
-from ingest import app
-from tests.conftest import load_event
-from botocore.stub import Stubber, ANY
-import pytest
 import json
 
-ingest_event_file = Path("tests/events/ingest_event.json")
+import pytest
+from loyalty.ingest import app
+from loyalty.shared.storage import FakeStorage
 
 
-@pytest.fixture(autouse=True)
-def dynamodb_stub():
-    stubber = Stubber(app.dynamodb.meta.client)
-    stubber.activate()
-    yield stubber
-    stubber.deactivate()
-    stubber.assert_no_pending_responses()
+def test_process_loyalty_points(record, transaction):
+    storage = FakeStorage()
+    app.process_loyalty_points(record=record, storage_client=storage)
+    assert transaction in storage
 
 
-def test_add_loyalty_points(lambda_context, dynamodb_stub):
-    event = load_event(filepath=ingest_event_file)
-    record = json.loads(event["Records"][0]["body"])
+def test_add_loyalty_points_invalid_record(record, monkeypatch):
+    monkeypatch.setenv("TABLE_NAME", "test")
+    record["body"] = '{"customerId":"1234","price":100}'  # old payload
+    with pytest.raises(TypeError, match="unexpected keyword argument 'price'"):
+        app.process_loyalty_points(record=record)
 
-    put_item_params = {
-        "Item": {
-            "bookingDetails": record.get("bookingDetails"),
-            "createdAt": ANY,
-            "outboundFlightId": record.get("outboundFlightId"),
-            "paymentDetails": record.get("paymentDetails"),
-            "pk": record.get("customerId"),
-            "points": 100,
-            "sk": ANY,
-            "status": "ACTIVE",
-            "tier": "BRONZE",
-        },
-        "TableName": "undefined",
-    }
-    dynamodb_stub.add_response("put_item", {}, put_item_params)
 
-    app.lambda_handler(event, lambda_context)
+def test_handler_process_sqs_event(records, mocker, lambda_context):
+    storage = FakeStorage()
+    app.DynamoDBStorage.from_env = mocker.MagicMock(return_value=storage)
+    customer_id = json.loads(records["Records"][0]["body"])["customerId"]
+
+    app.lambda_handler(event=records, context=lambda_context)
+    assert len(storage.data[customer_id].transactions) == 2

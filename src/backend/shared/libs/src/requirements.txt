@@ -1,3 +1,4 @@
-aws-lambda-powertools==1.0.1
-boto3==1.14.16
-requests==2.24.0
+aws-lambda-powertools==1.20.1
+boto3==1.18.31
+requests==2.26.0
+cyksuid==1.1.0

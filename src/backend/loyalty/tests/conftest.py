@@ -1,8 +1,11 @@
+import json
 from dataclasses import dataclass
 from pathlib import Path
-import json
 
 import pytest
+from loyalty.shared.models import LoyaltyPoint
+
+INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 
 
 @pytest.fixture
@@ -15,6 +18,21 @@ def lambda_context():
         aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
 
     return LambdaContext()
+
+
+@pytest.fixture
+def records():
+    return load_event(filepath=INGEST_TEST_EVENT)
+
+
+@pytest.fixture
+def record():
+    return load_event(filepath=INGEST_TEST_EVENT)["Records"][0]
+
+
+@pytest.fixture
+def transaction(record):
+    return LoyaltyPoint(**json.loads(record["body"]))
 
 
 def load_event(filepath: Path) -> dict:
