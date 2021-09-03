@@ -1,10 +1,5 @@
-import json
-
-import boto3
-import pytest
-from botocore.stub import ANY, Stubber
+from botocore.stub import ANY
 from loyalty.ingest import app
-from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import DynamoDBStorage
 
 

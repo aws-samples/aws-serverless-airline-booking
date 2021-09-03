@@ -4,6 +4,7 @@ from typing import Optional
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import sqs_batch_processor
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import BaseStorage, DynamoDBStorage
 
@@ -25,5 +26,5 @@ def process_loyalty_points(record: dict, storage_client: Optional[BaseStorage] =
 
 
 @sqs_batch_processor(record_handler=process_loyalty_points)
-def lambda_handler(event, context):
+def lambda_handler(event: dict, context: LambdaContext):
     return "success"

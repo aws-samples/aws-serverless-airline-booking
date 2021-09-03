@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 from cyksuid import ksuid  # type: ignore
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from mypy_boto3_dynamodb import service_resource
+from mypy_boto3_dynamodb.type_defs import GetItemOutputTypeDef, UpdateItemOutputTypeDef
 
 logger = Logger(child=True)
 
@@ -40,7 +41,7 @@ class FakeStorage(BaseStorage):
         self.data: dict[str, FakeTransactions] = {}
 
     def add(self, item: LoyaltyPoint):
-        item.points = item.payment["amount"]
+        item.points = item.payment["amount"]  # type: ignore
         if item.customerId in self.data:
             return self.data[item.customerId].transactions.append(item)
 
@@ -86,7 +87,7 @@ class DynamoDBStorage(BaseStorage):
             logger.debug(
                 f"Adding aggregate points into '{self.client.table_name}' table with {aggregate_expression} expr"
             )
-            ret = self.client.update_item(
+            ret: UpdateItemOutputTypeDef = self.client.update_item(
                 Key=composite_key,  # type: ignore
                 UpdateExpression=f"SET totalPoints = totalPoints {aggregate_expression} :incr",
                 ExpressionAttributeValues={":incr": {"N": item.points}},
@@ -94,6 +95,7 @@ class DynamoDBStorage(BaseStorage):
 
         except ClientError:
             logger.exception(f"Failed to aggregate loyalty points into '{self.client.table_name}' table")
+            raise
 
         return cast(int, ret["Attributes"]["totalPoints"])
 
@@ -115,9 +117,11 @@ class DynamoDBStorage(BaseStorage):
         composite_key = {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"}
         try:
             logger.debug(f"Fetching '{customer_id}' aggregate points from '{self.client.table_name}' table")
-            ret = self.client.get_item(Key=composite_key, AttributesToGet=["total_points", "tier"])  # type: ignore
-            tier: str = ret.get("Item", {}).get("tier", "BRONZE")
-            aggregate_points: int = ret.get("Item", {}).get("total_points", 0)
+            ret: GetItemOutputTypeDef = self.client.get_item(
+                Key=composite_key, AttributesToGet=["total_points", "tier"]  # type: ignore
+            )
+            tier = cast(str, ret["Item"].get("tier", "BRONZE"))
+            aggregate_points: int = cast(int, ret["Item"].get("total_points", 0))
         except ClientError:
             logger.exception(f"Failed to fetch '{customer_id}' aggregate points from '{self.client.table_name}' table")
             raise
@@ -129,8 +133,8 @@ class DynamoDBStorage(BaseStorage):
         return {
             "pk": f"CUSTOMER#{item.customerId}",
             "sk": f"TRANSACTION#{ksuid.ksuid().encoded.decode()}",
-            "outboundFlightId": item.booking["outboundFlightId"],
-            "points": item.payment["amount"],
+            "outboundFlightId": item.booking["outboundFlightId"],  # type: ignore
+            "points": item.payment["amount"],  # type: ignore
             "status": item.status,
             "bookingDetails": item.booking,
             "paymentDetails": item.payment,
@@ -140,7 +144,7 @@ class DynamoDBStorage(BaseStorage):
 
     @classmethod
     def from_env(cls):
-        table = os.getenv("TABLE_NAME")
+        table = os.getenv("TABLE_NAME", "")
         session = boto3.Session()
         dynamodb = session.resource("dynamodb").Table(table)
         return cls(client=dynamodb)
