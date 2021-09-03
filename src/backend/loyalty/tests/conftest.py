@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from botocore.stub import Stubber
 from loyalty.shared.models import LoyaltyPoint
+from loyalty.shared.storage import DynamoDBStorage
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 
@@ -33,6 +35,17 @@ def record():
 @pytest.fixture
 def transaction(record):
     return LoyaltyPoint(**json.loads(record["body"]))
+
+
+@pytest.fixture(scope="function")
+def dynamodb_stub(monkeypatch):
+    monkeypatch.setenv("TABLE_NAME", "test")
+    ddb_storage = DynamoDBStorage.from_env()
+    stubber = Stubber(ddb_storage.client.meta.client)
+    stubber.activate()
+    yield ddb_storage, stubber
+    stubber.deactivate()
+    stubber.assert_no_pending_responses()
 
 
 def load_event(filepath: Path) -> dict:

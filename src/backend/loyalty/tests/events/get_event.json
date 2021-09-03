@@ -1,0 +1,9 @@
+{
+  "body": "",
+  "resource": "/{customerId+}",
+  "path": "/loyalty/customerId",
+  "httpMethod": "GET",
+  "pathParameters": {
+    "customerId": "zomg"
+  }
+}

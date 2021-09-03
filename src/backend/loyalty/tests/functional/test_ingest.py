@@ -8,17 +8,6 @@ from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import DynamoDBStorage
 
 
-@pytest.fixture(autouse=True)
-def dynamodb_stub(monkeypatch):
-    monkeypatch.setenv("TABLE_NAME", "test")
-    ddb_storage = DynamoDBStorage.from_env()
-    stubber = Stubber(ddb_storage.client.meta.client)
-    stubber.activate()
-    yield ddb_storage, stubber
-    stubber.deactivate()
-    stubber.assert_no_pending_responses()
-
-
 def test_add_loyalty_points(dynamodb_stub, record, transaction):
     ddb_storage, stubber = dynamodb_stub
     put_item_params = {

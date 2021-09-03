@@ -1,0 +1,5 @@
+LOYALTY_TIER_MIN_POINTS = {
+    "BRONZE": 1,
+    "SILVER": 50000,
+    "GOLD": 100000,
+}

@@ -2,13 +2,13 @@ import datetime
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, cast
+from typing import List, Tuple, cast
 
 import boto3
 from aws_lambda_powertools import Logger
 from botocore.exceptions import ClientError
 from cyksuid import ksuid  # type: ignore
-from loyalty.shared.models import LoyaltyPoint
+from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from mypy_boto3_dynamodb import service_resource
 
 logger = Logger(child=True)
@@ -18,6 +18,7 @@ logger = Logger(child=True)
 class FakeTransactions:
     transactions: List[LoyaltyPoint]
     total_points: int = 0
+    tier: str = LoyaltyTier.BRONZE.value
 
 
 class BaseStorage(ABC):
@@ -26,11 +27,11 @@ class BaseStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def compute_points(self, item: LoyaltyPoint, increment: bool = True) -> int:
+    def compute_aggregate_points(self, item: LoyaltyPoint, increment: bool = True):
         raise NotImplementedError()
 
     @abstractmethod
-    def total_points(self, customer_id: str) -> int:
+    def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
         raise NotImplementedError()
 
 
@@ -39,20 +40,24 @@ class FakeStorage(BaseStorage):
         self.data: dict[str, FakeTransactions] = {}
 
     def add(self, item: LoyaltyPoint):
+        item.points = item.payment["amount"]
         if item.customerId in self.data:
             return self.data[item.customerId].transactions.append(item)
 
         self.data[item.customerId] = FakeTransactions(transactions=[item])
+        self.compute_aggregate_points(item=item, increment=True)
 
-    def compute_points(self, item: LoyaltyPoint, increment: bool = True) -> int:
-        return (
-            self.data[item.customerId].total_points + item.points
-            if increment
-            else self.data[item.customerId].total_points - item.points
-        )
+    def compute_aggregate_points(self, item: LoyaltyPoint, increment: bool = True):
+        if increment:
+            self.data[item.customerId].total_points += item.points
+        else:
+            self.data[item.customerId].total_points -= item.points
 
-    def total_points(self, customer_id: str) -> int:
-        return self.data[customer_id].total_points if customer_id in self.data else 0
+    def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
+        if customer_id in self.data:
+            return (LoyaltyTier[self.data[customer_id].tier], self.data[customer_id].total_points)
+
+        return LoyaltyTier.BRONZE, 0
 
     def __contains__(self, item):
         return item in self.data[item.customerId].transactions
@@ -67,12 +72,10 @@ class DynamoDBStorage(BaseStorage):
             logger.debug(f"Adding Loyalty points into '{self.client.table_name}' table")
             self.client.put_item(Item=self.build_add_transaction_item(item))
         except ClientError:
-            logger.exception(
-                f"Failed to add loyalty points into '{self.client.table_name}' table"
-            )
+            logger.exception(f"Failed to add loyalty points into '{self.client.table_name}' table")
             raise
 
-    def compute_points(self, item: LoyaltyPoint, increment: bool = True) -> int:
+    def compute_aggregate_points(self, item: LoyaltyPoint, increment: bool = True) -> int:
         composite_key = {
             "pk": f"CUSTOMER#{item.customerId}",
             "sk": f"AGGREGATE",
@@ -90,15 +93,12 @@ class DynamoDBStorage(BaseStorage):
             )
 
         except ClientError:
-            logger.exception(
-                f"Failed to aggregate loyalty points into '{self.client.table_name}' table"
-            )
-            raise
+            logger.exception(f"Failed to aggregate loyalty points into '{self.client.table_name}' table")
 
         return cast(int, ret["Attributes"]["totalPoints"])
 
-    def total_points(self, customer_id: str) -> int:
-        """Get aggregate points from given customer id
+    def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
+        """Get aggregate points and loyalty tier from given customer id
 
         Parameters
         ----------
@@ -107,23 +107,22 @@ class DynamoDBStorage(BaseStorage):
 
         Returns
         -------
+        LoyaltyTier
+            Customer loyalty tier
         int
             Aggregated loyalty points
         """
         composite_key = {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"}
         try:
-            logger.debug(
-                f"Fetching '{customer_id}' aggregate points from '{self.client.table_name}' table"
-            )
-            ret = self.client.get_item(
-                Key=composite_key, AttributesToGet=["total_points"]  # type: ignore
-            )
+            logger.debug(f"Fetching '{customer_id}' aggregate points from '{self.client.table_name}' table")
+            ret = self.client.get_item(Key=composite_key, AttributesToGet=["total_points", "tier"])  # type: ignore
+            tier: str = ret.get("Item", {}).get("tier", "BRONZE")
+            aggregate_points: int = ret.get("Item", {}).get("total_points", 0)
         except ClientError:
-            logger.exception(
-                f"Failed to fetch '{customer_id}' aggregate points from '{self.client.table_name}' table"
-            )
+            logger.exception(f"Failed to fetch '{customer_id}' aggregate points from '{self.client.table_name}' table")
+            raise
 
-        return cast(int, ret["Item"]["total_points"])
+        return LoyaltyTier[tier.upper()], aggregate_points
 
     @staticmethod
     def build_add_transaction_item(item: LoyaltyPoint) -> dict:
