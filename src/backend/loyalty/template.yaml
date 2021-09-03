@@ -325,6 +325,10 @@ Outputs:
     Value: !GetAtt LoyaltyDataTable.Arn
     Description: Loyalty Data Table ARN
 
+  LoyaltyTransactionsQueue:
+    Value: !GetAtt LoyaltyTransactionsQueue.Arn
+    Description: Loyalty SQS Queue ARN
+
   BaseUrl:
     Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Description: Base URL for the API Gateway
