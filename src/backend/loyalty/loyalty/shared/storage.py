@@ -118,10 +118,10 @@ class DynamoDBStorage(BaseStorage):
         try:
             logger.debug(f"Fetching '{customer_id}' aggregate points from '{self.client.table_name}' table")
             ret: GetItemOutputTypeDef = self.client.get_item(
-                Key=composite_key, AttributesToGet=["total_points", "tier"]  # type: ignore
+                Key=composite_key, AttributesToGet=["totalPoints", "tier"]  # type: ignore
             )
             tier = cast(str, ret["Item"].get("tier", "BRONZE"))
-            aggregate_points: int = cast(int, ret["Item"].get("total_points", 0))
+            aggregate_points: int = cast(int, ret["Item"].get("totalPoints", 0))
         except ClientError:
             logger.exception(f"Failed to fetch '{customer_id}' aggregate points from '{self.client.table_name}' table")
             raise
