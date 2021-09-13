@@ -8,6 +8,8 @@ from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import DynamoDBStorage
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
+AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")
+AGG_REMOVE_TEST_EVENT = Path("tests/events/aggregate_remove_event.json")
 
 
 @pytest.fixture
@@ -35,6 +37,11 @@ def record():
 @pytest.fixture
 def transaction(record):
     return LoyaltyPoint(**json.loads(record["body"]))
+
+
+@pytest.fixture
+def aggregate_records():
+    return load_event(filepath=AGG_INSERT_TEST_EVENT)
 
 
 @pytest.fixture(scope="function")

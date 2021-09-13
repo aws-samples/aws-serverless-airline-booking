@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import TypedDict
 
 
 class PointStatus(Enum):
     ACTIVE = "ACTIVE"
     REVOKED = "REVOKED"
-    EXPIRED = "EXPIRED"
 
 
 class LoyaltyTier(Enum):
@@ -35,3 +35,18 @@ class LoyaltyPoint:
     points: int = 0
     tier: str = LoyaltyTier.BRONZE.value
     status: str = PointStatus.ACTIVE.value
+
+
+@dataclass
+class LoyaltyPointAggregate(LoyaltyPoint):
+    increment: bool = True
+
+
+class LoyaltyPointAggregateDynamoDB(TypedDict):
+    pk: str
+    sk: str
+    total_points: int
+    tier: str
+    increment: bool
+    updatedAt: str
+    bookingId: str

@@ -1,0 +1,394 @@
+{
+    "Records": [
+        {
+            "eventID": "206c59c813a30d2747baa46a15bb18f2",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "eu-west-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1630931490.0,
+                "Keys": {
+                    "sk": {
+                        "S": "TRANSACTION#1xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                    }
+                },
+                "NewImage": {
+                    "createdAt": {
+                        "S": "2021-09-06 12:31:28.565129"
+                    },
+                    "sk": {
+                        "S": "TRANSACTION#1xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "outboundFlightId": {
+                        "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                    },
+                    "paymentDetails": {
+                        "M": {
+                            "amount": {
+                                "N": "100"
+                            },
+                            "receipt": {
+                                "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"
+                            }
+                        }
+                    },
+                    "bookingDetails": {
+                        "M": {
+                            "reference": {
+                                "S": "ZKz7oA"
+                            },
+                            "outboundFlightId": {
+                                "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                            },
+                            "id": {
+                                "S": "4c3c4803-330b-42b7-811a-c68689425de1"
+                            }
+                        }
+                    },
+                    "points": {
+                        "N": "100"
+                    },
+                    "status": {
+                        "S": "ACTIVE"
+                    }
+                },
+                "SequenceNumber": "22100000000025532203502",
+                "SizeBytes": 560,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:eu-west-1:231436140809:table/LoyaltyTest/stream/2021-09-06T12:13:09.690"
+        },
+        {
+            "eventID": "106c59c813a30d2747baa46a15bb18f2",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "eu-west-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 2630931490.0,
+                "Keys": {
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                    }
+                },
+                "NewImage": {
+                    "createdAt": {
+                        "S": "2021-09-06 12:32:28.565129"
+                    },
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "outboundFlightId": {
+                        "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                    },
+                    "paymentDetails": {
+                        "M": {
+                            "amount": {
+                                "N": "100"
+                            },
+                            "receipt": {
+                                "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"
+                            }
+                        }
+                    },
+                    "bookingDetails": {
+                        "M": {
+                            "reference": {
+                                "S": "ZKz7oA"
+                            },
+                            "outboundFlightId": {
+                                "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                            },
+                            "id": {
+                                "S": "5c3c4803-330b-42b7-811a-c68689425de1"
+                            }
+                        }
+                    },
+                    "points": {
+                        "N": "100"
+                    },
+                    "status": {
+                        "S": "ACTIVE"
+                    }
+                },
+                "SequenceNumber": "2210000000002553220350",
+                "SizeBytes": 560,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:eu-west-1:231436140809:table/LoyaltyTest/stream/2021-09-06T12:13:09.690"
+        },
+        {
+            "eventID": "106c59c813a30d2747baa46a15bb18f2",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "eu-west-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 2630931490.0,
+                "Keys": {
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                    }
+                },
+                "NewImage": {
+                    "createdAt": {
+                        "S": "2021-09-06 12:32:28.565129"
+                    },
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "outboundFlightId": {
+                        "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                    },
+                    "paymentDetails": {
+                        "M": {
+                            "amount": {
+                                "N": "50000"
+                            },
+                            "receipt": {
+                                "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"
+                            }
+                        }
+                    },
+                    "bookingDetails": {
+                        "M": {
+                            "reference": {
+                                "S": "ZKz7oA"
+                            },
+                            "outboundFlightId": {
+                                "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                            },
+                            "id": {
+                                "S": "5c3c4803-330b-42b7-811a-c68689425de1"
+                            }
+                        }
+                    },
+                    "points": {
+                        "N": "50000"
+                    },
+                    "status": {
+                        "S": "ACTIVE"
+                    }
+                },
+                "SequenceNumber": "2210000000002553220350",
+                "SizeBytes": 560,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:eu-west-1:231436140809:table/LoyaltyTest/stream/2021-09-06T12:13:09.690"
+        },
+        {
+            "eventID": "106c59c813a30d2747baa46a15bb18f2",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "eu-west-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 2630931490.0,
+                "Keys": {
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                    }
+                },
+                "NewImage": {
+                    "createdAt": {
+                        "S": "2021-09-06 12:32:28.565129"
+                    },
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "outboundFlightId": {
+                        "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                    },
+                    "paymentDetails": {
+                        "M": {
+                            "amount": {
+                                "N": "50000"
+                            },
+                            "receipt": {
+                                "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"
+                            }
+                        }
+                    },
+                    "bookingDetails": {
+                        "M": {
+                            "reference": {
+                                "S": "ZKz7oA"
+                            },
+                            "outboundFlightId": {
+                                "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                            },
+                            "id": {
+                                "S": "5c3c4803-330b-42b7-811a-c68689425de1"
+                            }
+                        }
+                    },
+                    "points": {
+                        "N": "50000"
+                    },
+                    "status": {
+                        "S": "ACTIVE"
+                    }
+                },
+                "SequenceNumber": "2210000000002553220350",
+                "SizeBytes": 560,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:eu-west-1:231436140809:table/LoyaltyTest/stream/2021-09-06T12:13:09.690"
+        },
+        {
+            "eventID": "106c59c813a30d2747baa46a15bb18f2",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "eu-west-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 2630931490.0,
+                "Keys": {
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#abc279e6-2484-4993-acb8-0f9123105678"
+                    }
+                },
+                "NewImage": {
+                    "createdAt": {
+                        "S": "2021-09-06 12:32:28.565129"
+                    },
+                    "sk": {
+                        "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "outboundFlightId": {
+                        "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#abc279e6-2484-4993-acb8-0f9123105678"
+                    },
+                    "paymentDetails": {
+                        "M": {
+                            "amount": {
+                                "N": "50000"
+                            },
+                            "receipt": {
+                                "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"
+                            }
+                        }
+                    },
+                    "bookingDetails": {
+                        "M": {
+                            "reference": {
+                                "S": "ZKz7oA"
+                            },
+                            "outboundFlightId": {
+                                "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                            },
+                            "id": {
+                                "S": "5c3c4803-330b-42b7-811a-c68689425de1"
+                            }
+                        }
+                    },
+                    "points": {
+                        "N": "50000"
+                    },
+                    "status": {
+                        "S": "ACTIVE"
+                    }
+                },
+                "SequenceNumber": "2210000000002553220350",
+                "SizeBytes": 560,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:eu-west-1:231436140809:table/LoyaltyTest/stream/2021-09-06T12:13:09.690"
+        },
+        {
+            "eventID": "f455357fb1060745c478a3e58ee9ca67",
+            "eventName": "REMOVE",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "eu-west-1",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1631240718.0,
+                "Keys": {
+                    "sk": {
+                        "S": "TRANSACTION#1xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                    }
+                },
+                "OldImage": {
+                    "createdAt": {
+                        "S": "2021-09-06 12:31:28.565129"
+                    },
+                    "sk": {
+                        "S": "TRANSACTION#1xlZA5SuZIThMs2Ncp7MdX0jerY"
+                    },
+                    "outboundFlightId": {
+                        "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                    },
+                    "pk": {
+                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                    },
+                    "paymentDetails": {
+                        "M": {
+                            "amount": {
+                                "N": "400"
+                            },
+                            "receipt": {
+                                "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"
+                            }
+                        }
+                    },
+                    "bookingDetails": {
+                        "M": {
+                            "reference": {
+                                "S": "ZKz7oA"
+                            },
+                            "outboundFlightId": {
+                                "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
+                            },
+                            "id": {
+                                "S": "4c3c4803-330b-42b7-811a-c68689425de1"
+                            }
+                        }
+                    },
+                    "points": {
+                        "N": "400"
+                    },
+                    "status": {
+                        "S": "ACTIVE"
+                    }
+                },
+                "SequenceNumber": "16480000000000016091901539",
+                "SizeBytes": 560,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:eu-west-1:231436140809:table/LoyaltyTest/stream/2021-09-06T12:13:09.690"
+        }
+    ]
+}
