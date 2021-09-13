@@ -5,36 +5,27 @@ from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent, ev
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from loyalty.shared.storage import BaseStorage, DynamoDBStorage
 from loyalty.shared.models import LoyaltyPointAggregate
-from loyalty.aggregate.tier import calculate_tier
+from loyalty.shared.functions import calculate_tier, calculate_aggregate_points
 
 tracer = Tracer()
 logger = Logger()
 
 
 @tracer.capture_method
-def aggregate_loyalty_points(records: List[LoyaltyPointAggregate], storage_client: BaseStorage = None):
+def aggregate_loyalty_points(
+    records: List[LoyaltyPointAggregate], storage_client: BaseStorage = None
+) -> Dict[str, LoyaltyPointAggregate]:
     if storage_client is None:
         storage_client = DynamoDBStorage.from_env()
 
-    transactions = {}
-    for record in records:
-        if record.customerId in transactions:
-            if record.increment:
-                transactions[record.customerId].points += record.points
-            else:
-                transactions[record.customerId].points -= record.points
-        else:
-            transactions[record.customerId] = record
-
-    for transaction in transactions.values():
-        transaction.tier = calculate_tier(transaction.points).value
-
+    transactions = calculate_aggregate_points(records=records)
     storage_client.add_aggregate(items=transactions)
 
-    return True
+    return transactions
 
 
 @event_source(data_class=DynamoDBStreamEvent)
-def lambda_handler(event: DynamoDBStreamEvent, context: LambdaContext):
+def lambda_handler(event: DynamoDBStreamEvent, _: LambdaContext):
     aggregates = DynamoDBStorage.build_loyalty_point_aggregate(event)
-    return aggregate_loyalty_points(records=aggregates)
+    ret = aggregate_loyalty_points(records=aggregates)
+    return {"processed_aggregate": len(ret)}

@@ -3,7 +3,7 @@ import datetime
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, cast
+from typing import Dict, List, NoReturn, Tuple, cast
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -34,7 +34,7 @@ class BaseStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def add_aggregate(self, item: LoyaltyPoint):
+    def add_aggregate(self, item: LoyaltyPoint) -> NoReturn:
         raise NotImplementedError()
 
     @abstractmethod
@@ -54,9 +54,9 @@ class FakeStorage(BaseStorage):
         self.data[item.customerId] = FakeTransactions(transactions=[item])
         self.add_aggregate(item=item, increment=True)
 
-    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]):
-        # TODO: Redo w/ new Aggregate impl
-        ...
+    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> NoReturn:
+        for customer_id, transaction in items.items():
+            self.data[customer_id] = transaction
 
     def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
         if customer_id in self.data:
@@ -83,7 +83,7 @@ class DynamoDBStorage(BaseStorage):
             logger.exception(f"Failed to add loyalty points into '{self.client.table_name}' table")
             raise
 
-    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]):
+    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> NoReturn:
         batch = self.build_add_aggregate_transaction_item(customers=items)
 
         try:

@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Generator
 
 import pytest
 from botocore.stub import Stubber

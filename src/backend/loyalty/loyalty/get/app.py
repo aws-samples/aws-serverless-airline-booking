@@ -31,6 +31,7 @@ def get_loyalty_points(customer_id: str, storage_client: Optional[BaseStorage] =
 
     tier, total_points = storage_client.get_customer_tier_points(customer_id=customer_id)
     remaining_points = calculate_next_tier_points(tier=tier, points=total_points)
+    # TODO: Fix missing customer ID
     logger.info(
         "Retrieved and calculated points and tier successfully",
         extra={"customer_id": "", "tier": tier, "points": total_points, "next_tier": remaining_points},
