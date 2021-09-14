@@ -13,7 +13,7 @@ def test_handler_process_ddb_stream_insert_remove(mocker, aggregate_records, lam
 
 def test_aggregate_loyalty_points(aggregate_records):
     storage = FakeStorage()
-    records = DynamoDBStorage.build_loyalty_point_aggregate(event=DynamoDBStreamEvent(aggregate_records))
+    records = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
     aggregated = app.aggregate_loyalty_points(records=records, storage_client=storage)
     assert len(records) == 6
     assert len(aggregated) == 3

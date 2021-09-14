@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import TypedDict
+from typing import TypedDict, Set
+import datetime
 
 
 class PointStatus(Enum):
@@ -35,11 +36,15 @@ class LoyaltyPoint:
     points: int = 0
     tier: str = LoyaltyTier.BRONZE.value
     status: str = PointStatus.ACTIVE.value
+    increment: bool = True
 
 
 @dataclass
-class LoyaltyPointAggregate(LoyaltyPoint):
-    increment: bool = True
+class LoyaltyPointAggregate:
+    total_points: int
+    tier: str
+    bookings: Set[str]
+    updatedAt: datetime = field(default_factory=datetime.datetime.utcnow)
 
 
 class LoyaltyPointAggregateDynamoDB(TypedDict):
@@ -47,6 +52,5 @@ class LoyaltyPointAggregateDynamoDB(TypedDict):
     sk: str
     total_points: int
     tier: str
-    increment: bool
     updatedAt: str
     bookingId: str

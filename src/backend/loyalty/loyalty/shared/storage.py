@@ -1,8 +1,7 @@
 import datetime
 import os
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -17,12 +16,7 @@ from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyPo
 from mypy_boto3_dynamodb import service_resource
 from mypy_boto3_dynamodb.type_defs import GetItemOutputTypeDef, UpdateItemOutputTypeDef
 
-
-@dataclass
-class FakeTransactions:
-    transactions: List[LoyaltyPoint]
-    total_points: int = 0
-    tier: str = LoyaltyTier.BRONZE.value
+from loyalty.shared.functions import calculate_aggregate_points
 
 
 class BaseStorage(ABC):
@@ -31,7 +25,7 @@ class BaseStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def add_aggregate(self, item: LoyaltyPoint) -> None:
+    def add_aggregate(self, items: LoyaltyPoint) -> None:
         raise NotImplementedError()
 
     @abstractmethod
@@ -41,28 +35,35 @@ class BaseStorage(ABC):
 
 class FakeStorage(BaseStorage):
     def __init__(self):
-        self.data: dict[str, FakeTransactions] = {}
+        self.data: Dict[str, List[LoyaltyPoint]] = {}
+        self.aggregates: Dict[str, LoyaltyPointAggregate] = {}
 
     def add(self, item: LoyaltyPoint):
         item.points = item.payment["amount"]  # type: ignore
         if item.customerId in self.data:
-            return self.data[item.customerId].transactions.append(item)
+            self.data[item.customerId].append(item)
+        else:
+            self.data[item.customerId] = [item]
 
-        self.data[item.customerId] = FakeTransactions(transactions=[item])
-        self.add_aggregate(item=item, increment=True)
+        self.process_aggregate()  # mimic async aggregation
+
+    def process_aggregate(self):
+        for _, transactions in self.data.items():
+            agg = calculate_aggregate_points(records=transactions)
+            self.add_aggregate(items=agg)
 
     def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
         for customer_id, transaction in items.items():
-            self.data[customer_id] = transaction
+            self.aggregates[customer_id] = transaction
 
     def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
-        if customer_id in self.data:
-            return (LoyaltyTier[self.data[customer_id].tier], self.data[customer_id].total_points)
+        if customer_id in self.aggregates:
+            return (LoyaltyTier[self.aggregates[customer_id].tier], self.aggregates[customer_id].total_points)
 
         return LoyaltyTier.BRONZE, 0
 
     def __contains__(self, item):
-        return item in self.data[item.customerId].transactions
+        return item in self.data[item.customerId]
 
 
 class DynamoDBStorage(BaseStorage):
@@ -175,7 +176,7 @@ class DynamoDBStorage(BaseStorage):
         ]
 
     @staticmethod
-    def build_loyalty_point_aggregate(event: DynamoDBStreamEvent) -> List[LoyaltyPointAggregate]:
+    def build_loyalty_point_list(event: DynamoDBStreamEvent) -> List[LoyaltyPoint]:
         aggregates = []
         for record in event.records:
             if DynamoDBStorage.detect_run_away_transaction(record):
@@ -185,13 +186,15 @@ class DynamoDBStorage(BaseStorage):
                 data = record.dynamodb.old_image  # type: ignore
             else:
                 data = record.dynamodb.new_image  # type: ignore
+
+            booking: Dict = {k: v.get_value for k, v in data.get("bookingDetails").get_value.items()}  # type: ignore
+            payment: Dict = {k: v.get_value for k, v in data.get("paymentDetails").get_value.items()}  # type: ignore
             aggregates.append(
-                LoyaltyPointAggregate(
+                LoyaltyPoint(
                     customerId=data.get("pk").get_value,  # type: ignore
-                    booking=data.get("bookingDetails").get_value,  # type: ignore
-                    payment=data.get("paymentDetails").get_value,  # type: ignore
+                    booking=booking,
+                    payment=payment,
                     points=int(data.get("points").get_value),  # type: ignore
-                    increment=record.event_name != DynamoDBRecordEventName.REMOVE,
                 )
             )
 

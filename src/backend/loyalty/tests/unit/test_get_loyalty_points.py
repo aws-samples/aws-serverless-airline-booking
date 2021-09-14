@@ -13,6 +13,7 @@ def test_get_loyalty_points_not_found_defaults_to_bronze():
 def test_get_loyalty_points(transaction: LoyaltyPoint):
     storage = FakeStorage()
     storage.add(item=transaction)
+    storage.add(item=transaction)
     ret = app.get_loyalty_points(customer_id=transaction.customerId, storage_client=storage)
     assert ret["level"] == "BRONZE"
-    assert ret["points"] == 100
+    assert ret["points"] == 200

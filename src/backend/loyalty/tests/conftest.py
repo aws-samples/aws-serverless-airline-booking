@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-from botocore.stub import Stubber
 from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import DynamoDBStorage
 from aws_lambda_powertools import Logger
@@ -37,7 +36,9 @@ def record():
 
 @pytest.fixture
 def transaction(record):
-    return LoyaltyPoint(**json.loads(record["body"]))
+    transaction = LoyaltyPoint(**json.loads(record["body"]))
+    transaction.points = transaction.payment["amount"]
+    return transaction
 
 
 @pytest.fixture
@@ -54,18 +55,8 @@ def aggregate_modify_records():
     return event
 
 
-@pytest.fixture(scope="function")
-def dynamodb_stub(monkeypatch):
-    monkeypatch.setenv("TABLE_NAME", "test")
-    ddb_storage = DynamoDBStorage.from_env()
-    stubber = Stubber(ddb_storage.client.meta.client)
-    stubber.activate()
-    yield ddb_storage, stubber
-    stubber.deactivate()
-    stubber.assert_no_pending_responses()
-
-
-@pytest.fixture(scope="function")
+# @pytest.fixture(scope="function")
+@pytest.fixture
 def dynamodb_storage(monkeypatch):
     monkeypatch.setenv("TABLE_NAME", "test")
     return DynamoDBStorage.from_env(logger=Logger(service="test"))

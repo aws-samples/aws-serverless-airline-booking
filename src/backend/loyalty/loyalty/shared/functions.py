@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from loyalty.shared.constants import LOYALTY_TIER_MIN_POINTS
-from loyalty.shared.models import LoyaltyPointAggregate, LoyaltyTier
+from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier
 from copy import deepcopy
 
 
@@ -26,9 +26,11 @@ def calculate_tier(points: int) -> LoyaltyTier:
         return LoyaltyTier.BRONZE
 
 
-def calculate_aggregate_points(records: List[LoyaltyPointAggregate]) -> Dict[str, LoyaltyPointAggregate]:
-    transactions = {}
+def calculate_aggregate_points(records: List[LoyaltyPoint]) -> Dict[str, LoyaltyPointAggregate]:
+    transactions: Dict[str, LoyaltyPoint] = {}
+    aggregates: Dict[str, LoyaltyPointAggregate] = {}
     data = deepcopy(records)
+
     for record in data:
         if record.customerId in transactions:
             if record.increment:
@@ -38,7 +40,11 @@ def calculate_aggregate_points(records: List[LoyaltyPointAggregate]) -> Dict[str
         else:
             transactions[record.customerId] = record
 
-    for transaction in transactions.values():
-        transaction.tier = calculate_tier(transaction.points).value
+    for customer, transaction in transactions.items():
+        aggregates[customer] = LoyaltyPointAggregate(
+            total_points=transaction.points,
+            tier=calculate_tier(transaction.points).value,
+            bookings={transaction.booking["id"]},
+        )
 
-    return transactions
+    return aggregates

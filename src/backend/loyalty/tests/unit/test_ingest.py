@@ -24,4 +24,4 @@ def test_handler_process_sqs_event(records, mocker, lambda_context):
     customer_id = json.loads(records["Records"][0]["body"])["customerId"]
 
     app.lambda_handler(event=records, context=lambda_context)
-    assert len(storage.data[customer_id].transactions) == 2
+    assert len(storage.data[customer_id]) == 2

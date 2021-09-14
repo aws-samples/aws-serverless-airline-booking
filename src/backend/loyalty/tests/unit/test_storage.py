@@ -92,3 +92,6 @@ def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_re
         dynamodb_storage.add_aggregate(items=aggregated_customers)
         dynamodb_storage.add(item=transaction)
         dynamodb_storage.get_customer_tier_points(customer_id=transaction.customerId)
+
+
+# TODO: ksuid into datetime str
