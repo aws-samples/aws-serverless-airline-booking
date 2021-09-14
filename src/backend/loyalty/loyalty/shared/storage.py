@@ -1,24 +1,21 @@
-import concurrent
 import datetime
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, NoReturn, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import boto3
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
+    DynamoDBRecord,
+    DynamoDBRecordEventName,
+    DynamoDBStreamEvent,
+)
 from botocore.exceptions import ClientError
 from cyksuid import ksuid  # type: ignore
-from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier, LoyaltyPointAggregateDynamoDB
+from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyPointAggregateDynamoDB, LoyaltyTier
 from mypy_boto3_dynamodb import service_resource
 from mypy_boto3_dynamodb.type_defs import GetItemOutputTypeDef, UpdateItemOutputTypeDef
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
-    DynamoDBStreamEvent,
-    DynamoDBRecordEventName,
-)
-
-
-logger = Logger(child=True)
 
 
 @dataclass
@@ -34,7 +31,7 @@ class BaseStorage(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def add_aggregate(self, item: LoyaltyPoint) -> NoReturn:
+    def add_aggregate(self, item: LoyaltyPoint) -> None:
         raise NotImplementedError()
 
     @abstractmethod
@@ -54,7 +51,7 @@ class FakeStorage(BaseStorage):
         self.data[item.customerId] = FakeTransactions(transactions=[item])
         self.add_aggregate(item=item, increment=True)
 
-    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> NoReturn:
+    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
         for customer_id, transaction in items.items():
             self.data[customer_id] = transaction
 
@@ -72,28 +69,29 @@ class DynamoDBStorage(BaseStorage):
     DYNAMODB_BATCH_WRITE_ITEM_LIMIT = 25
     MAX_THREADS = 4
 
-    def __init__(self, client: service_resource.Table) -> None:
+    def __init__(self, client: service_resource.Table, logger: Optional[Logger] = None) -> None:
         self.client = client
+        self.logger = logger or Logger(child=True)
 
     def add(self, item: LoyaltyPoint):
         try:
-            logger.debug(f"Adding Loyalty points into '{self.client.table_name}' table")
+            self.logger.debug(f"Adding Loyalty points into '{self.client.table_name}' table")
             self.client.put_item(Item=self.build_add_transaction_item(item))
         except ClientError:
-            logger.exception(f"Failed to add loyalty points into '{self.client.table_name}' table")
+            self.logger.exception(f"Unable to add loyalty points into")
             raise
 
-    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> NoReturn:
+    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
         batch = self.build_add_aggregate_transaction_item(customers=items)
 
         try:
             for transaction in batch:
-                logger.append_keys(
+                self.logger.append_keys(
                     customer_id=transaction["pk"],
                     increment=transaction["increment"],
                     booking_id=transaction["bookingId"],
                 )
-                logger.info("Adding aggregate points")
+                self.logger.debug("Adding aggregate points")
                 bookings = {transaction["bookingId"]}
                 composite_key = {"pk": transaction["pk"], "sk": transaction["sk"]}
                 self.client.update_item(
@@ -109,10 +107,11 @@ class DynamoDBStorage(BaseStorage):
                     # Only update aggregate points if booking has not been processed before
                     ConditionExpression="not(contains(bookings, :booking))",
                 )
-                logger.info("Points and tier aggregated successfully")
-        except self.client.meta.client.exceptions.ConditionalCheckFailedException as e:
-            logger.error("Detected duplicate transaction; ignoring...")
+                self.logger.info("Points and tier aggregated successfully")
+        except self.client.meta.client.exceptions.ConditionalCheckFailedException:
+            self.logger.info("Detected duplicate transaction; safely ignoring...")
         except self.client.meta.client.exceptions.ClientError:
+            self.logger.exception("Unable to add aggregate transaction")
             raise
 
     def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
@@ -132,14 +131,14 @@ class DynamoDBStorage(BaseStorage):
         """
         composite_key = {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"}
         try:
-            logger.debug(f"Fetching '{customer_id}' aggregate points from '{self.client.table_name}' table")
+            self.logger.info(f"Fetching '{customer_id}' aggregate points")
             ret: GetItemOutputTypeDef = self.client.get_item(
                 Key=composite_key, AttributesToGet=["totalPoints", "tier"]  # type: ignore
             )
-            tier = cast(str, ret["Item"].get("tier", "BRONZE"))
-            aggregate_points: int = cast(int, ret["Item"].get("totalPoints", 0))
+            tier: str = ret["Item"].get("tier", "BRONZE")
+            aggregate_points = int(ret["Item"].get("totalPoints", 0))
         except ClientError:
-            logger.exception(f"Failed to fetch '{customer_id}' aggregate points from '{self.client.table_name}' table")
+            self.logger.exception(f"Unable to fetch '{customer_id}' aggregate points")
             raise
 
         return LoyaltyTier[tier.upper()], aggregate_points
@@ -179,8 +178,7 @@ class DynamoDBStorage(BaseStorage):
     def build_loyalty_point_aggregate(event: DynamoDBStreamEvent) -> List[LoyaltyPointAggregate]:
         aggregates = []
         for record in event.records:
-            # ignore potential runaway condition
-            if "AGGREGATE" in record.dynamodb.keys.get("sk").get_value:  # type: ignore
+            if DynamoDBStorage.detect_run_away_transaction(record):
                 continue
 
             if record.event_name == DynamoDBRecordEventName.REMOVE:
@@ -200,8 +198,15 @@ class DynamoDBStorage(BaseStorage):
         return aggregates
 
     @classmethod
-    def from_env(cls):
+    def from_env(cls, logger: Optional[Logger] = None):
         table = os.getenv("TABLE_NAME", "")
         session = boto3.Session()
         dynamodb = session.resource("dynamodb").Table(table)
-        return cls(client=dynamodb)
+        return cls(client=dynamodb, logger=logger)
+
+    @staticmethod
+    def detect_run_away_transaction(record: DynamoDBRecord) -> bool:
+        return (
+            record.event_name == DynamoDBRecordEventName.MODIFY
+            or "AGGREGATE" in record.dynamodb.keys.get("sk").get_value  # type: ignore
+        )

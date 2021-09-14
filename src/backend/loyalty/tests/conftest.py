@@ -1,12 +1,12 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator
 
 import pytest
 from botocore.stub import Stubber
 from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import DynamoDBStorage
+from aws_lambda_powertools import Logger
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")
@@ -45,6 +45,15 @@ def aggregate_records():
     return load_event(filepath=AGG_INSERT_TEST_EVENT)
 
 
+@pytest.fixture
+def aggregate_modify_records():
+    event = load_event(filepath=AGG_INSERT_TEST_EVENT)
+    for record in event["Records"]:
+        record["eventName"] = "MODIFY"
+
+    return event
+
+
 @pytest.fixture(scope="function")
 def dynamodb_stub(monkeypatch):
     monkeypatch.setenv("TABLE_NAME", "test")
@@ -54,6 +63,12 @@ def dynamodb_stub(monkeypatch):
     yield ddb_storage, stubber
     stubber.deactivate()
     stubber.assert_no_pending_responses()
+
+
+@pytest.fixture(scope="function")
+def dynamodb_storage(monkeypatch):
+    monkeypatch.setenv("TABLE_NAME", "test")
+    return DynamoDBStorage.from_env(logger=Logger(service="test"))
 
 
 def load_event(filepath: Path) -> dict:
