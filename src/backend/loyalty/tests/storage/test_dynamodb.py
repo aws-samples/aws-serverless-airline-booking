@@ -6,7 +6,7 @@ from loyalty.shared.functions import calculate_aggregate_points
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from loyalty.shared.storage import DynamoDBStorage
 
-# NOTE: Pytest has
+# NOTE: Pytest has import conflict w/ storage somehow; keeping storage tests separate
 
 
 def test_get_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: LoyaltyPoint):

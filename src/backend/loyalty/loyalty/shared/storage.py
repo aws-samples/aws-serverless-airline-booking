@@ -203,6 +203,7 @@ class DynamoDBStorage(BaseStorage):
                     booking=booking,
                     payment=payment,
                     points=int(data.get("points").get_value),  # type: ignore
+                    increment=record.event_name != DynamoDBRecordEventName.REMOVE,
                 )
             )
 

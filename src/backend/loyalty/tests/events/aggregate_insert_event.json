@@ -292,7 +292,7 @@
                     "paymentDetails": {
                         "M": {
                             "amount": {
-                                "N": "50000"
+                                "N": "100000"
                             },
                             "receipt": {
                                 "S": "https://pay.stripe.com/receipts/acct_1Dvn7pF4aIiftV70/ch_3JTC14F4aIiftV700iFq2CHB/rcpt_K7QsrFln9FgFnzUuBIiNdkkRYGxUL0X"

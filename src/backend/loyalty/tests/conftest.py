@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from aws_lambda_powertools import Logger
 from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import DynamoDBStorage
-from aws_lambda_powertools import Logger
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")

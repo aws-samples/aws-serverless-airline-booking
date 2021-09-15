@@ -18,4 +18,4 @@ delete: ##=> Delete booking service
 
 
 test:
-	poetry run pytest --cov=loyalty --cov-report=html
+	poetry run pytest --cov=loyalty --cov-report=html tests

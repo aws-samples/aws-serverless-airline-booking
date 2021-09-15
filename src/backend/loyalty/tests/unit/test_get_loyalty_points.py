@@ -12,11 +12,11 @@ def test_get_loyalty_points_not_found_defaults_to_bronze():
 
 def test_get_loyalty_points(transaction: LoyaltyPoint):
     storage = FakeStorage()
-    storage.add(item=transaction)
+    transaction.payment["amount"] = 50_000
     storage.add(item=transaction)
     ret = app.get_loyalty_points(customer_id=transaction.customerId, storage_client=storage)
-    assert ret["level"] == "BRONZE"
-    assert ret["points"] == 200
+    assert ret["level"] == "SILVER"
+    assert ret["points"] == 50_000
 
 
 def test_handler_process_api_route(mocker, lambda_context):
@@ -24,3 +24,12 @@ def test_handler_process_api_route(mocker, lambda_context):
     app.DynamoDBStorage.from_env = mocker.MagicMock(return_value=storage)
     event = {"path": "/loyalty/test", "resource": "/loyalty/{customerId}", "httpMethod": "GET"}
     app.lambda_handler(event=event, context=lambda_context)
+
+
+def test_get_loyalty_points_no_remaining_points_next_tier(transaction: LoyaltyPoint):
+    storage = FakeStorage()
+    transaction.payment["amount"] = 100_000
+    storage.add(item=transaction)
+    ret = app.get_loyalty_points(customer_id=transaction.customerId, storage_client=storage)
+    assert ret["level"] == "GOLD"
+    assert ret["remainingPoints"] == 0
