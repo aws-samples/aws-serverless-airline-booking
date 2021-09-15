@@ -36,7 +36,6 @@ def calculate_aggregate_points(records: List[LoyaltyPoint]) -> Dict[str, Loyalty
             if record.increment:
                 transactions[record.customerId].points += record.points
             else:
-                # TODO: Fix missing logic
                 transactions[record.customerId].points -= record.points
         else:
             transactions[record.customerId] = record

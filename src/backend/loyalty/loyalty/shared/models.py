@@ -43,4 +43,4 @@ class LoyaltyPointAggregate:
     total_points: int
     tier: str
     booking: str
-    updatedAt: datetime = field(default_factory=datetime.datetime.utcnow)
+    updatedAt: datetime = field(default_factory=datetime.datetime.utcnow().isoformat)

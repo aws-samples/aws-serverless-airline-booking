@@ -148,17 +148,17 @@ class DynamoDBStorage(BaseStorage):
 
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputRequestTypeDef:
+        sortable_id = ksuid.ksuid()
         return {
             "Item": {
                 "pk": f"CUSTOMER#{item.customerId}",
-                "sk": f"TRANSACTION#{ksuid.ksuid().encoded.decode()}",
+                "sk": f"TRANSACTION#{str(sortable_id)}",
                 "outboundFlightId": item.booking["outboundFlightId"],  # type: ignore
                 "points": item.payment["amount"],  # type: ignore
                 "status": item.status,
                 "bookingDetails": item.booking,
                 "paymentDetails": item.payment,
-                # Convert ksuid time to utc?
-                "createdAt": str(datetime.datetime.utcnow()),
+                "createdAt": sortable_id.datetime.isoformat(),
             }
         }
 
