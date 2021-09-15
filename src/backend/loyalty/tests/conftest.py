@@ -55,8 +55,7 @@ def aggregate_modify_records():
     return event
 
 
-# @pytest.fixture(scope="function")
-@pytest.fixture
+@pytest.fixture(scope="function")
 def dynamodb_storage(monkeypatch):
     monkeypatch.setenv("TABLE_NAME", "test")
     return DynamoDBStorage.from_env(logger=Logger(service="test"))

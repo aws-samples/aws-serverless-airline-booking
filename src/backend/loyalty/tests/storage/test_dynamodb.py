@@ -3,33 +3,16 @@ from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent
 from botocore.exceptions import ClientError
 from botocore.stub import ANY, Stubber
 from loyalty.shared.functions import calculate_aggregate_points
-from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregateDynamoDB, LoyaltyTier
+from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from loyalty.shared.storage import DynamoDBStorage
 
-
-def expected_params_update_item_aggregate(data: LoyaltyPointAggregateDynamoDB):
-    return {
-        "ConditionExpression": "not(contains(bookings, :booking))",
-        "ExpressionAttributeValues": {
-            ":booking": data["bookingId"],
-            ":bookings": {data["bookingId"]},
-            ":incr": data["total_points"],
-            ":tier": data["tier"],
-            ":timestamp": ANY,
-        },
-        "Key": {"pk": data["pk"], "sk": data["sk"]},
-        "TableName": "test",
-        "UpdateExpression": "ADD totalPoints :incr, bookings :bookings SET tier = :tier, updatedAt = :timestamp",
-    }
+# NOTE: Pytest has
 
 
 def test_get_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: LoyaltyPoint):
     # GIVEN
-    get_item_params = {
-        "Key": {"pk": f"CUSTOMER#{transaction.customerId}", "sk": "AGGREGATE"},
-        "AttributesToGet": ["totalPoints", "tier"],
-        "TableName": "test",
-    }
+    get_item_params = dynamodb_storage.build_get_loyalty_tier_points_get_item_input(customer_id=transaction.customerId)
+    get_item_params["TableName"] = "test"
     with Stubber(dynamodb_storage.client.meta.client) as stub:
         stub.add_response("get_item", {"Item": {"tier": {"S": "BRONZE"}, "totalPoints": {"N": "100"}}}, get_item_params)
 
@@ -42,15 +25,10 @@ def test_get_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: Loya
 
 def test_add_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction):
     # GIVEN
-    put_item_params = {
-        "Item": {
-            **dynamodb_storage.build_add_transaction_item(item=transaction),
-            "sk": ANY,
-            "createdAt": ANY,
-        },
-        "TableName": "test",
-    }
-
+    put_item_params = dynamodb_storage.build_add_put_item_input(item=transaction)
+    put_item_params["TableName"] = "test"
+    put_item_params["Item"]["sk"] = ANY
+    put_item_params["Item"]["createdAt"] = ANY
     with Stubber(dynamodb_storage.client.meta.client) as stub:
         stub.add_response("put_item", {}, put_item_params)
         dynamodb_storage.add(item=transaction)  # WHEN
@@ -59,14 +37,15 @@ def test_add_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction):
 
 def test_aggregate_loyalty_points(dynamodb_storage: DynamoDBStorage, aggregate_records):
     # GIVEN
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_aggregate(event=DynamoDBStreamEvent(aggregate_records))
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
-    loyalty_update_items = DynamoDBStorage.build_add_aggregate_transaction_item(customers=aggregated_customers)
+    update_item_inputs = DynamoDBStorage.build_add_aggregate_update_item_input(customers=aggregated_customers)
 
     with Stubber(dynamodb_storage.client.meta.client) as stub:
-        for item in loyalty_update_items:
-            expected_param = expected_params_update_item_aggregate(data=item)
-            stub.add_response("update_item", {}, expected_param)
+        for transaction in update_item_inputs:
+            transaction["ExpressionAttributeValues"][":timestamp"] = ANY  # type: ignore
+            transaction["TableName"] = "test"
+            stub.add_response("update_item", {}, transaction)
 
         dynamodb_storage.add_aggregate(items=aggregated_customers)  # WHEN
         stub.assert_no_pending_responses()  # THEN
@@ -74,9 +53,7 @@ def test_aggregate_loyalty_points(dynamodb_storage: DynamoDBStorage, aggregate_r
 
 def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorage, aggregate_modify_records):
     # GIVEN
-    loyalty_aggregates = dynamodb_storage.build_loyalty_point_aggregate(
-        event=DynamoDBStreamEvent(aggregate_modify_records)
-    )
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_modify_records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
     with Stubber(dynamodb_storage.client.meta.client) as stub:
@@ -85,13 +62,14 @@ def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorag
 
 
 def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_records, transaction: LoyaltyPoint):
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_aggregate(event=DynamoDBStreamEvent(aggregate_records))
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
     with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.add_aggregate(items=aggregated_customers)
+
+    with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.add(item=transaction)
+
+    with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.get_customer_tier_points(customer_id=transaction.customerId)
-
-
-# TODO: ksuid into datetime str

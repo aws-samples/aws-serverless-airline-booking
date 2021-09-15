@@ -17,3 +17,10 @@ def test_get_loyalty_points(transaction: LoyaltyPoint):
     ret = app.get_loyalty_points(customer_id=transaction.customerId, storage_client=storage)
     assert ret["level"] == "BRONZE"
     assert ret["points"] == 200
+
+
+def test_handler_process_api_route(mocker, lambda_context):
+    storage = FakeStorage()
+    app.DynamoDBStorage.from_env = mocker.MagicMock(return_value=storage)
+    event = {"path": "/loyalty/test", "resource": "/loyalty/{customerId}", "httpMethod": "GET"}
+    app.lambda_handler(event=event, context=lambda_context)

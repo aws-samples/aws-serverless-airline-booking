@@ -21,7 +21,7 @@ def calculate_next_tier_points(tier: LoyaltyTier, points: int) -> int:
     return 0
 
 
-@app.get("/loyalty/<customerId>")
+@app.get("/loyalty/<customer_id>")
 @tracer.capture_method
 def get_loyalty_points(customer_id: str, storage_client: Optional[BaseStorage] = None):
     tracer.put_annotation(key="CustomerId", value=customer_id)

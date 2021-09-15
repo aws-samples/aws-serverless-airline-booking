@@ -15,3 +15,7 @@ deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 
 delete: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
+
+
+test:
+	poetry run pytest --cov=loyalty --cov-report=html

@@ -12,9 +12,16 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from botocore.exceptions import ClientError
 from cyksuid import ksuid  # type: ignore
-from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyPointAggregateDynamoDB, LoyaltyTier
+from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier
 from mypy_boto3_dynamodb import service_resource
-from mypy_boto3_dynamodb.type_defs import GetItemOutputTypeDef, UpdateItemOutputTypeDef
+from mypy_boto3_dynamodb.type_defs import (
+    GetItemInputRequestTypeDef,
+    GetItemOutputTypeDef,
+    PutItemInputRequestTypeDef,
+    UpdateItemInputRequestTypeDef,
+    UpdateItemInputTableTypeDef,
+    UpdateItemOutputTypeDef,
+)
 
 from loyalty.shared.functions import calculate_aggregate_points
 
@@ -22,15 +29,15 @@ from loyalty.shared.functions import calculate_aggregate_points
 class BaseStorage(ABC):
     @abstractmethod
     def add(self, item: LoyaltyPoint) -> LoyaltyPoint:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @abstractmethod
     def add_aggregate(self, items: LoyaltyPoint) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
     @abstractmethod
     def get_customer_tier_points(self, customer_id: str) -> Tuple[LoyaltyTier, int]:
-        raise NotImplementedError()
+        raise NotImplementedError()  # pragma: no cover
 
 
 class FakeStorage(BaseStorage):
@@ -75,39 +82,26 @@ class DynamoDBStorage(BaseStorage):
         self.logger = logger or Logger(child=True)
 
     def add(self, item: LoyaltyPoint):
+        self.logger.append_keys(customer_id=item.customerId, booking_id=item.booking["id"])
         try:
-            self.logger.debug(f"Adding Loyalty points into '{self.client.table_name}' table")
-            self.client.put_item(Item=self.build_add_transaction_item(item))
+            self.logger.info(f"Adding loyalty points")
+            self.client.put_item(**self.build_add_put_item_input(item))
+            self.logger.info("Loyalty points added successfully")
         except ClientError:
-            self.logger.exception(f"Unable to add loyalty points into")
+            self.logger.exception(f"Unable to add loyalty points")
             raise
 
     def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
-        batch = self.build_add_aggregate_transaction_item(customers=items)
+        transactions = self.build_add_aggregate_update_item_input(customers=items)
 
         try:
-            for transaction in batch:
+            for transaction in transactions:
                 self.logger.append_keys(
-                    customer_id=transaction["pk"],
-                    increment=transaction["increment"],
-                    booking_id=transaction["bookingId"],
+                    customer_id=transaction["Key"]["pk"].lstrip("CUSTOMER#"),  # type: ignore
+                    booking_id=transaction["ExpressionAttributeValues"][":booking"],
                 )
                 self.logger.debug("Adding aggregate points")
-                bookings = {transaction["bookingId"]}
-                composite_key = {"pk": transaction["pk"], "sk": transaction["sk"]}
-                self.client.update_item(
-                    Key=composite_key,
-                    UpdateExpression="ADD totalPoints :incr, bookings :bookings SET tier = :tier, updatedAt = :timestamp",
-                    ExpressionAttributeValues={
-                        ":incr": transaction["total_points"],
-                        ":bookings": bookings,
-                        ":tier": transaction["tier"],
-                        ":timestamp": transaction["updatedAt"],
-                        ":booking": transaction["bookingId"],
-                    },
-                    # Only update aggregate points if booking has not been processed before
-                    ConditionExpression="not(contains(bookings, :booking))",
-                )
+                self.client.update_item(**transaction)
                 self.logger.info("Points and tier aggregated successfully")
         except self.client.meta.client.exceptions.ConditionalCheckFailedException:
             self.logger.info("Detected duplicate transaction; safely ignoring...")
@@ -130,49 +124,63 @@ class DynamoDBStorage(BaseStorage):
         int
             Aggregated loyalty points
         """
-        composite_key = {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"}
+        self.logger.append_keys(customer_id=customer_id)
         try:
-            self.logger.info(f"Fetching '{customer_id}' aggregate points")
+            self.logger.info(f"Fetching aggregate points")
             ret: GetItemOutputTypeDef = self.client.get_item(
-                Key=composite_key, AttributesToGet=["totalPoints", "tier"]  # type: ignore
+                **self.build_get_loyalty_tier_points_get_item_input(customer_id)
             )
+            self.logger.info("Fetched loyalty tier and aggregate points")
             tier: str = ret["Item"].get("tier", "BRONZE")
             aggregate_points = int(ret["Item"].get("totalPoints", 0))
         except ClientError:
-            self.logger.exception(f"Unable to fetch '{customer_id}' aggregate points")
+            self.logger.exception(f"Unable to fetch aggregate points")
             raise
 
         return LoyaltyTier[tier.upper()], aggregate_points
 
     @staticmethod
-    def build_add_transaction_item(item: LoyaltyPoint) -> dict:
+    def build_get_loyalty_tier_points_get_item_input(customer_id: str) -> GetItemInputRequestTypeDef:
         return {
-            "pk": f"CUSTOMER#{item.customerId}",
-            "sk": f"TRANSACTION#{ksuid.ksuid().encoded.decode()}",
-            "outboundFlightId": item.booking["outboundFlightId"],  # type: ignore
-            "points": item.payment["amount"],  # type: ignore
-            "status": item.status,
-            "bookingDetails": item.booking,
-            "paymentDetails": item.payment,
-            # Convert ksuid time to utc?
-            "createdAt": str(datetime.datetime.utcnow()),
+            "Key": {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"},
+            "AttributesToGet": ["totalPoints", "tier"],
         }
 
     @staticmethod
-    def build_add_aggregate_transaction_item(
+    def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputRequestTypeDef:
+        return {
+            "Item": {
+                "pk": f"CUSTOMER#{item.customerId}",
+                "sk": f"TRANSACTION#{ksuid.ksuid().encoded.decode()}",
+                "outboundFlightId": item.booking["outboundFlightId"],  # type: ignore
+                "points": item.payment["amount"],  # type: ignore
+                "status": item.status,
+                "bookingDetails": item.booking,
+                "paymentDetails": item.payment,
+                # Convert ksuid time to utc?
+                "createdAt": str(datetime.datetime.utcnow()),
+            }
+        }
+
+    @staticmethod
+    def build_add_aggregate_update_item_input(
         customers: Dict[str, LoyaltyPointAggregate]
-    ) -> List[LoyaltyPointAggregateDynamoDB]:
+    ) -> List[UpdateItemInputTableTypeDef]:
         return [
             {
-                "pk": customer.customerId,
-                "sk": "AGGREGATE",
-                "total_points": customer.points,
-                "tier": customer.tier,
-                "increment": customer.increment,
-                "updatedAt": str(datetime.datetime.utcnow()),
-                "bookingId": customer.booking["id"].get_value,
+                "Key": {"pk": customer, "sk": "AGGREGATE"},
+                "UpdateExpression": "ADD totalPoints :incr, bookings :bookings SET tier = :tier, updatedAt = :timestamp",
+                "ExpressionAttributeValues": {
+                    ":incr": transaction.total_points,
+                    ":bookings": {transaction.booking},
+                    ":tier": transaction.tier,
+                    ":timestamp": str(transaction.updatedAt),
+                    ":booking": transaction.booking,
+                },
+                # Only update aggregate points if booking has not been processed before
+                "ConditionExpression": "not(contains(bookings, :booking))",
             }
-            for customer in customers.values()
+            for customer, transaction in customers.items()
         ]
 
     @staticmethod
