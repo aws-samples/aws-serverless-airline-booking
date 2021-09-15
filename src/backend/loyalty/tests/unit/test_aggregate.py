@@ -1,4 +1,5 @@
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBStreamEvent
+
 from loyalty.aggregate import app
 from loyalty.shared.storage import DynamoDBStorage, FakeStorage
 

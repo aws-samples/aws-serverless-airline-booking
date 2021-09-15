@@ -1,7 +1,7 @@
-import datetime
+from dataclasses import asdict
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -12,18 +12,18 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from botocore.exceptions import ClientError
 from cyksuid import ksuid  # type: ignore
-from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier
 from mypy_boto3_dynamodb import service_resource
 from mypy_boto3_dynamodb.type_defs import (
     GetItemInputRequestTypeDef,
+    GetItemInputTableTypeDef,
     GetItemOutputTypeDef,
     PutItemInputRequestTypeDef,
-    UpdateItemInputRequestTypeDef,
+    PutItemInputTableTypeDef,
     UpdateItemInputTableTypeDef,
-    UpdateItemOutputTypeDef,
 )
 
 from loyalty.shared.functions import calculate_aggregate_points
+from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier, Booking, Payment
 
 
 class BaseStorage(ABC):
@@ -32,7 +32,7 @@ class BaseStorage(ABC):
         raise NotImplementedError()  # pragma: no cover
 
     @abstractmethod
-    def add_aggregate(self, items: LoyaltyPoint) -> None:
+    def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
         raise NotImplementedError()  # pragma: no cover
 
     @abstractmethod
@@ -46,7 +46,7 @@ class FakeStorage(BaseStorage):
         self.aggregates: Dict[str, LoyaltyPointAggregate] = {}
 
     def add(self, item: LoyaltyPoint):
-        item.points = item.payment["amount"]  # type: ignore
+        item.points = item.payment.amount
         if item.customerId in self.data:
             self.data[item.customerId].append(item)
         else:
@@ -83,11 +83,11 @@ class DynamoDBStorage(BaseStorage):
 
     def add(self, item: LoyaltyPoint):
         try:
-            self.logger.info(f"Adding loyalty points")
+            self.logger.info("Adding loyalty points")
             self.client.put_item(**self.build_add_put_item_input(item))
             self.logger.info("Loyalty points added successfully")
         except ClientError:
-            self.logger.exception(f"Unable to add loyalty points")
+            self.logger.exception("Unable to add loyalty points")
             raise
 
     def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
@@ -124,39 +124,40 @@ class DynamoDBStorage(BaseStorage):
             Aggregated loyalty points
         """
         try:
-            self.logger.info(f"Fetching aggregate points")
+            self.logger.info("Fetching aggregate points")
             ret: GetItemOutputTypeDef = self.client.get_item(
                 **self.build_get_loyalty_tier_points_get_item_input(customer_id)
             )
             self.logger.info("Fetched loyalty tier and aggregate points successfully")
 
-            tier: str = ret["Item"].get("tier", "BRONZE")
-            aggregate_points = int(ret["Item"].get("totalPoints", 0))
+            data: Dict[str, str] = cast(dict, ret["Item"])
+            tier = data.get("tier", "BRONZE")
+            aggregate_points = int(data.get("totalPoints", 0))
         except ClientError:
-            self.logger.exception(f"Unable to fetch aggregate points")
+            self.logger.exception("Unable to fetch aggregate points")
             raise
 
         return LoyaltyTier[tier.upper()], aggregate_points
 
     @staticmethod
-    def build_get_loyalty_tier_points_get_item_input(customer_id: str) -> GetItemInputRequestTypeDef:
+    def build_get_loyalty_tier_points_get_item_input(customer_id: str) -> GetItemInputTableTypeDef:
         return {
             "Key": {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"},
             "AttributesToGet": ["totalPoints", "tier"],
         }
 
     @staticmethod
-    def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputRequestTypeDef:
+    def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
         sortable_id = ksuid.ksuid()
         return {
             "Item": {
                 "pk": f"CUSTOMER#{item.customerId}",
                 "sk": f"TRANSACTION#{str(sortable_id)}",
-                "outboundFlightId": item.booking["outboundFlightId"],  # type: ignore
-                "points": item.payment["amount"],  # type: ignore
+                "outboundFlightId": item.booking.outboundFlightId,
+                "points": item.payment.amount,
                 "status": item.status,
-                "bookingDetails": item.booking,
-                "paymentDetails": item.payment,
+                "bookingDetails": asdict(item.booking),
+                "paymentDetails": asdict(item.payment),
                 "createdAt": sortable_id.datetime.isoformat(),
             }
         }
@@ -168,7 +169,7 @@ class DynamoDBStorage(BaseStorage):
         return [
             {
                 "Key": {"pk": customer, "sk": "AGGREGATE"},
-                "UpdateExpression": "ADD totalPoints :incr, bookings :bookings SET tier = :tier, updatedAt = :timestamp",
+                "UpdateExpression": "ADD totalPoints :incr, bookings :bookings SET tier = :tier, updatedAt = :timestamp",  # noqa: E501
                 "ExpressionAttributeValues": {
                     ":incr": transaction.total_points,
                     ":bookings": {transaction.booking},
@@ -199,8 +200,8 @@ class DynamoDBStorage(BaseStorage):
             aggregates.append(
                 LoyaltyPoint(
                     customerId=data.get("pk").get_value,  # type: ignore
-                    booking=booking,
-                    payment=payment,
+                    booking=Booking(**booking),
+                    payment=Payment(**payment),
                     points=int(data.get("points").get_value),  # type: ignore
                     increment=record.event_name != DynamoDBRecordEventName.REMOVE,
                 )

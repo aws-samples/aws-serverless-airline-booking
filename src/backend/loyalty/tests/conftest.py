@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 from aws_lambda_powertools import Logger
-from loyalty.shared.models import LoyaltyPoint
+
+from loyalty.shared.models import LoyaltyPoint, Booking, Payment
 from loyalty.shared.storage import DynamoDBStorage
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
@@ -36,8 +37,9 @@ def record():
 
 @pytest.fixture
 def transaction(record):
-    transaction = LoyaltyPoint(**json.loads(record["body"]))
-    transaction.points = transaction.payment["amount"]
+    data: dict = json.loads(record["body"])
+    transaction = LoyaltyPoint(booking=Booking(**data.pop("booking")), payment=Payment(**data.pop("payment")), **data)
+    transaction.points = transaction.payment.amount
     return transaction
 
 

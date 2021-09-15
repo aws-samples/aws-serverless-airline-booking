@@ -3,6 +3,7 @@ from typing import Optional
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 from aws_lambda_powertools.logging import correlation_paths
+
 from loyalty.shared.constants import LOYALTY_TIER_MIN_POINTS
 from loyalty.shared.models import LoyaltyTier
 from loyalty.shared.storage import BaseStorage, DynamoDBStorage

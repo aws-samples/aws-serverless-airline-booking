@@ -1,6 +1,6 @@
+import datetime
 from dataclasses import dataclass, field
 from enum import Enum
-import datetime
 
 
 class PointStatus(Enum):
@@ -16,7 +16,7 @@ class LoyaltyTier(Enum):
 
 @dataclass
 class Booking:
-    id: str
+    id: str  # noqa: A003 VNE003
     reference: str
     outboundFlightId: str
 
@@ -43,4 +43,4 @@ class LoyaltyPointAggregate:
     total_points: int
     tier: str
     booking: str
-    updatedAt: datetime = field(default_factory=datetime.datetime.utcnow().isoformat)
+    updatedAt: str = field(default_factory=datetime.datetime.utcnow().isoformat)
