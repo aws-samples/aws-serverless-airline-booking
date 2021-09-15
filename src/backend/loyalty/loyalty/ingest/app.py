@@ -22,6 +22,8 @@ def process_loyalty_points(record: dict, storage_client: Optional[BaseStorage] =
         storage_client = DynamoDBStorage.from_env()
 
     transaction = LoyaltyPoint(**json.loads(payload.body))
+    logger.append_keys(customer_id=transaction.customerId, booking_id=transaction.booking["id"])
+
     storage_client.add(item=transaction)
 
 

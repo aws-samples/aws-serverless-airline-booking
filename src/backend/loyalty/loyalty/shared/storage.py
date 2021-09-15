@@ -82,7 +82,6 @@ class DynamoDBStorage(BaseStorage):
         self.logger = logger or Logger(child=True)
 
     def add(self, item: LoyaltyPoint):
-        self.logger.append_keys(customer_id=item.customerId, booking_id=item.booking["id"])
         try:
             self.logger.info(f"Adding loyalty points")
             self.client.put_item(**self.build_add_put_item_input(item))
@@ -124,13 +123,13 @@ class DynamoDBStorage(BaseStorage):
         int
             Aggregated loyalty points
         """
-        self.logger.append_keys(customer_id=customer_id)
         try:
             self.logger.info(f"Fetching aggregate points")
             ret: GetItemOutputTypeDef = self.client.get_item(
                 **self.build_get_loyalty_tier_points_get_item_input(customer_id)
             )
-            self.logger.info("Fetched loyalty tier and aggregate points")
+            self.logger.info("Fetched loyalty tier and aggregate points successfully")
+
             tier: str = ret["Item"].get("tier", "BRONZE")
             aggregate_points = int(ret["Item"].get("totalPoints", 0))
         except ClientError:

@@ -25,6 +25,7 @@ def calculate_next_tier_points(tier: LoyaltyTier, points: int) -> int:
 @tracer.capture_method
 def get_loyalty_points(customer_id: str, storage_client: Optional[BaseStorage] = None):
     tracer.put_annotation(key="CustomerId", value=customer_id)
+    logger.append_keys(customer_id=customer_id)
 
     if storage_client is None:
         storage_client = DynamoDBStorage.from_env()
@@ -33,7 +34,7 @@ def get_loyalty_points(customer_id: str, storage_client: Optional[BaseStorage] =
     remaining_points = calculate_next_tier_points(tier=tier, points=total_points)
     logger.info(
         "Retrieved and calculated points and tier successfully",
-        extra={"customer_id": customer_id, "tier": tier, "points": total_points, "next_tier": remaining_points},
+        extra={"tier": tier, "points": total_points, "next_tier": remaining_points},
     )
 
     return {
