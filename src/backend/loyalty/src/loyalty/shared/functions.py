@@ -27,6 +27,18 @@ def calculate_tier(points: int) -> LoyaltyTier:
 
 
 def calculate_aggregate_points(records: List[LoyaltyPoint]) -> Dict[str, LoyaltyPointAggregate]:
+    """Aggregate list of loyalty transactions by incrementing and/or decrementing them
+
+    Parameters
+    ----------
+    records : List[LoyaltyPoint]
+        List of loyalty transactions
+
+    Returns
+    -------
+    Dict[str, LoyaltyPointAggregate]
+        Loyalty transactions aggregated per customer
+    """
     transactions: Dict[str, LoyaltyPoint] = {}
     aggregates: Dict[str, LoyaltyPointAggregate] = {}
     data = deepcopy(records)

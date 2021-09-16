@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, Type, cast
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -26,7 +26,7 @@ from loyalty.shared.models import Booking, LoyaltyPoint, LoyaltyPointAggregate, 
 
 class BaseStorage(ABC):
     @abstractmethod
-    def add(self, item: LoyaltyPoint) -> LoyaltyPoint:
+    def add(self, item: LoyaltyPoint) -> None:
         raise NotImplementedError()  # pragma: no cover
 
     @abstractmethod
@@ -43,7 +43,7 @@ class FakeStorage(BaseStorage):
         self.data: Dict[str, List[LoyaltyPoint]] = {}
         self.aggregates: Dict[str, LoyaltyPointAggregate] = {}
 
-    def add(self, item: LoyaltyPoint):
+    def add(self, item: LoyaltyPoint) -> None:
         item.points = item.payment.amount
         if item.customerId in self.data:
             self.data[item.customerId].append(item)
@@ -79,7 +79,15 @@ class DynamoDBStorage(BaseStorage):
         self.client = client
         self.logger = logger or Logger(child=True)
 
-    def add(self, item: LoyaltyPoint):
+    def add(self, item: LoyaltyPoint) -> None:
+        """Add a single loyalty point transaction
+
+        Parameters
+        ----------
+        item : LoyaltyPoint
+            Loyalty Point to be added
+
+        """
         try:
             self.logger.info("Adding loyalty points")
             self.client.put_item(**self.build_add_put_item_input(item))
@@ -89,6 +97,13 @@ class DynamoDBStorage(BaseStorage):
             raise
 
     def add_aggregate(self, items: Dict[str, LoyaltyPointAggregate]) -> None:
+        """Update aggregate point to unique bookings
+
+        Parameters
+        ----------
+        items : Dict[str, LoyaltyPointAggregate]
+            Aggregate of Loyalty point per customer
+        """
         transactions = self.build_add_aggregate_update_item_input(customers=items)
 
         try:
@@ -183,6 +198,18 @@ class DynamoDBStorage(BaseStorage):
 
     @staticmethod
     def build_loyalty_point_list(event: DynamoDBStreamEvent) -> List[LoyaltyPoint]:
+        """Convert DynamoDB Stream event into a list of loyalty transactions
+
+        Parameters
+        ----------
+        event : DynamoDBStreamEvent
+            DynamoDB Stream event
+
+        Returns
+        -------
+        List[LoyaltyPoint]
+            List of loyalty transactions
+        """
         aggregates = []
         for record in event.records:
             if DynamoDBStorage.detect_run_away_transaction(record):
@@ -208,7 +235,19 @@ class DynamoDBStorage(BaseStorage):
         return aggregates
 
     @classmethod
-    def from_env(cls, logger: Optional[Logger] = None):
+    def from_env(cls, logger: Optional[Logger] = None) -> "DynamoDBStorage":
+        """Factory to create DynamoDBStorage instance using `TABLE_NAME` env
+
+        Parameters
+        ----------
+        logger : Optional[Logger], optional
+            Logger, by default None
+
+        Returns
+        -------
+        DynamoDBStorage
+            Instance of DynamoDB Storage
+        """
         table = os.getenv("TABLE_NAME", "")
         session = boto3.Session()
         dynamodb = session.resource("dynamodb").Table(table)
@@ -216,6 +255,18 @@ class DynamoDBStorage(BaseStorage):
 
     @staticmethod
     def detect_run_away_transaction(record: DynamoDBRecord) -> bool:
+        """Detect whether is a Modify event or an admin call updating aggregate points
+
+        Parameters
+        ----------
+        record : DynamoDBRecord
+            DynamoDB Stream Event Record
+
+        Returns
+        -------
+        bool
+            Whether it's a runaway transaction
+        """
         return (
             record.event_name == DynamoDBRecordEventName.MODIFY
             or "AGGREGATE" in record.dynamodb.keys.get("sk").get_value  # type: ignore
