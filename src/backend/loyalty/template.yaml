@@ -43,6 +43,9 @@ Resources:
   UnhandledLoyaltyTransactionsQueue:
     Type: AWS::SQS::Queue
 
+  UnhandledLoyaltyAggregatesQueue:
+    Type: AWS::SQS::Queue
+
 
   BookingLoyaltySubscription:
     Type: AWS::SNS::Subscription
@@ -73,6 +76,11 @@ Resources:
           KeyType: RANGE
       SSESpecification:
         SSEEnabled: yes
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      TimeToLiveSpecification:
+        AttributeName: createdAt
+        Enabled: true
 
   IngestFunc:
     Type: AWS::Serverless::Function
@@ -123,6 +131,36 @@ Resources:
             Path: /loyalty/{customerId}
             RestApiId: !Ref LoyaltyApi
 
+  AggregateFunc:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ServerlessAirline-AggregateLoyalty-${Stage}
+      CodeUri: src
+      Handler: loyalty.aggregate.app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            Action: dynamodb:UpdateItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
+      Environment:
+        Variables:
+          LOYALTY_TABLE_NAME: !Ref LoyaltyDataTable
+          STAGE: !Ref Stage
+      Events:
+        Stream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt LoyaltyTransactionsQueue.Arn
+            StartingPosition: LATEST
+            MaximumBatchingWindowInSeconds: 5
+            BisectBatchOnFunctionError: true
+            DestinationConfig:
+              OnFailure:
+                Destination: !GetAtt UnhandledLoyaltyAggregatesQueue.Arn
+
+
   IngestLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -135,6 +173,12 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${GetFunc}"
       RetentionInDays: !Ref LogRetentionInDays
 
+  AggregateLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AggregateFunc}"
+      RetentionInDays: !Ref LogRetentionInDays
+
   LoyaltyEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
@@ -142,6 +186,12 @@ Resources:
       Type: String
       Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
+  LoyaltyQueueParameters:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${Stage}/service/loyalty/messaging/queue"
+      Type: String
+      Value: !GetAtt LoyaltyTransactionsQueue.Arn
   #
   # Uncomment the following resources + AccessLogSetting to enable API Gateway Logs
   # [CAUTION] API Gateway can only have one IAM Role to push logs too, do not uncomment if you already have one

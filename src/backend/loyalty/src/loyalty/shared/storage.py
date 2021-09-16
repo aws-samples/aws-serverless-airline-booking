@@ -1,3 +1,5 @@
+import datetime
+import calendar
 import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
@@ -162,6 +164,7 @@ class DynamoDBStorage(BaseStorage):
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
         sortable_id = ksuid.ksuid()
+        ttl: datetime.datetime = sortable_id + datetime.timedelta(days=365)
         return {
             "Item": {
                 "pk": f"CUSTOMER#{item.customerId}",
@@ -171,7 +174,7 @@ class DynamoDBStorage(BaseStorage):
                 "status": item.status,
                 "bookingDetails": asdict(item.booking),
                 "paymentDetails": asdict(item.payment),
-                "createdAt": sortable_id.datetime.isoformat(),
+                "createdAt": calendar.timegm(ttl.timetuple()),
             }
         }
 
