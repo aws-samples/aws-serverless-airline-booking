@@ -79,7 +79,7 @@ Resources:
     Properties:
       FunctionName: !Sub ServerlessAirline-IngestLoyalty-${Stage}
       CodeUri: src
-      Handler: loyalty.aggregate.app.lambda_handler
+      Handler: loyalty.ingest.app.lambda_handler
       Runtime: python3.9
       Policies:
         - Version: '2012-10-17'
