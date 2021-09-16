@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from aws_lambda_powertools import Logger
 
-from loyalty.shared.models import LoyaltyPoint, Booking, Payment
+from loyalty.shared.models import Booking, LoyaltyPoint, Payment
 from loyalty.shared.storage import DynamoDBStorage
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")

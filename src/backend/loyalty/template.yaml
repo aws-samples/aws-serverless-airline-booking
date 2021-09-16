@@ -78,8 +78,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ServerlessAirline-IngestLoyalty-${Stage}
-      CodeUri: src/ingest
-      Handler: app.lambda_handler
+      CodeUri: src
+      Handler: loyalty.aggregate.app.lambda_handler
       Runtime: python3.9
       Policies:
         - Version: '2012-10-17'
@@ -105,8 +105,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ServerlessAirline-GetLoyalty-${Stage}
-      CodeUri: src/get
-      Handler: app.lambda_handler
+      CodeUri: src
+      Handler: loyalty.get.app.lambda_handler
       Runtime: python3.8
       Policies:
         - DynamoDBReadPolicy:

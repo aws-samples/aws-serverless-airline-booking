@@ -17,11 +17,11 @@ delete: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
 
 format:
-	poetry run isort loyalty tests
-	poetry run black loyalty tests
+	poetry run isort src/loyalty tests
+	poetry run black src/loyalty tests
 
 lint: format
-	poetry run flake8 loyalty tests
+	poetry run flake8 src/loyalty tests
 
 test:
 	poetry run pytest tests
@@ -30,6 +30,6 @@ coverage-html:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
 
 static-analysis:
-	poetry run mypy --pretty loyalty
+	poetry run mypy --pretty src/loyalty
 
 pr: lint static-analysis

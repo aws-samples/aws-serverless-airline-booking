@@ -1,8 +1,8 @@
-from mypy_boto3_dynamodb.type_defs import GetItemInputRequestTypeDef, PutItemInputRequestTypeDef
 import pytest
 from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent
 from botocore.exceptions import ClientError
 from botocore.stub import ANY, Stubber
+from mypy_boto3_dynamodb.type_defs import GetItemInputRequestTypeDef, PutItemInputRequestTypeDef
 
 from loyalty.shared.functions import calculate_aggregate_points
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
@@ -15,7 +15,7 @@ def test_get_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: Loya
     # GIVEN
     get_item_params: GetItemInputRequestTypeDef = {
         "TableName": "test",
-        **dynamodb_storage.build_get_loyalty_tier_points_get_item_input(customer_id=transaction.customerId),  # type: ignore
+        **dynamodb_storage.build_get_loyalty_tier_points_get_item_input(customer_id=transaction.customerId),  # type: ignore # noqa: E501
     }
 
     with Stubber(dynamodb_storage.client.meta.client) as stub:

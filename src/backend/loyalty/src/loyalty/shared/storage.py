@@ -1,6 +1,6 @@
-from dataclasses import asdict
 import os
 from abc import ABC, abstractmethod
+from dataclasses import asdict
 from typing import Dict, List, Optional, Tuple, cast
 
 import boto3
@@ -11,19 +11,17 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     DynamoDBStreamEvent,
 )
 from botocore.exceptions import ClientError
-from cyksuid import ksuid  # type: ignore
+from cyksuid import ksuid
 from mypy_boto3_dynamodb import service_resource
 from mypy_boto3_dynamodb.type_defs import (
-    GetItemInputRequestTypeDef,
     GetItemInputTableTypeDef,
     GetItemOutputTypeDef,
-    PutItemInputRequestTypeDef,
     PutItemInputTableTypeDef,
     UpdateItemInputTableTypeDef,
 )
 
 from loyalty.shared.functions import calculate_aggregate_points
-from loyalty.shared.models import LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier, Booking, Payment
+from loyalty.shared.models import Booking, LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier, Payment
 
 
 class BaseStorage(ABC):
