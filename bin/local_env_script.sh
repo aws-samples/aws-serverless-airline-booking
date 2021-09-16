@@ -36,32 +36,28 @@ function prompt_aws_cli_profile() {
 }
 
 function prompt_amplify_env() {
-    echo -e "[*] Listing Amplify environments available"
-    amplify env list
-    echo -en "[?] Which ${BOLD}Amplify environment${NOCOLOR} would you like to use: "
+    echo -en "[?] Which ${BOLD}branch ${NOCOLOR} would you like to use (e.g. AWS_BRANCH): "
     read AWS_BRANCH
 }
 
 function prompt_aws_region() {
-    echo -e "[*] Listing current AWS regions" \\n
-    aws ec2 describe-regions --query 'Regions[].RegionName' --output table
     echo -en "[?] Which ${BOLD}AWS region${NOCOLOR} would you like to use:  "
     read AWS_DEFAULT_REGION
 }
 
 function prompt_options() {
-    echo -e "${BOLD}[+] Using AWS Profile detected: [${AWS_DEFAULT_PROFILE}]${NOCOLOR}"
-    echo -e "${BOLD}[+] Using AWS Region detected: [${AWS_DEFAULT_REGION}]${NOCOLOR}"
-    test -z $AWS_DEFAULT_PROFILE && prompt_aws_cli_profile
-    test -z $AWS_DEFAULT_REGION && prompt_aws_region
-    prompt_amplify_env
+    echo -e "${BOLD}[+] Using AWS Profile detected: [${AWS_DEFAULT_PROFILE}]${NOCOLOR}" "\t env: \$AWS_DEFAULT_PROFILE"
+    echo -e "${BOLD}[+] Using AWS Region detected: [${AWS_DEFAULT_REGION}]${NOCOLOR}" "\t env: \$AWS_DEFAULT_REGION"
+    echo -e "${BOLD}[+] Using Branch detected: [${AWS_BRANCH}]${NOCOLOR}" "\t\t env: \$AWS_BRANCH"
+    test -z ${AWS_DEFAULT_PROFILE} && prompt_aws_cli_profile
+    test -z ${AWS_DEFAULT_REGION} && prompt_aws_region
+    test -z ${AWS_BRANCH} && prompt_amplify_env
 }
 
 function main() {
     echo ${AWS_DEFAULT_PROFILE}
     prompt_options
     fetch_env_vars
-    test -z ${AWS_DEFAULT_REGION} || test -z ${AWS_DEFAULT_PROFILE} && echo -e "[*] Next time, you can also use AWS_DEFAULT_REGION and AWS_DEFAULT_PROFILE, if necessary" \\n
     echo -e "[+] ${BOLD}Copy and paste the env vars below${NOCOLOR}" \\n
     print_vars
 }
