@@ -141,9 +141,17 @@ Resources:
       Policies:
         - Version: '2012-10-17'
           Statement:
-            Action: dynamodb:UpdateItem
             Effect: Allow
+            Action: dynamodb:UpdateItem
             Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
+        - Version: "2012-10-17"
+          Statement:
+            Effect: "Allow"
+            Action:
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+            Resource: !GetAtt UnhandledLoyaltyAggregatesQueue.Arn
       Environment:
         Variables:
           LOYALTY_TABLE_NAME: !Ref LoyaltyDataTable
@@ -152,7 +160,7 @@ Resources:
         Stream:
           Type: DynamoDB
           Properties:
-            Stream: !GetAtt LoyaltyTransactionsQueue.Arn
+            Stream: !GetAtt LoyaltyDataTable.StreamArn
             StartingPosition: LATEST
             MaximumBatchingWindowInSeconds: 5
             BisectBatchOnFunctionError: true

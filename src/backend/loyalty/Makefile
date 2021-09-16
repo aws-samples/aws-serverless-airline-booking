@@ -1,20 +1,17 @@
 deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)
-	sam build --cached --parallel && \
-	sam package \
-		--s3-bucket $${DEPLOYMENT_BUCKET_NAME} \
-		--output-template-file packaged.yaml && \
+	sam build --cached --parallel -m requirements.txt && \
 	sam deploy \
-		--template-file packaged.yaml \
 		--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
 		--capabilities CAPABILITY_IAM \
 		--parameter-overrides \
 			BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
 			Stage=$${AWS_BRANCH} \
-			AppsyncApiId=$${GRAPHQL_API_ID}
+			AppsyncApiId=$${GRAPHQL_API_ID} \
+		--resolve-s3
 
 delete: ##=> Delete booking service
-	aws cloudformation delete-stack --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
+	sam delete --stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH}
 
 format:
 	poetry run isort src/loyalty tests
