@@ -8,6 +8,9 @@ Globals:
     Timeout: 5
     Tracing: Active
     MemorySize: 512
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: loyalty
   Api:
     TracingEnabled: true
     EndpointConfiguration: REGIONAL
@@ -30,6 +33,9 @@ Parameters:
     Default: 14
     Description: CloudWatch Logs retention period
 
+  SharedLibsLayer:
+      Type: AWS::SSM::Parameter::Value<String>
+      Description: Project shared libraries Lambda Layer ARN
 
 Resources:
   LoyaltyTransactionsQueue:
@@ -87,6 +93,8 @@ Resources:
     Properties:
       FunctionName: !Sub ServerlessAirline-IngestLoyalty-${Stage}
       CodeUri: src
+      Layers:
+          - !Ref SharedLibsLayer
       Handler: loyalty.ingest.app.lambda_handler
       Runtime: python3.9
       Policies:
@@ -114,6 +122,8 @@ Resources:
     Properties:
       FunctionName: !Sub ServerlessAirline-GetLoyalty-${Stage}
       CodeUri: src
+      Layers:
+          - !Ref SharedLibsLayer
       Handler: loyalty.get.app.lambda_handler
       Runtime: python3.8
       Policies:
@@ -121,7 +131,7 @@ Resources:
             TableName: !Ref LoyaltyDataTable
       Environment:
         Variables:
-          TABLE_NAME: !Ref LoyaltyDataTable
+          LOYALTY_TABLE_NAME: !Ref LoyaltyDataTable
           STAGE: !Ref Stage
       Events:
         Api:
@@ -136,8 +146,11 @@ Resources:
     Properties:
       FunctionName: !Sub ServerlessAirline-AggregateLoyalty-${Stage}
       CodeUri: src
+      Layers:
+          - !Ref SharedLibsLayer
       Handler: loyalty.aggregate.app.lambda_handler
       Runtime: python3.9
+      MemorySize: 1024
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -164,6 +177,7 @@ Resources:
             StartingPosition: LATEST
             MaximumBatchingWindowInSeconds: 5
             BisectBatchOnFunctionError: true
+            MaximumRetryAttempts: 2
             DestinationConfig:
               OnFailure:
                 Destination: !GetAtt UnhandledLoyaltyAggregatesQueue.Arn

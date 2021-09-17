@@ -13,7 +13,7 @@ def test_process_loyalty_points(record, transaction):
 
 
 def test_add_loyalty_points_invalid_record(record, monkeypatch):
-    monkeypatch.setenv("TABLE_NAME", "test")
+    monkeypatch.setenv("LOYALTY_TABLE_NAME", "test")
     record["body"] = '{"customerId":"1234","price":100}'  # old payload
     with pytest.raises(ValueError, match="Invalid payload"):
         app.process_loyalty_points(record=record)
