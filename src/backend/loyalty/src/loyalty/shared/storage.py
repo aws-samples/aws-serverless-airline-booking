@@ -3,7 +3,7 @@ import calendar
 import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
-from typing import Dict, List, Optional, Tuple, Type, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -81,6 +81,7 @@ class DynamoDBStorage(BaseStorage):
         self.client = client
         self.logger = logger or Logger(child=True)
 
+    # TODO:
     def add(self, item: LoyaltyPoint) -> None:
         """Add a single loyalty point transaction
 
@@ -107,12 +108,12 @@ class DynamoDBStorage(BaseStorage):
             Aggregate of Loyalty point per customer
         """
         transactions = self.build_add_aggregate_update_item_input(customers=items)
-
+        self.logger.info(transactions)
         try:
             for transaction in transactions:
                 self.logger.append_keys(
                     customer_id=transaction["Key"]["pk"].lstrip("CUSTOMER#"),  # type: ignore
-                    booking_id=transaction["ExpressionAttributeValues"][":booking"],
+                    booking_id=next(iter(transaction["ExpressionAttributeValues"][":booking"])),  # type: ignore
                 )
                 self.logger.debug("Adding aggregate points")
                 self.client.update_item(**transaction)
@@ -145,7 +146,7 @@ class DynamoDBStorage(BaseStorage):
             )
             self.logger.info("Fetched loyalty tier and aggregate points successfully")
 
-            data: Dict[str, str] = cast(dict, ret["Item"])
+            data: Dict[str, str] = cast(dict, ret.get("Item", {}))
             tier = data.get("tier", "BRONZE")
             aggregate_points = int(data.get("totalPoints", 0))
         except ClientError:
@@ -164,7 +165,7 @@ class DynamoDBStorage(BaseStorage):
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
         sortable_id = ksuid.ksuid()
-        ttl: datetime.datetime = sortable_id + datetime.timedelta(days=365)
+        ttl: datetime.datetime = sortable_id.datetime + datetime.timedelta(days=365)
         return {
             "Item": {
                 "pk": f"CUSTOMER#{item.customerId}",
@@ -182,22 +183,43 @@ class DynamoDBStorage(BaseStorage):
     def build_add_aggregate_update_item_input(
         customers: Dict[str, LoyaltyPointAggregate]
     ) -> List[UpdateItemInputTableTypeDef]:
-        return [
-            {
+        """Builds a list of conditional loyalty transaction updates for DynamoDB
+
+
+        We use a set of bookings for idempotency,
+        and ADD operation to take into account increment/decrement
+
+        Parameters
+        ----------
+        customers : Dict[str, LoyaltyPointAggregate]
+            Dict of unique customers and their transactions
+
+        Returns
+        -------
+        List[UpdateItemInputTableTypeDef]
+            List of loyalty transactions to be updated in DynamoDB
+        """
+        transactions = []
+        for customer, transaction in customers.items():
+            input_item: UpdateItemInputTableTypeDef = {
                 "Key": {"pk": customer, "sk": "AGGREGATE"},
-                "UpdateExpression": "ADD totalPoints :incr, bookings :bookings SET tier = :tier, updatedAt = :timestamp",  # noqa: E501
+                "UpdateExpression": "ADD totalPoints :incr, bookings :booking SET tier = :tier, updatedAt = :timestamp",  # noqa: E501
                 "ExpressionAttributeValues": {
                     ":incr": transaction.total_points,
-                    ":bookings": {transaction.booking},
+                    ":booking": {transaction.booking},
                     ":tier": transaction.tier,
                     ":timestamp": str(transaction.updatedAt),
-                    ":booking": transaction.booking,
                 },
-                # Only update aggregate points if booking has not been processed before
-                "ConditionExpression": "not(contains(bookings, :booking))",
             }
-            for customer, transaction in customers.items()
-        ]
+            if transaction.increment:
+                # Only update aggregate points if booking has not been processed before
+                input_item["ConditionExpression"] = "not(contains(bookings, :booking))"
+
+            transactions.append(input_item)
+
+        return transactions
+
+        # for customer, transaction in customers.items()
 
     @staticmethod
     def build_loyalty_point_list(event: DynamoDBStreamEvent) -> List[LoyaltyPoint]:
@@ -251,7 +273,7 @@ class DynamoDBStorage(BaseStorage):
         DynamoDBStorage
             Instance of DynamoDB Storage
         """
-        table = os.getenv("TABLE_NAME", "")
+        table = os.getenv("LOYALTY_TABLE_NAME", "")
         session = boto3.Session()
         dynamodb = session.resource("dynamodb").Table(table)
         return cls(client=dynamodb, logger=logger)

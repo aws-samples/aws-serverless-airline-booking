@@ -39,24 +39,28 @@ def calculate_aggregate_points(records: List[LoyaltyPoint]) -> Dict[str, Loyalty
     Dict[str, LoyaltyPointAggregate]
         Loyalty transactions aggregated per customer
     """
-    transactions: Dict[str, LoyaltyPoint] = {}
+    seen: Dict[str, LoyaltyPoint] = {}
     aggregates: Dict[str, LoyaltyPointAggregate] = {}
     data = deepcopy(records)
 
     for record in data:
-        if record.customerId in transactions:
-            if record.increment:
-                transactions[record.customerId].points += record.points
-            else:
-                transactions[record.customerId].points -= record.points
+        if record.customerId not in seen:
+            seen[record.customerId] = record
         else:
-            transactions[record.customerId] = record
-
-    for customer, transaction in transactions.items():
+            # duplicate transaction
+            if seen[record.customerId].booking == record.booking:
+                continue
+            if record.increment:
+                seen[record.customerId].points += record.points
+            else:
+                seen[record.customerId].points -= record.points
+    for customer, transaction in seen.items():
+        points = transaction.points if transaction.increment else 0 - transaction.points
         aggregates[customer] = LoyaltyPointAggregate(
-            total_points=transaction.points,
-            tier=calculate_tier(transaction.points).value,
+            total_points=points,
+            tier=calculate_tier(points).value,
             booking=transaction.booking.id,
+            increment=transaction.increment,
         )
 
     return aggregates

@@ -20,11 +20,14 @@ def aggregate_loyalty_points(
         storage_client = DynamoDBStorage.from_env()
 
     transactions = calculate_aggregate_points(records=records)
+    logger.debug(f"Transactions before we store them: {records}")
     storage_client.add_aggregate(items=transactions)
 
     return transactions
 
 
+@tracer.capture_lambda_handler
+@logger.inject_lambda_context
 @event_source(data_class=DynamoDBStreamEvent)
 def lambda_handler(event: DynamoDBStreamEvent, _: LambdaContext):
     aggregates = DynamoDBStorage.build_loyalty_point_list(event=event)

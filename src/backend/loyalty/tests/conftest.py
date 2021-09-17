@@ -1,6 +1,8 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
+import os
+from aws_lambda_powertools.utilities.parameters import get_parameter
 
 import pytest
 from aws_lambda_powertools import Logger
@@ -11,6 +13,8 @@ from loyalty.shared.storage import DynamoDBStorage
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")
 AGG_REMOVE_TEST_EVENT = Path("tests/events/aggregate_remove_event.json")
+
+import uuid
 
 
 @pytest.fixture
@@ -59,10 +63,33 @@ def aggregate_modify_records():
 
 @pytest.fixture(scope="function")
 def dynamodb_storage(monkeypatch):
-    monkeypatch.setenv("TABLE_NAME", "test")
+    monkeypatch.setenv("LOYALTY_TABLE_NAME", "test")
     return DynamoDBStorage.from_env(logger=Logger(service="test"))
 
 
 def load_event(filepath: Path) -> dict:
     with filepath.open() as event:
         return json.load(event)
+
+
+@pytest.fixture
+def fake_loyalty_point():
+    return LoyaltyPoint(
+        customerId=f"fake-{str(uuid.uuid4())}",
+        booking=Booking(id="dummy", reference="dummy", outboundFlightId="dummy"),
+        payment=Payment(receipt="fake", amount=100),
+        points=100,
+    )
+
+
+@pytest.fixture
+def stage():
+    return os.getenv("AWS_BRANCH", "develop")
+
+
+@pytest.fixture
+def table_name(stage):
+    table = os.getenv("LOYALTY_TABLE_NAME")
+    if table is None:
+        table = get_parameter(name=f"/{stage}/service/loyalty/storage/table")
+    return table

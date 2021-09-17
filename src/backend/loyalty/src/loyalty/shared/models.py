@@ -44,3 +44,4 @@ class LoyaltyPointAggregate:
     tier: str
     booking: str
     updatedAt: str = field(default_factory=datetime.datetime.utcnow().isoformat)
+    increment: bool = True
