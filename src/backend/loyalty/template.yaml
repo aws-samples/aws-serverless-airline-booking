@@ -194,12 +194,19 @@ Resources:
       Type: String
       Value: !Sub "https://${LoyaltyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
-  LoyaltyQueueParameters:
+  LoyaltyQueueParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: !Sub "/${Stage}/service/loyalty/messaging/queue"
       Type: String
-      Value: !GetAtt LoyaltyTransactionsQueue.Arn
+      Value: !Ref LoyaltyTransactionsQueue
+
+  LoyaltyTableParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${Stage}/service/loyalty/storage/table"
+      Type: String
+      Value: !Ref LoyaltyDataTable
   #
   # Uncomment the following resources + AccessLogSetting to enable API Gateway Logs
   # [CAUTION] API Gateway can only have one IAM Role to push logs too, do not uncomment if you already have one
@@ -380,11 +387,11 @@ Resources:
 
 Outputs:
   LoyaltyDataTable:
-    Value: !GetAtt LoyaltyDataTable.Arn
-    Description: Loyalty Data Table ARN
+    Value: !Ref LoyaltyDataTable
+    Description: Loyalty Data Table
 
   LoyaltyTransactionsQueue:
-    Value: !GetAtt LoyaltyTransactionsQueue.Arn
+    Value: !Ref LoyaltyTransactionsQueue
     Description: Loyalty SQS Queue ARN
 
   BaseUrl:
