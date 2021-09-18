@@ -1,5 +1,5 @@
 import time
-from typing import List
+from typing import Tuple
 
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -14,9 +14,7 @@ from loyalty.shared.storage import DynamoDBStorage
 
 session = boto3.Session()
 MAX_RETRIES = 5
-QUERY_TIMEOUT = 0.5
-
-from typing import Tuple
+QUERY_TIMEOUT = 0.6
 
 
 def fetch_aggregate(storage: DynamoDBStorage, customer_id: str) -> Tuple[LoyaltyTier, int]:

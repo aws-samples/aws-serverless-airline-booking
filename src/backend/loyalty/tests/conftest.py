@@ -1,11 +1,12 @@
 import json
+import os
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
-import os
-from aws_lambda_powertools.utilities.parameters import get_parameter
 
 import pytest
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.parameters import get_parameter
 
 from loyalty.shared.models import Booking, LoyaltyPoint, Payment
 from loyalty.shared.storage import DynamoDBStorage
@@ -13,8 +14,6 @@ from loyalty.shared.storage import DynamoDBStorage
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")
 AGG_REMOVE_TEST_EVENT = Path("tests/events/aggregate_remove_event.json")
-
-import uuid
 
 
 @pytest.fixture

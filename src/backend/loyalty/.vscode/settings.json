@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/Users/lessa/.pyenv/loyalty-PDs58T6r-py3.8/bin/python",
+    "python.pythonPath": "/Users/lessa/.pyenv/loyalty-PDs58T6r-py3.9/bin/python",
     "python.analysis.diagnosticSeverityOverrides": {
         "reportGeneralTypeIssues": "none",
     },
