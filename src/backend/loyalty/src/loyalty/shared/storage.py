@@ -164,6 +164,8 @@ class DynamoDBStorage(BaseStorage):
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
         sortable_id = ksuid.ksuid()
+        ttl: datetime.datetime = sortable_id.datetime + datetime.timedelta(days=365)
+
         return {
             "Item": {
                 "pk": f"CUSTOMER#TRANSACTION#{item.customerId}",
@@ -174,6 +176,7 @@ class DynamoDBStorage(BaseStorage):
                 "bookingDetails": asdict(item.booking),
                 "paymentDetails": asdict(item.payment),
                 "createdAt": sortable_id.datetime.isoformat(),
+                "expireAt": calendar.timegm(ttl.timetuple()),
             }
         }
 

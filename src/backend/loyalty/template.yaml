@@ -85,7 +85,7 @@ Resources:
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
       TimeToLiveSpecification:
-        AttributeName: createdAt
+        AttributeName: expireAt
         Enabled: true
 
   IngestFunc:
