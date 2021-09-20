@@ -7,7 +7,6 @@ from boto3.dynamodb.conditions import Key
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from loyalty.shared.storage import DynamoDBStorage
 
-# TODO: test row level access w/ composite key || change partition key to accommodate least privilege
 # TODO: tearDown:
 ### A) Delete all fake records including aggregates (batch_delete)
 ### B) Batch update items createdAt and updatedAt and let DDB delete it as part of TTL
@@ -29,10 +28,12 @@ def fetch_aggregate(storage: DynamoDBStorage, customer_id: str) -> Tuple[Loyalty
 def test_add_item_and_aggregation(fake_loyalty_point: LoyaltyPoint, table_name):
     ddb = session.resource("dynamodb").Table(table_name)
     storage = DynamoDBStorage(client=ddb)
-    customer_id = f"CUSTOMER#{fake_loyalty_point.customerId}"
 
     storage.add(item=fake_loyalty_point)
-    transaction = ddb.query(KeyConditionExpression=Key("pk").eq(customer_id) & Key("sk").begins_with("TRANSACTION"))
+    transaction = ddb.query(
+        KeyConditionExpression=Key("pk").eq(f"CUSTOMER#TRANSACTION#{fake_loyalty_point.customerId}")
+        & Key("sk").begins_with("TRANSACTION")
+    )
     assert transaction["Count"] == 1
 
     tier, points = fetch_aggregate(storage=storage, customer_id=fake_loyalty_point.customerId)

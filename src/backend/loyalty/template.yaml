@@ -102,7 +102,18 @@ Resources:
           Statement:
             Action: dynamodb:PutItem
             Effect: Allow
-            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
+            Resource: !GetAtt LoyaltyDataTable.Arn
+        - Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action: 
+              - dynamodb:PutItem
+              - dynamodb:BatchWriteItem
+            Resource: !GetAtt LoyaltyDataTable.Arn
+            Condition:
+              ForAllValues:StringLike:
+                dynamodb:LeadingKeys:
+                  - CUSTOMER#TRANSACTION#*
         - SQSPollerPolicy:
             QueueName:
                 !GetAtt LoyaltyTransactionsQueue.QueueName
@@ -127,8 +138,16 @@ Resources:
       Handler: loyalty.get.app.lambda_handler
       Runtime: python3.8
       Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref LoyaltyDataTable
+        - Version: '2012-10-17'
+          Statement:
+            Effect: Allow
+            Action: 
+              - dynamodb:GetItem
+            Resource: !GetAtt LoyaltyDataTable.Arn
+            Condition:
+              ForAllValues:StringLike:
+                dynamodb:LeadingKeys:
+                  - CUSTOMER#AGGREGATE
       Environment:
         Variables:
           LOYALTY_TABLE_NAME: !Ref LoyaltyDataTable
@@ -156,7 +175,11 @@ Resources:
           Statement:
             Effect: Allow
             Action: dynamodb:UpdateItem
-            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
+            Resource: !GetAtt LoyaltyDataTable.Arn
+            Condition:
+              ForAllValues:StringLike:
+                dynamodb:LeadingKeys:
+                  - CUSTOMER#AGGREGATE
         - Version: "2012-10-17"
           Statement:
             Effect: "Allow"

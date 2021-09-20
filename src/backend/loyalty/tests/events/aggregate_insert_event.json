@@ -13,7 +13,7 @@
                         "S": "TRANSACTION#1xlZA5SuZIThMs2Ncp7MdX0jerY"
                     },
                     "pk": {
-                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                        "S": "CUSTOMER#TRANSACTION#dd4649e6-2484-4993-acb8-0f9123103394"
                     }
                 },
                 "NewImage": {
@@ -27,7 +27,7 @@
                         "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
                     },
                     "pk": {
-                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                        "S": "CUSTOMER#TRANSACTION#dd4649e6-2484-4993-acb8-0f9123103394"
                     },
                     "paymentDetails": {
                         "M": {
@@ -78,7 +78,7 @@
                         "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
                     },
                     "pk": {
-                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                        "S": "CUSTOMER#TRANSACTION#dd4649e6-2484-4993-acb8-0f9123103394"
                     }
                 },
                 "NewImage": {
@@ -92,7 +92,7 @@
                         "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
                     },
                     "pk": {
-                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                        "S": "CUSTOMER#TRANSACTION#dd4649e6-2484-4993-acb8-0f9123103394"
                     },
                     "paymentDetails": {
                         "M": {
@@ -143,7 +143,7 @@
                         "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
                     },
                     "pk": {
-                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                        "S": "CUSTOMER#TRANSACTION#ff1279e6-2484-4993-acb8-0f9123103201"
                     }
                 },
                 "NewImage": {
@@ -157,7 +157,7 @@
                         "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
                     },
                     "pk": {
-                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                        "S": "CUSTOMER#TRANSACTION#ff1279e6-2484-4993-acb8-0f9123103201"
                     },
                     "paymentDetails": {
                         "M": {
@@ -208,7 +208,7 @@
                         "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
                     },
                     "pk": {
-                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                        "S": "CUSTOMER#TRANSACTION#ff1279e6-2484-4993-acb8-0f9123103201"
                     }
                 },
                 "NewImage": {
@@ -222,7 +222,7 @@
                         "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
                     },
                     "pk": {
-                        "S": "CUSTOMER#ff1279e6-2484-4993-acb8-0f9123103201"
+                        "S": "CUSTOMER#TRANSACTION#ff1279e6-2484-4993-acb8-0f9123103201"
                     },
                     "paymentDetails": {
                         "M": {
@@ -273,7 +273,7 @@
                         "S": "TRANSACTION#2xlZA5SuZIThMs2Ncp7MdX0jerY"
                     },
                     "pk": {
-                        "S": "CUSTOMER#abc279e6-2484-4993-acb8-0f9123105678"
+                        "S": "CUSTOMER#TRANSACTION#abc279e6-2484-4993-acb8-0f9123105678"
                     }
                 },
                 "NewImage": {
@@ -287,7 +287,7 @@
                         "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
                     },
                     "pk": {
-                        "S": "CUSTOMER#abc279e6-2484-4993-acb8-0f9123105678"
+                        "S": "CUSTOMER#TRANSACTION#abc279e6-2484-4993-acb8-0f9123105678"
                     },
                     "paymentDetails": {
                         "M": {
@@ -338,7 +338,7 @@
                         "S": "TRANSACTION#1xlZA5SuZIThMs2Ncp7MdX0jerY"
                     },
                     "pk": {
-                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                        "S": "CUSTOMER#TRANSACTION#dd4649e6-2484-4993-acb8-0f9123103394"
                     }
                 },
                 "OldImage": {
@@ -352,7 +352,7 @@
                         "S": "30c0d2f2-56a3-4068-bf20-ff7703db552d"
                     },
                     "pk": {
-                        "S": "CUSTOMER#dd4649e6-2484-4993-acb8-0f9123103394"
+                        "S": "CUSTOMER#TRANSACTION#dd4649e6-2484-4993-acb8-0f9123103394"
                     },
                     "paymentDetails": {
                         "M": {

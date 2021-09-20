@@ -81,14 +81,13 @@ class DynamoDBStorage(BaseStorage):
         self.client = client
         self.logger = logger or Logger(child=True)
 
-    # TODO:
     def add(self, item: LoyaltyPoint) -> None:
         """Add a single loyalty point transaction
 
         Parameters
         ----------
         item : LoyaltyPoint
-            Loyalty Point to be added
+            Loyalty Point `to` be added
 
         """
         try:
@@ -112,7 +111,7 @@ class DynamoDBStorage(BaseStorage):
         try:
             for transaction in transactions:
                 self.logger.append_keys(
-                    customer_id=transaction["Key"]["pk"].lstrip("CUSTOMER#"),  # type: ignore
+                    customer_id=transaction["Key"]["sk"].lstrip("AGGREGATE#"),  # type: ignore
                     booking_id=next(iter(transaction["ExpressionAttributeValues"][":booking"])),  # type: ignore
                 )
                 self.logger.debug("Adding aggregate points")
@@ -158,24 +157,23 @@ class DynamoDBStorage(BaseStorage):
     @staticmethod
     def build_get_loyalty_tier_points_get_item_input(customer_id: str) -> GetItemInputTableTypeDef:
         return {
-            "Key": {"pk": f"CUSTOMER#{customer_id}", "sk": "AGGREGATE"},
+            "Key": {"pk": "CUSTOMER#AGGREGATE", "sk": f"AGGREGATE#{customer_id}"},
             "AttributesToGet": ["totalPoints", "tier"],
         }
 
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
         sortable_id = ksuid.ksuid()
-        ttl: datetime.datetime = sortable_id.datetime + datetime.timedelta(days=365)
         return {
             "Item": {
-                "pk": f"CUSTOMER#{item.customerId}",
-                "sk": f"TRANSACTION#{str(sortable_id)}",
+                "pk": f"CUSTOMER#TRANSACTION#{item.customerId}",
+                "sk": f"TRANSACTION#{sortable_id}",
                 "outboundFlightId": item.booking.outboundFlightId,
                 "points": item.payment.amount,
                 "status": item.status,
                 "bookingDetails": asdict(item.booking),
                 "paymentDetails": asdict(item.payment),
-                "createdAt": calendar.timegm(ttl.timetuple()),
+                "createdAt": sortable_id.datetime.isoformat(),
             }
         }
 
@@ -202,7 +200,7 @@ class DynamoDBStorage(BaseStorage):
         transactions = []
         for customer, transaction in customers.items():
             input_item: UpdateItemInputTableTypeDef = {
-                "Key": {"pk": customer, "sk": "AGGREGATE"},
+                "Key": {"pk": "CUSTOMER#AGGREGATE", "sk": f"AGGREGATE#{customer}"},
                 "UpdateExpression": "ADD totalPoints :incr, bookings :booking SET tier = :tier, updatedAt = :timestamp",  # noqa: E501
                 "ExpressionAttributeValues": {
                     ":incr": transaction.total_points,
@@ -247,9 +245,10 @@ class DynamoDBStorage(BaseStorage):
 
             booking: Dict = {k: v.get_value for k, v in data.get("bookingDetails").get_value.items()}  # type: ignore
             payment: Dict = {k: v.get_value for k, v in data.get("paymentDetails").get_value.items()}  # type: ignore
+
             aggregates.append(
                 LoyaltyPoint(
-                    customerId=data.get("pk").get_value,  # type: ignore
+                    customerId=data.get("pk").get_value.lstrip("CUSTOMER#TRANSACTION#"),  # type: ignore
                     booking=Booking(**booking),
                     payment=Payment(**payment),
                     points=int(data.get("points").get_value),  # type: ignore

@@ -30,6 +30,7 @@ def aggregate_loyalty_points(
 @logger.inject_lambda_context
 @event_source(data_class=DynamoDBStreamEvent)
 def lambda_handler(event: DynamoDBStreamEvent, _: LambdaContext):
+    logger.debug(event.raw_event)
     aggregates = DynamoDBStorage.build_loyalty_point_list(event=event)
     ret = aggregate_loyalty_points(records=aggregates)
     return {"processed_aggregate": len(ret)}
