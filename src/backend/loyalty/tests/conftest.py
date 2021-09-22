@@ -74,7 +74,7 @@ def load_event(filepath: Path) -> dict:
 @pytest.fixture
 def fake_loyalty_point():
     return LoyaltyPoint(
-        customerId=f"fake-{str(uuid.uuid4())}",
+        customerId=f"fake-{uuid.uuid4()}",
         booking=Booking(id="dummy", reference="dummy", outboundFlightId="dummy"),
         payment=Payment(receipt="fake", amount=100),
         points=100,
