@@ -1,5 +1,3 @@
-import calendar
-import datetime
 import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
@@ -23,7 +21,17 @@ from mypy_boto3_dynamodb.type_defs import (
 )
 
 from loyalty.shared.functions import calculate_aggregate_points
-from loyalty.shared.models import Booking, LoyaltyPoint, LoyaltyPointAggregate, LoyaltyTier, Payment
+from loyalty.shared.models import (
+    Booking,
+    LoyaltyPoint,
+    LoyaltyPointAggregate,
+    LoyaltyTier,
+    Payment,
+    create_loyalty_expiration_epoch,
+)
+
+
+STAGE: str = os.getenv("STAGE", "")
 
 
 class BaseStorage(ABC):
@@ -164,7 +172,6 @@ class DynamoDBStorage(BaseStorage):
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
         sortable_id = ksuid.ksuid()
-        ttl: datetime.datetime = sortable_id.datetime + datetime.timedelta(days=365)
 
         return {
             "Item": {
@@ -176,7 +183,7 @@ class DynamoDBStorage(BaseStorage):
                 "bookingDetails": asdict(item.booking),
                 "paymentDetails": asdict(item.payment),
                 "createdAt": sortable_id.datetime.isoformat(),
-                "expireAt": calendar.timegm(ttl.timetuple()),
+                "expireAt": item.expireAt,
             }
         }
 
@@ -204,12 +211,15 @@ class DynamoDBStorage(BaseStorage):
         for customer, transaction in customers.items():
             input_item: UpdateItemInputTableTypeDef = {
                 "Key": {"pk": "CUSTOMER#AGGREGATE", "sk": f"AGGREGATE#{customer}"},
-                "UpdateExpression": "ADD totalPoints :incr, bookings :booking SET tier = :tier, updatedAt = :timestamp",  # noqa: E501
+                "UpdateExpression": "ADD totalPoints :incr, bookings :booking SET tier = :tier, updatedAt = :timestamp, expireAt = :expiration",  # noqa: E501
                 "ExpressionAttributeValues": {
                     ":incr": transaction.total_points,
                     ":booking": {transaction.booking},
                     ":tier": transaction.tier,
                     ":timestamp": str(transaction.updatedAt),
+                    # sets TTL for fake aggregate data or simply set a safe non-epoch time to be ignored
+                    # since we don't want to expire aggregate points from a business perspective
+                    ":expiration": 0 if "prod" in STAGE else create_loyalty_expiration_epoch(days=7),
                 },
             }
             if transaction.increment:

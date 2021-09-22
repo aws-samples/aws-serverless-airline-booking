@@ -1,6 +1,24 @@
+import calendar
 import datetime
 from dataclasses import dataclass, field
 from enum import Enum
+
+
+def create_loyalty_expiration_epoch(days: int = 365) -> int:
+    """Create expiration utc time in epoch for loyalty transaction
+
+    Parameters
+    ----------
+    days : int, optional
+        days before it expires, by default 365
+
+    Returns
+    -------
+    int
+        expiration in epoch time
+    """
+    ttl = datetime.datetime.utcnow() + datetime.timedelta(days=days)
+    return calendar.timegm(ttl.timetuple())
 
 
 class PointStatus(Enum):
@@ -36,6 +54,7 @@ class LoyaltyPoint:
     tier: str = LoyaltyTier.BRONZE.value
     status: str = PointStatus.ACTIVE.value
     increment: bool = True
+    expireAt: int = field(default_factory=create_loyalty_expiration_epoch)
 
 
 @dataclass

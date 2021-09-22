@@ -27,7 +27,7 @@ lint: format
 
 test:
 	poetry run pytest tests/unit
-	poetry run pytest tests/integ
+	STAGE=test poetry run pytest tests/integ
 
 coverage-html:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html

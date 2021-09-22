@@ -8,8 +8,9 @@ import pytest
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.parameters import get_parameter
 
-from loyalty.shared.models import Booking, LoyaltyPoint, Payment
+from loyalty.shared.models import Booking, LoyaltyPoint, Payment, create_loyalty_expiration_epoch
 from loyalty.shared.storage import DynamoDBStorage
+
 
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")
@@ -78,6 +79,7 @@ def fake_loyalty_point():
         booking=Booking(id="dummy", reference="dummy", outboundFlightId="dummy"),
         payment=Payment(receipt="fake", amount=100),
         points=100,
+        expireAt=create_loyalty_expiration_epoch(days=7),
     )
 
 

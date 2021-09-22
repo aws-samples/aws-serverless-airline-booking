@@ -7,9 +7,6 @@ from boto3.dynamodb.conditions import Key
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from loyalty.shared.storage import DynamoDBStorage
 
-# TODO: tearDown:
-### A) Delete all fake records including aggregates (batch_delete)
-### B) Batch update items createdAt and updatedAt and let DDB delete it as part of TTL
 
 session = boto3.Session()
 MAX_RETRIES = 5
