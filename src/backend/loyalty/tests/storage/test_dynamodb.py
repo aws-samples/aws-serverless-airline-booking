@@ -8,7 +8,7 @@ from loyalty.shared.functions import calculate_aggregate_points
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from loyalty.shared.storage import DynamoDBStorage
 
-# NOTE: Pytest has import conflict w/ storage somehow; keeping storage tests separate
+# NOTE: Pytest has import conflict w/ storage somehow; keeping storage unit tests separate
 
 
 def test_get_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: LoyaltyPoint):
@@ -68,6 +68,16 @@ def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorag
         stub.assert_no_pending_responses()  # THEN
 
 
+def test_aggregate_loyalty_points_ignore_aggregate(dynamodb_storage: DynamoDBStorage, aggregate_modify_records):
+    # GIVEN
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_modify_records))
+    aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
+
+    with Stubber(dynamodb_storage.client.meta.client) as stub:
+        dynamodb_storage.add_aggregate(items=aggregated_customers)  # WHEN
+        stub.assert_no_pending_responses()  # THEN
+
+
 def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_records, transaction: LoyaltyPoint):
     loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
@@ -80,3 +90,6 @@ def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_re
 
     with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.get_customer_tier_points(customer_id=transaction.customerId)
+
+
+# Test for missing key errors

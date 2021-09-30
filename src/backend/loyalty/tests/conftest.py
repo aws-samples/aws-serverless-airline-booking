@@ -30,13 +30,13 @@ def lambda_context():
 
 
 @pytest.fixture
-def records():
+def sqs_records():
     return load_event(filepath=INGEST_TEST_EVENT)
 
 
 @pytest.fixture
-def record():
-    return load_event(filepath=INGEST_TEST_EVENT)["Records"][0]
+def record(sqs_records):
+    return sqs_records["Records"][0]
 
 
 @pytest.fixture
