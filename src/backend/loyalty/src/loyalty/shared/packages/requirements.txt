@@ -1,0 +1,2 @@
+aws-lambda-powertools==1.20.2
+cyksuid==1.1.0

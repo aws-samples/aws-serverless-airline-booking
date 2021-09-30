@@ -4,7 +4,7 @@ dev:
 
 deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 	$(info [*] Packaging and deploying Loyalty service...)
-	sam build --cached --use-container -m requirements.txt && \
+	sam build --cached --use-container && \
 	sam deploy \
 		--stack-name $${STACK_NAME}-loyalty-$${AWS_BRANCH} \
 		--capabilities CAPABILITY_IAM \
@@ -12,7 +12,6 @@ deploy: ##=> Deploy loyalty service using SAM and TypeScript build
 			BookingSNSTopic=/$${AWS_BRANCH}/service/booking/messaging/bookingTopic \
 			Stage=$${AWS_BRANCH} \
 			AppsyncApiId=$${GRAPHQL_API_ID} \
-			SharedLibsLayer=/$${AWS_BRANCH}/shared/lambda/layers/projectArn \
 		--resolve-s3
 
 delete: ##=> Delete booking service

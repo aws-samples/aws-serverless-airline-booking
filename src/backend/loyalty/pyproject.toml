@@ -6,6 +6,8 @@ authors = ["heitorlessa <lessa@amazon.nl>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+cyksuid = "^1.1.0"
+aws-lambda-powertools = "^1.20.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
@@ -14,8 +16,6 @@ pytest-cov = "^2.12.1"
 boto3-stubs = {extras = ["dynamodb"], version = "^1.18.31"}
 black = "^21.7b0"
 isort = "^5.9.3"
-aws-lambda-powertools = "^1.20.1"
-cyksuid = "^1.1.0"
 boto3 = "^1.18.41"
 flake8-black = "^0.2.3"
 flake8-builtins = "^1.5.3"
