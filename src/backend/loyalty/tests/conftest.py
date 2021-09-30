@@ -53,12 +53,11 @@ def aggregate_records():
 
 
 @pytest.fixture
-def aggregate_modify_records():
-    event = load_event(filepath=AGG_INSERT_TEST_EVENT)
-    for record in event["Records"]:
+def aggregate_modify_records(aggregate_records):
+    for record in aggregate_records["Records"]:
         record["eventName"] = "MODIFY"
 
-    return event
+    return aggregate_records
 
 
 @pytest.fixture(scope="function")

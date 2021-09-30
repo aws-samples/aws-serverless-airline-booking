@@ -306,5 +306,5 @@ class DynamoDBStorage(BaseStorage):
         """
         return (
             record.event_name == DynamoDBRecordEventName.MODIFY
-            or "AGGREGATE" in record.dynamodb.keys.get("sk").get_value  # type: ignore
+            or "CUSTOMER#AGGREGATE" in record.dynamodb.keys.get("pk").get_value  # type: ignore
         )

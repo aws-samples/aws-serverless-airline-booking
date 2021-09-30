@@ -1,3 +1,5 @@
+import copy
+
 import pytest
 from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent
 from botocore.exceptions import ClientError
@@ -58,38 +60,47 @@ def test_aggregate_loyalty_points(dynamodb_storage: DynamoDBStorage, aggregate_r
         stub.assert_no_pending_responses()  # THEN
 
 
-def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorage, aggregate_modify_records):
+def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorage, aggregate_modify_records: dict):
     # GIVEN
     loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_modify_records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
-    with Stubber(dynamodb_storage.client.meta.client) as stub:
-        dynamodb_storage.add_aggregate(items=aggregated_customers)  # WHEN
-        stub.assert_no_pending_responses()  # THEN
+    # WHEN
+    dynamodb_storage.add_aggregate(items=aggregated_customers)
+    # THEN
+    assert loyalty_aggregates == []
+    assert aggregated_customers == {}
 
 
-def test_aggregate_loyalty_points_ignore_aggregate(dynamodb_storage: DynamoDBStorage, aggregate_modify_records):
+def test_aggregate_loyalty_points_ignore_aggregate(dynamodb_storage: DynamoDBStorage, aggregate_records: dict):
     # GIVEN
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_modify_records))
+    records = copy.deepcopy(aggregate_records)
+    for record in records["Records"]:
+        record["dynamodb"]["Keys"]["pk"]["S"] = "CUSTOMER#AGGREGATE"
+
+    loyalty_aggregates = dynamodb_storage.build_loyalty_point_list(event=DynamoDBStreamEvent(records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
-    with Stubber(dynamodb_storage.client.meta.client) as stub:
-        dynamodb_storage.add_aggregate(items=aggregated_customers)  # WHEN
-        stub.assert_no_pending_responses()  # THEN
+    # WHEN
+    dynamodb_storage.add_aggregate(items=aggregated_customers)
+    # THEN
+    assert loyalty_aggregates == []
+    assert aggregated_customers == {}
 
 
-def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_records, transaction: LoyaltyPoint):
+def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_records: dict, transaction: LoyaltyPoint):
+    # GIVEN
     loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
+    # WHEN/THEN
     with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.add_aggregate(items=aggregated_customers)
 
+    # WHEN/THEN
     with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.add(item=transaction)
 
+    # WHEN/THEN
     with pytest.raises(ClientError, match="ResourceNotFoundException"):
         dynamodb_storage.get_customer_tier_points(customer_id=transaction.customerId)
-
-
-# Test for missing key errors
