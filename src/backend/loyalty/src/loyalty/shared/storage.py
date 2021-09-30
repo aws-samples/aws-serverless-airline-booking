@@ -1,7 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
-from typing import Dict, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, cast
 
 import boto3
 from aws_lambda_powertools import Logger
@@ -12,13 +12,6 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from botocore.exceptions import ClientError
 from cyksuid import ksuid
-from mypy_boto3_dynamodb import service_resource
-from mypy_boto3_dynamodb.type_defs import (
-    GetItemInputTableTypeDef,
-    GetItemOutputTypeDef,
-    PutItemInputTableTypeDef,
-    UpdateItemInputTableTypeDef,
-)
 
 from loyalty.shared.functions import calculate_aggregate_points
 from loyalty.shared.models import (
@@ -29,6 +22,15 @@ from loyalty.shared.models import (
     Payment,
     create_loyalty_expiration_epoch,
 )
+
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb import service_resource
+    from mypy_boto3_dynamodb.type_defs import (
+        GetItemInputTableTypeDef,
+        GetItemOutputTypeDef,
+        PutItemInputTableTypeDef,
+        UpdateItemInputTableTypeDef,
+    )
 
 
 STAGE: str = os.getenv("STAGE", "")

@@ -26,6 +26,7 @@ flake8-isort = "^4.0.0"
 flake8-variables-names = "^0.0.4"
 mypy = "^0.910"
 typed-ast = "^1.4.3"
+mypy-boto3-dynamodb = "^1.18.51"
 
 [tool.black]
 line-length = 120

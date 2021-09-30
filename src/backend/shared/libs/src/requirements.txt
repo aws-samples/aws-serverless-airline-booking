@@ -2,4 +2,3 @@ aws-lambda-powertools==1.20.2
 boto3==1.18.31
 requests==2.26.0
 cyksuid==1.1.0
-mypy_boto3_dynamodb==1.18.43
