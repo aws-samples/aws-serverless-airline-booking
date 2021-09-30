@@ -6,15 +6,14 @@ from pathlib import Path
 
 import pytest
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent
 from aws_lambda_powertools.utilities.parameters import get_parameter
 
 from loyalty.shared.models import Booking, LoyaltyPoint, Payment, create_loyalty_expiration_epoch
 from loyalty.shared.storage import DynamoDBStorage
 
-
 INGEST_TEST_EVENT = Path("tests/events/ingest_event.json")
 AGG_INSERT_TEST_EVENT = Path("tests/events/aggregate_insert_event.json")
-AGG_REMOVE_TEST_EVENT = Path("tests/events/aggregate_remove_event.json")
 
 
 @pytest.fixture
@@ -48,16 +47,29 @@ def transaction(record):
 
 
 @pytest.fixture
-def aggregate_records():
+def aggregate_insert_event():
     return load_event(filepath=AGG_INSERT_TEST_EVENT)
 
 
 @pytest.fixture
-def aggregate_modify_records(aggregate_records):
-    for record in aggregate_records["Records"]:
+def aggregate_records(aggregate_insert_event: dict):
+    return DynamoDBStreamEvent(aggregate_insert_event)
+
+
+@pytest.fixture
+def aggregate_modify_records(aggregate_insert_event: dict):
+    for record in aggregate_insert_event["Records"]:
         record["eventName"] = "MODIFY"
 
-    return aggregate_records
+    return DynamoDBStreamEvent(aggregate_insert_event)
+
+
+@pytest.fixture
+def aggregate_agg_records(aggregate_insert_event: dict):
+    for record in aggregate_insert_event["Records"]:
+        record["dynamodb"]["Keys"]["pk"]["S"] = "CUSTOMER#AGGREGATE"
+
+    return DynamoDBStreamEvent(aggregate_insert_event)
 
 
 @pytest.fixture(scope="function")

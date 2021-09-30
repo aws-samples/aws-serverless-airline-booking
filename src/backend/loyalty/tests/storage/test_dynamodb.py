@@ -1,5 +1,3 @@
-import copy
-
 import pytest
 from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent
 from botocore.exceptions import ClientError
@@ -30,7 +28,7 @@ def test_get_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: Loya
         assert points == 100
 
 
-def test_add_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction):
+def test_add_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction: LoyaltyPoint):
     # GIVEN
     put_item_params: PutItemInputRequestTypeDef = {
         "TableName": "test",
@@ -44,9 +42,9 @@ def test_add_loyalty_points(dynamodb_storage: DynamoDBStorage, transaction):
         stub.assert_no_pending_responses()  # THEN
 
 
-def test_aggregate_loyalty_points(dynamodb_storage: DynamoDBStorage, aggregate_records):
+def test_aggregate_loyalty_points(dynamodb_storage: DynamoDBStorage, aggregate_records: DynamoDBStreamEvent):
     # GIVEN
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=aggregate_records)
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
     update_item_inputs = DynamoDBStorage.build_add_aggregate_update_item_input(customers=aggregated_customers)
 
@@ -60,9 +58,11 @@ def test_aggregate_loyalty_points(dynamodb_storage: DynamoDBStorage, aggregate_r
         stub.assert_no_pending_responses()  # THEN
 
 
-def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorage, aggregate_modify_records: dict):
+def test_aggregate_loyalty_points_ignore_modify(
+    dynamodb_storage: DynamoDBStorage, aggregate_modify_records: DynamoDBStreamEvent
+):
     # GIVEN
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_modify_records))
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=aggregate_modify_records)
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
     # WHEN
@@ -72,13 +72,11 @@ def test_aggregate_loyalty_points_ignore_modify(dynamodb_storage: DynamoDBStorag
     assert aggregated_customers == {}
 
 
-def test_aggregate_loyalty_points_ignore_aggregate(dynamodb_storage: DynamoDBStorage, aggregate_records: dict):
+def test_aggregate_loyalty_points_ignore_aggregate(
+    dynamodb_storage: DynamoDBStorage, aggregate_agg_records: DynamoDBStreamEvent
+):
     # GIVEN
-    records = copy.deepcopy(aggregate_records)
-    for record in records["Records"]:
-        record["dynamodb"]["Keys"]["pk"]["S"] = "CUSTOMER#AGGREGATE"
-
-    loyalty_aggregates = dynamodb_storage.build_loyalty_point_list(event=DynamoDBStreamEvent(records))
+    loyalty_aggregates = dynamodb_storage.build_loyalty_point_list(event=aggregate_agg_records)
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
     # WHEN
@@ -88,9 +86,11 @@ def test_aggregate_loyalty_points_ignore_aggregate(dynamodb_storage: DynamoDBSto
     assert aggregated_customers == {}
 
 
-def test_client_errors_propagate(dynamodb_storage: DynamoDBStorage, aggregate_records: dict, transaction: LoyaltyPoint):
+def test_client_errors_propagate(
+    dynamodb_storage: DynamoDBStorage, aggregate_records: DynamoDBStreamEvent, transaction: LoyaltyPoint
+):
     # GIVEN
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
+    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=aggregate_records)
     aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
 
     # WHEN/THEN
