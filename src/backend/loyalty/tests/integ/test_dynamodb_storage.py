@@ -43,7 +43,7 @@ def test_aggregate_idempotency(fake_loyalty_point: LoyaltyPoint, table_name):
     ddb = session.resource("dynamodb").Table(table_name)
     storage = DynamoDBStorage(client=ddb)
 
-    # WHEN we attempt circumvent dedup logic in aggregate code
+    # WHEN we attempt to circumvent dedup logic in aggregate code
     storage.add(item=fake_loyalty_point)
     storage.add(item=fake_loyalty_point)
     storage.add(item=fake_loyalty_point)
@@ -51,5 +51,6 @@ def test_aggregate_idempotency(fake_loyalty_point: LoyaltyPoint, table_name):
     tier, points = fetch_aggregate(storage=storage, customer_id=fake_loyalty_point.customerId)
 
     # THEN we should have calculated aggregate key only once
+    # and no exception
     assert points == fake_loyalty_point.points
     assert tier.value == fake_loyalty_point.tier
