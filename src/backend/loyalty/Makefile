@@ -25,8 +25,13 @@ format:
 lint: format
 	poetry run flake8 src/loyalty tests
 
-test:
+test: unit-test integ-test
+
+unit-test:
 	poetry run pytest tests/unit
+	poetry run pytest tests/storage
+
+integ-test:
 	STAGE=test poetry run pytest tests/integ
 
 coverage-html:
