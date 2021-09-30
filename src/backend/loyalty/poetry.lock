@@ -464,14 +464,6 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 toml = ["toml"]
 
 [[package]]
-name = "cyksuid"
-version = "1.1.0"
-description = "Cython implementation of ksuid"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "fastjsonschema"
 version = "2.15.1"
 description = "Fastest Python implementation of JSON schema"
@@ -820,6 +812,14 @@ pytest = ">=5.0"
 dev = ["pre-commit", "tox", "pytest-asyncio"]
 
 [[package]]
+name = "python-baseconv"
+version = "1.2.2"
+description = "Convert numbers from base 10 integers to base X strings and back again."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -888,6 +888,17 @@ description = "Python 2 and 3 compatibility utilities"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[[package]]
+name = "svix-ksuid"
+version = "0.6.0"
+description = "A pure-Python KSUID implementation"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+python-baseconv = "*"
 
 [[package]]
 name = "testfixtures"
@@ -966,7 +977,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "72dfa402d15b75b20f7d787b597289a2c9917c6d46ecfe056f5b8c9c7162392a"
+content-hash = "fc9cff4bce464e292589d6ff9ab084419268668f549c51218f79a03d6aa8158e"
 
 [metadata.files]
 atomicwrites = [
@@ -1074,37 +1085,6 @@ coverage = [
     {file = "coverage-5.5-pp36-none-any.whl", hash = "sha256:f030f8873312a16414c0d8e1a1ddff2d3235655a2174e3648b4fa66b3f2f1079"},
     {file = "coverage-5.5-pp37-none-any.whl", hash = "sha256:2a3859cb82dcbda1cfd3e6f71c27081d18aa251d20a17d87d26d4cd216fb0af4"},
     {file = "coverage-5.5.tar.gz", hash = "sha256:ebe78fe9a0e874362175b02371bdfbee64d8edc42a044253ddf4ee7d3c15212c"},
-]
-cyksuid = [
-    {file = "cyksuid-1.1.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:155bf47d51ee54a8a6e4e6949b3dca96cdbb0001332f3d2d907b97ec8300cdd4"},
-    {file = "cyksuid-1.1.0-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:b8b79f081da6dbe88ca5fc97fcb832d13500b88c1261af9ad2668ed9d90d4ecc"},
-    {file = "cyksuid-1.1.0-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:aab40a603bd1bfee5c66aa665d24d5cc7f0edca429b304e2dfe333e81c5c4efe"},
-    {file = "cyksuid-1.1.0-cp36-cp36m-win32.whl", hash = "sha256:0f037b793d8db35e4c4b33d71aa4b568581b3bb262467d984bd736227450f5d9"},
-    {file = "cyksuid-1.1.0-cp36-cp36m-win_amd64.whl", hash = "sha256:2ceee8ad772b969f10b45f65209046fbf929038f1c5c6032741ef89d03e40298"},
-    {file = "cyksuid-1.1.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:6708f2b351ca3ac28fe563d0e6f2d7ee003e1b1e4584a09efda3d3d07d1e8adc"},
-    {file = "cyksuid-1.1.0-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:0b456949b6702aebf9fa5d675d647b87e67987866e30ab2de2d3229e1caf764e"},
-    {file = "cyksuid-1.1.0-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:7026be2cbc669686ec61732eee42f9b0a983a6663435a7aee00b1469d77a2947"},
-    {file = "cyksuid-1.1.0-cp37-cp37m-win32.whl", hash = "sha256:cdca62b84ace4ca7870a647c75760c6148846c080e1540103ebbd0a5f4351a06"},
-    {file = "cyksuid-1.1.0-cp37-cp37m-win_amd64.whl", hash = "sha256:3d05f39c3b0ba7a834668bf9e91612648f96f303eb41fdcda1629d8b4f07d799"},
-    {file = "cyksuid-1.1.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:0ee473459422df4c38b5c5f76c6fbabfb1ef331cc7f38f632408e6a013b60fd6"},
-    {file = "cyksuid-1.1.0-cp38-cp38-manylinux1_i686.whl", hash = "sha256:821b2f47d3a233430bb7ab18de442334760f93876a97c7cb78ebae3ead958bf6"},
-    {file = "cyksuid-1.1.0-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:1dc466ea34e029838c2367653b33b688fc1b0f7bc6de5184d6464bcb60cdaf96"},
-    {file = "cyksuid-1.1.0-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:67ad4c1dc367fc60ba59b836c28f5f8f4af8424b335d4f8bd28afa8949976505"},
-    {file = "cyksuid-1.1.0-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:1e23b3d08191fccbe68ce74c29db1b9986ca9ec22e3cc73e1d619e0e0b999917"},
-    {file = "cyksuid-1.1.0-cp38-cp38-win32.whl", hash = "sha256:f0cbd7fe9d39aaf2a0232483214c2fe4a87a4a700d31057039a8c7e5b9f0e4ab"},
-    {file = "cyksuid-1.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:2b4e386c6d9ac1a59feabfe122d0172591708843c3beebc12c7d26f5e6450a17"},
-    {file = "cyksuid-1.1.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:9b32e524a8fae700fde081cb0a1e0dfb0e94b487fa8a16410eba8627a3418340"},
-    {file = "cyksuid-1.1.0-cp39-cp39-manylinux1_i686.whl", hash = "sha256:b2271e03267395f89ad413ed1c98f0eaa20f88fe82e45f4170d8f640e76dfa96"},
-    {file = "cyksuid-1.1.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:1fc9a87001453231899c56bdbfbdbc44a69faa0713e3ed0ed3459b665b6cac1a"},
-    {file = "cyksuid-1.1.0-cp39-cp39-manylinux2010_i686.whl", hash = "sha256:9d1f71ee45fe46536250c74cad51f6e305524c933af3848a46930d97cf301f03"},
-    {file = "cyksuid-1.1.0-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:e206f53cf65ff7daeda23bf2ada7edba49461769e69bf8fd85ce9ecaffaa91d6"},
-    {file = "cyksuid-1.1.0-cp39-cp39-win32.whl", hash = "sha256:14e1a9e9447297a8e8e85eb64166e20a1e19f5c7ad283ec9dfa2ae020a370c37"},
-    {file = "cyksuid-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:6c4287318602131de0a6a9b87b5cdf9fc2813f72ddb0aa5b3804ba5bf5d48dc5"},
-    {file = "cyksuid-1.1.0-pp36-pypy36_pp73-macosx_10_9_x86_64.whl", hash = "sha256:f0760d32f34f500152503c804f417f79008b68b433de04a4be307cd84b5151f2"},
-    {file = "cyksuid-1.1.0-pp36-pypy36_pp73-win32.whl", hash = "sha256:739a83ab81822ba82035423fe9e19dc349c5e59c12bdb283936542463b911cee"},
-    {file = "cyksuid-1.1.0-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:e45f11d9e669565c8ffca696447097bad3d289eb72b81a670ffa7b3aa5008926"},
-    {file = "cyksuid-1.1.0-pp37-pypy37_pp73-win32.whl", hash = "sha256:9bdaa94b1543618bb92a2c5621cb7d084ca78cefc6f85e4ae7ec5cb407d2185a"},
-    {file = "cyksuid-1.1.0.tar.gz", hash = "sha256:63fc34e0c927d6868a8b2ea513c89804a344885a796996405058a3faf60695d1"},
 ]
 fastjsonschema = [
     {file = "fastjsonschema-2.15.1-py3-none-any.whl", hash = "sha256:fa2f4bb1e31419c5eb1150f2e0545921712c10c34165b86d33f08f5562ad4b85"},
@@ -1253,6 +1233,9 @@ pytest-mock = [
     {file = "pytest-mock-3.6.1.tar.gz", hash = "sha256:40217a058c52a63f1042f0784f62009e976ba824c418cced42e88d5f40ab0e62"},
     {file = "pytest_mock-3.6.1-py3-none-any.whl", hash = "sha256:30c2f2cc9759e76eee674b81ea28c9f0b94f8f0445a1b87762cadf774f0df7e3"},
 ]
+python-baseconv = [
+    {file = "python-baseconv-1.2.2.tar.gz", hash = "sha256:0539f8bd0464013b05ad62e0a1673f0ac9086c76b43ebf9f833053527cd9931b"},
+]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
@@ -1315,6 +1298,9 @@ s3transfer = [
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+svix-ksuid = [
+    {file = "svix-ksuid-0.6.0.tar.gz", hash = "sha256:c6f1583eff2c02af4b8efee8384ddb2085d411fa95ef1d45c50cbbab660c4579"},
 ]
 testfixtures = [
     {file = "testfixtures-6.18.1-py2.py3-none-any.whl", hash = "sha256:486be7b01eb71326029811878a3317b7e7994324621c0ec633c8e24499d8d5b3"},

@@ -378,43 +378,47 @@ Resources:
         ## Retrieve customer ID from query args; Injects current authenticated session if null
         #set( $customer = $util.defaultIfNull($ctx.args.customer, $ctx.identity.claims.get("sub")) )
 
-        ## [Start] ** Static Group Authorization Checks **
-        ## Authorization rule: Allow groups to fetch loyalty (e.g. Admins, Travel agency, etc.) **
-        #set( $userGroups = $util.defaultIfNull($ctx.identity.claims.get("cognito:groups"), []) )
-        #set( $allowedGroups = ["Admin"] )
-        #set($isStaticGroupAuthorized = $util.defaultIfNull($isStaticGroupAuthorized, false))
-        #foreach( $userGroup in $userGroups )
-            #foreach( $allowedGroup in $allowedGroups )
-            #if( $allowedGroup == $userGroup )
-                #set( $isStaticGroupAuthorized = true )
-            #end
-            #end
-        #end
-        ## [End] ** Static Group Authorization Checks **
+        ## API Key Authorization should be allowed if allowed in Schema, as it's e2e tests
+        #if ($util.authType() == "User Pool Authorization")
+          ## [Start] ** Static Group Authorization Checks **
+          ## Authorization rule: Allow groups to fetch loyalty (e.g. Admins, Travel agency, etc.) **
+          #set( $userGroups = $util.defaultIfNull($ctx.identity.claims.get("cognito:groups"), []) )
+          #set( $allowedGroups = ["Admin"] )
+          #set($isStaticGroupAuthorized = $util.defaultIfNull($isStaticGroupAuthorized, false))
+          #foreach( $userGroup in $userGroups )
+              #foreach( $allowedGroup in $allowedGroups )
+              #if( $allowedGroup == $userGroup )
+                  #set( $isStaticGroupAuthorized = true )
+              #end
+              #end
+          #end
+          ## [End] ** Static Group Authorization Checks **
 
-        ## [Start] ** Owner Authorization Checks **
-        #set( $isOwnerAuthorized = $util.defaultIfNull($isOwnerAuthorized, false) )
-        ## Authorization rule: Allows customers to fetch their own Loyalty data
-        ## retrieve customer ID from authenticated session
-        #set( $identityValue = $util.defaultIfNull($ctx.identity.claims.get("sub"), "___xamznone____") )
-        #if( $customer == $identityValue )
-            #set( $isOwnerAuthorized = true )
-        #end
-        ## [End] ** Owner Authorization Checks **
+          ## [Start] ** Owner Authorization Checks **
+          #set( $isOwnerAuthorized = $util.defaultIfNull($isOwnerAuthorized, false) )
+          ## Authorization rule: Allows customers to fetch their own Loyalty data
+          ## retrieve customer ID from authenticated session
+          #set( $identityValue = $util.defaultIfNull($ctx.identity.claims.get("sub"), "___xamznone____") )
+          #if( $customer == $identityValue )
+              #set( $isOwnerAuthorized = true )
+          #end
+          ## [End] ** Owner Authorization Checks **
 
-        ## [Start] ** Throw if unauthorized **
-        #if( !($isStaticGroupAuthorized == true || $isOwnerAuthorized == true) )
-            $util.unauthorized()
+          ## [Start] ** Throw if unauthorized **
+          #if( !($isStaticGroupAuthorized == true || $isOwnerAuthorized == true) )
+              $util.unauthorized()
+          #end
+          ## [End] Throw if unauthorized **
         #end
-        ## [End] Throw if unauthorized **
+        
         {
             "version": "2018-05-29",
             "method": "GET",
             "resourcePath": "/Prod/loyalty/$customer",
             "params":{
-            "headers": {
-                "Content-Type" : "application/json"
-            }
+              "headers": {
+                  "Content-Type" : "application/json"
+              }
             }
         }
       ResponseMappingTemplate: |

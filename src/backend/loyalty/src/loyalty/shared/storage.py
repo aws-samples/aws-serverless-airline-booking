@@ -13,7 +13,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
     DynamoDBStreamEvent,
 )
 from botocore.exceptions import ClientError
-from cyksuid import ksuid
+from ksuid import Ksuid
 
 from loyalty.shared.functions import calculate_aggregate_points
 from loyalty.shared.models import (
@@ -175,7 +175,7 @@ class DynamoDBStorage(BaseStorage):
 
     @staticmethod
     def build_add_put_item_input(item: LoyaltyPoint) -> PutItemInputTableTypeDef:
-        sortable_id = ksuid.ksuid()
+        sortable_id = Ksuid()
 
         return {
             "Item": {
