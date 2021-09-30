@@ -27,6 +27,11 @@ flake8-variables-names = "^0.0.4"
 mypy = "^0.910"
 typed-ast = "^1.4.3"
 mypy-boto3-dynamodb = "^1.18.51"
+mypy-boto3-appsync = "^1.18.51"
+requests = "^2.26.0"
+mypy-boto3-sqs = "^1.18.51"
+types-requests = "^2.25.9"
+pytest-dotenv = "^0.5.2"
 
 [tool.black]
 line-length = 120

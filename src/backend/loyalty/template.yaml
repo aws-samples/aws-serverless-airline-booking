@@ -198,7 +198,6 @@ Resources:
           Properties:
             Stream: !GetAtt LoyaltyDataTable.StreamArn
             StartingPosition: LATEST
-            MaximumBatchingWindowInSeconds: 5
             BisectBatchOnFunctionError: true
             MaximumRetryAttempts: 2
             DestinationConfig:

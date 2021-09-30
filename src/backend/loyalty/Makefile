@@ -25,7 +25,7 @@ format:
 lint: format
 	poetry run flake8 src/loyalty tests
 
-test: unit-test integ-test
+test: unit-test integ-test e2e-test
 
 unit-test:
 	poetry run pytest tests/unit
@@ -33,6 +33,9 @@ unit-test:
 
 integ-test:
 	STAGE=test poetry run pytest tests/integ
+
+e2e-test:
+	poetry run pytest tests/e2e
 
 coverage-html:
 	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
