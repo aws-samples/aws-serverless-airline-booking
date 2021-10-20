@@ -5,21 +5,21 @@ target:
 	@$(MAKE) pr
 
 dev:
-	pipenv install
+	poetry install
 
 format:
-	pipenv run isort -rc .
-	pipenv run black src
-	pipenv run black tests
+	poetry run isort -rc .
+	poetry run black src
+	poetry run black tests
 
 lint: format
-	pipenv run flake8
+	poetry run flake8
 
 test:
-	pipenv run pytest
+	poetry run pytest
 
 test-html:
-	pipenv run pytest --cov-report html
+	poetry run pytest --cov-report html
 
 pr: lint test 
 
