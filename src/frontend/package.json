@@ -13,35 +13,36 @@
     "docs": "echo '[!!!] Looking for a replacement for esdoc due to CVEs' && exit 0"
   },
   "dependencies": {
-    "@aws-amplify/api": "^3.2.24",
-    "@aws-amplify/auth": "^3.4.24",
-    "@aws-amplify/core": "^3.8.16",
-    "@aws-amplify/interactions": "^3.3.24",
-    "@aws-amplify/storage": "^3.3.24",
-    "@aws-amplify/ui-vue": "^1.0.3",
+    "@aws-amplify/api": "^4.0.20",
+    "@aws-amplify/auth": "^4.3.10",
+    "@aws-amplify/core": "^4.3.2",
+    "@aws-amplify/interactions": "^4.0.20",
+    "@aws-amplify/storage": "^4.4.3",
+    "@aws-amplify/ui-components": "^1.9.0",
+    "@aws-amplify/ui-vue": "^1.1.14",
     "@quasar/extras": "^1.9.15",
-    "axios": "^0.21.1",
-    "core-js": "^3.7.0",
+    "axios": "^0.23.0",
+    "core-js": "^3.18.3",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "fuse.js": "^6.4.3",
-    "prettier": "^2.1.2",
+    "fuse.js": "^6.4.6",
+    "prettier": "^2.4.1",
     "quasar": "^1.15.1",
     "vue-content-loader": "^0.2.3",
     "vuelidate": "^0.7.6"
   },
   "devDependencies": {
     "@quasar/app": "^2.1.14",
-    "@quasar/quasar-app-extension-dotenv": "^1.0.6",
-    "babel-eslint": "^10.0.1",
+    "@quasar/quasar-app-extension-dotenv": "^1.1.0",
+    "babel-eslint": "^10.1.0",
     "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
+    "eslint-config-standard": "^16.0.3",
     "eslint-loader": "^3.0.3",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^6.1.2"
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-vue": "^7.20.0"
   },
   "browserslist": [
     "last 10 Chrome versions",
@@ -58,5 +59,9 @@
     "node": ">= 10.18.1",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
+  },
+  "resolutions": {
+    "glob-parent": ">=5.1.2",
+    "set-value": ">=4.0.1"
   }
 }

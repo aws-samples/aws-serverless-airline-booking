@@ -41,7 +41,14 @@
       </q-item-label>
       <div class="q-px-lg q-py-md pricing__range">
         <div
-          class="col-12 pricing__range--content shadow-up-3 bg-white row text-center"
+          class="
+            col-12
+            pricing__range--content
+            shadow-up-3
+            bg-white
+            row
+            text-center
+          "
         >
           <div class="col-6">
             <q-select
@@ -58,7 +65,11 @@
             >
               <template v-slot:before>
                 <span
-                  class="text-left text-subtitle2 filter__option--before q-pl-xs"
+                  class="
+                    text-left text-subtitle2
+                    filter__option--before
+                    q-pl-xs
+                  "
                   >from:</span
                 >
               </template>
@@ -84,7 +95,12 @@
             >
               <template v-slot:before>
                 <span
-                  class="text-left text-subtitle2 filter__option--before text-dark q-pl-md"
+                  class="
+                    text-left text-subtitle2
+                    filter__option--before
+                    text-dark
+                    q-pl-md
+                  "
                   >until:</span
                 >
               </template>
@@ -104,7 +120,14 @@
       >
       <div class="q-px-lg q-py-md schedule__range">
         <div
-          class="col-12 schedule__range--content shadow-up-3 bg-white row text-center"
+          class="
+            col-12
+            schedule__range--content
+            shadow-up-3
+            bg-white
+            row
+            text-center
+          "
         >
           <div class="col-6">
             <q-field class="departure__earliest" borderless stack-label>
@@ -123,7 +146,12 @@
                 <span class="full-width text-center text-subtitle2"
                   >earliest:
                   <span
-                    class="text-bold filter__option--value departure__earliest--value cursor-pointer"
+                    class="
+                      text-bold
+                      filter__option--value
+                      departure__earliest--value
+                      cursor-pointer
+                    "
                     >{{ departureFilter.min }}
                   </span>
                 </span>
@@ -147,7 +175,12 @@
                 <span class="full-width text-center text-subtitle2"
                   >latest:
                   <span
-                    class="text-bold filter__option--value departure__latest--value cursor-pointer"
+                    class="
+                      text-bold
+                      filter__option--value
+                      departure__latest--value
+                      cursor-pointer
+                    "
                     >{{ departureFilter.max }}
                   </span>
                 </span>
@@ -162,7 +195,14 @@
       >
       <div class="q-px-lg q-py-md schedule__range">
         <div
-          class="col-12 schedule__range--content shadow-up-3 bg-white row text-center"
+          class="
+            col-12
+            schedule__range--content
+            shadow-up-3
+            bg-white
+            row
+            text-center
+          "
         >
           <div class="col-6">
             <q-field class="arrival__earliest" borderless stack-label>
@@ -181,7 +221,12 @@
                 <span class="full-width text-center text-subtitle2"
                   >earliest:
                   <span
-                    class="text-bold filter__option--value arrival__earliest--value cursor-pointer"
+                    class="
+                      text-bold
+                      filter__option--value
+                      arrival__earliest--value
+                      cursor-pointer
+                    "
                     >{{ arrivalFilter.min }}
                   </span>
                 </span>
@@ -205,7 +250,12 @@
                 <span class="full-width text-center text-subtitle2"
                   >latest:
                   <span
-                    class="text-bold filter__option--value arrival__latest--value cursor-pointer"
+                    class="
+                      text-bold
+                      filter__option--value
+                      arrival__latest--value
+                      cursor-pointer
+                    "
                     >{{ arrivalFilter.max }}
                   </span>
                 </span>
