@@ -62,6 +62,7 @@
   },
   "resolutions": {
     "glob-parent": ">=5.1.2",
-    "set-value": ">=4.0.1"
+    "set-value": ">=4.0.1",
+    "nth-check": ">=2.0.1"
   }
 }
