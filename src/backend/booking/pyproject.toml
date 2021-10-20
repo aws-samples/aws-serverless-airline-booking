@@ -1,3 +1,35 @@
+[tool.poetry]
+name = "booking service"
+version = "0.1.0"
+description = ""
+authors = ["heitorlessa <lessa@amazon.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+aws-lambda-powertools = "^1.21.1"
+boto3 = "^1.18.65"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+cfn-lint = "*"
+flake8 = "*"
+flake8-black = "*"
+flake8-bugbear = "*"
+flake8-builtins = "*"
+flake8-comprehensions = "*"
+flake8-debugger = "*"
+flake8-eradicate = "*"
+flake8-fixme = "*"
+flake8-variables-names = "*"
+isort = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.black]
 line-length = 100
 target-version = ['py37']
