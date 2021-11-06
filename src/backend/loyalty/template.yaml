@@ -38,7 +38,7 @@ Resources:
   LoyaltyTransactionsQueue:
     Type: AWS::SQS::Queue
     Properties:
-      VisibilityTimeout: 35 # Fn timeout * 6 + Fn Batch Window
+      VisibilityTimeout: 30 # Fn timeout * 6
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt UnhandledLoyaltyTransactionsQueue.Arn
         maxReceiveCount: 2
@@ -105,11 +105,6 @@ Resources:
       Handler: loyalty.ingest.app.lambda_handler
       Runtime: python3.9
       Policies:
-        - Version: '2012-10-17'
-          Statement:
-            Action: dynamodb:PutItem
-            Effect: Allow
-            Resource: !GetAtt LoyaltyDataTable.Arn
         - Version: '2012-10-17'
           Statement:
             Effect: Allow
