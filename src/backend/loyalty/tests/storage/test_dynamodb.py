@@ -1,6 +1,4 @@
-import pytest
 from aws_lambda_powertools.utilities.data_classes import DynamoDBStreamEvent
-from botocore.exceptions import ClientError
 from botocore.stub import ANY, Stubber
 from mypy_boto3_dynamodb.type_defs import GetItemInputRequestTypeDef, PutItemInputRequestTypeDef
 
@@ -84,23 +82,3 @@ def test_aggregate_loyalty_points_ignore_aggregate(
     # THEN
     assert loyalty_aggregates == []
     assert aggregated_customers == {}
-
-
-def test_client_errors_propagate(
-    dynamodb_storage: DynamoDBStorage, aggregate_records: DynamoDBStreamEvent, transaction: LoyaltyPoint
-):
-    # GIVEN
-    loyalty_aggregates = DynamoDBStorage.build_loyalty_point_list(event=aggregate_records)
-    aggregated_customers = calculate_aggregate_points(records=loyalty_aggregates)
-
-    # WHEN/THEN
-    with pytest.raises(ClientError, match="ResourceNotFoundException"):
-        dynamodb_storage.add_aggregate(items=aggregated_customers)
-
-    # WHEN/THEN
-    with pytest.raises(ClientError, match="ResourceNotFoundException"):
-        dynamodb_storage.add(item=transaction)
-
-    # WHEN/THEN
-    with pytest.raises(ClientError, match="ResourceNotFoundException"):
-        dynamodb_storage.get_customer_tier_points(customer_id=transaction.customerId)

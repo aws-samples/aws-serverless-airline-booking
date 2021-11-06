@@ -14,15 +14,21 @@ logger = Logger()
 
 
 @tracer.capture_method
-def process_loyalty_points(record: dict, storage_client: Optional[BaseStorage] = None):
-    payload: SQSRecord = SQSRecord(record)
-    logger.set_correlation_id(payload.message_id)
-    tracer.put_annotation(key="MessageId", value=payload.message_id)
+def ingest_loyalty_points(transaction: LoyaltyPoint, storage_client: Optional[BaseStorage] = None):
+    tracer.put_annotation(key="customerId", value=transaction.customerId)
+    logger.append_keys(customer_id=transaction.customerId, booking_id=transaction.booking.id)
 
     if storage_client is None:
         storage_client = DynamoDBStorage.from_env()
 
+    storage_client.add(item=transaction)
+
+
+@tracer.capture_method
+def sqs_record_handler(record: dict):
+    payload: SQSRecord = SQSRecord(record)
     data: dict = json.loads(payload.body)
+
     try:
         transaction = LoyaltyPoint(
             booking=Booking(**data.pop("booking")), payment=Payment(**data.pop("payment")), **data
@@ -30,11 +36,23 @@ def process_loyalty_points(record: dict, storage_client: Optional[BaseStorage] =
     except KeyError:
         logger.exception("Possibly missing booking or payment required data", data)
         raise ValueError("Invalid payload")
-    logger.append_keys(customer_id=transaction.customerId, booking_id=transaction.booking.id)
 
-    storage_client.add(item=transaction)
+    ingest_loyalty_points(transaction=transaction)
+
+    tracer.put_metadata(
+        key="ProcessedMessage",
+        value={
+            "message_id": payload.message_id,
+            "record_attributes": payload.attributes.raw_event,
+            "source_arn": payload.event_source_arn,
+        },
+    )
 
 
-@sqs_batch_processor(record_handler=process_loyalty_points)
+@sqs_batch_processor(record_handler=sqs_record_handler)
+@logger.inject_lambda_context
 def lambda_handler(event: dict, context: LambdaContext):
     return "success"
+
+
+# TODO: Revisit correlation ID choice [booking ID or X-Ray]

@@ -1,7 +1,8 @@
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBStreamEvent
+from typing import List
 
 from loyalty.aggregate import app
-from loyalty.shared.storage import DynamoDBStorage, FakeStorage
+from loyalty.shared.models import LoyaltyPoint
+from loyalty.shared.storage import FakeStorage
 
 
 def test_handler_process_ddb_stream_insert_remove(mocker, aggregate_records, lambda_context):
@@ -10,9 +11,8 @@ def test_handler_process_ddb_stream_insert_remove(mocker, aggregate_records, lam
     app.lambda_handler(event=aggregate_records, context=lambda_context)
 
 
-def test_aggregate_loyalty_points(aggregate_records):
+def test_aggregate_loyalty_points(fake_loyalty_points: List[LoyaltyPoint]):
     st = FakeStorage()
-    records = DynamoDBStorage.build_loyalty_point_list(event=DynamoDBStreamEvent(aggregate_records))
-    aggregated = app.aggregate_loyalty_points(records=records, storage_client=st)
-    assert len(records) == 6
-    assert len(aggregated) == 3
+    aggregated = app.aggregate_loyalty_points(records=fake_loyalty_points, storage_client=st)
+    assert len(fake_loyalty_points) == 2
+    assert len(aggregated) == 1

@@ -7,7 +7,6 @@ from boto3.dynamodb.conditions import Key
 from loyalty.shared.models import LoyaltyPoint, LoyaltyTier
 from loyalty.shared.storage import DynamoDBStorage
 
-
 session = boto3.Session()
 MAX_RETRIES = 5
 QUERY_TIMEOUT = 0.6

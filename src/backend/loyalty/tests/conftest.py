@@ -95,6 +95,25 @@ def fake_loyalty_point():
 
 
 @pytest.fixture
+def fake_loyalty_points():
+    customer_id = f"fake-{uuid.uuid4()}"
+    return [
+        LoyaltyPoint(
+            customerId=customer_id,
+            booking=Booking(
+                id=f"{uuid.uuid4()}",
+                reference="dummy",
+                outboundFlightId=f"{uuid.uuid4()}",
+            ),
+            payment=Payment(receipt="fake", amount=100),
+            points=100,
+            expireAt=create_loyalty_expiration_epoch(days=7),
+        )
+        for _ in range(2)
+    ]
+
+
+@pytest.fixture
 def stage():
     return os.getenv("AWS_BRANCH", "develop")
 
