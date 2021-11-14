@@ -2,8 +2,8 @@
   "providers": [
     "awscloudformation"
   ],
-  "projectName": "aws-serverless-airline-booking",
-  "version": "3.0",
+  "projectName": "awsserverlessairline",
+  "version": "3.1",
   "frontend": "javascript",
   "javascript": {
     "framework": "vue",
