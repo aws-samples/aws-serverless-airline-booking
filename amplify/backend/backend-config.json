@@ -17,7 +17,7 @@
             {
               "authenticationType": "API_KEY",
               "apiKeyConfig": {
-                "apiKeyExpirationDays": -1
+                "apiKeyExpirationDays": 1
               }
             },
             {
