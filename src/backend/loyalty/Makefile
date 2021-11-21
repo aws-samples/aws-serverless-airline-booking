@@ -28,7 +28,6 @@ test: unit-test integ-test e2e-test
 
 unit-test:
 	poetry run pytest tests/unit
-	poetry run pytest tests/storage
 
 integ-test:
 	STAGE=test poetry run pytest tests/integ

@@ -3,29 +3,37 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from pytest_mock import MockerFixture
 
 from loyalty.ingest import app
-from loyalty.shared.models import LoyaltyPoint
 from loyalty.shared.storage import FakeStorage
+from tests.utils import make_loyalty_point
 
 
-def test_ingest_loyalty_points(transaction: LoyaltyPoint):
+def test_ingest_loyalty_points():
+    # GIVEN
     storage = FakeStorage()
-    app.ingest_loyalty_points(transaction=transaction, storage_client=storage)
-    assert transaction in storage
+    loyalty_point = make_loyalty_point()
+
+    # WHEN
+    app.ingest_loyalty_points(transaction=loyalty_point, storage_client=storage)
+
+    # THEN
+    assert loyalty_point in storage
 
 
-def test_add_loyalty_points_invalid_record(record, monkeypatch):
-    monkeypatch.setenv("LOYALTY_TABLE_NAME", "test")
-    record["body"] = '{"customerId":"1234","price":100}'  # old payload
+def test_ingest_invalid_record(record):
+    # GIVEN
+    record["body"] = '{"customerId":"1234","price":100}'  # v1 payload
     with pytest.raises(ValueError, match="Invalid payload"):
         app.sqs_record_handler(record=record)
 
 
-def test_handler_process_sqs_event(
-    sqs_records: dict, transaction: LoyaltyPoint, lambda_context: LambdaContext, mocker: MockerFixture
-):
+def test_ingest_lambda_handler(mocker: MockerFixture, sqs_records: dict, lambda_context: LambdaContext):
+    # GIVEN
     storage = FakeStorage()
-    app.DynamoDBStorage.from_env = mocker.MagicMock(return_value=storage)  # type: ignore
-    customer_id = transaction.customerId
+    loyalty_point = make_loyalty_point(customer_id="dd4649e6-2484-4993-acb8-0f9123103394")
 
+    # WHEN
+    mocker.patch.object(app.DynamoDBStorage, "from_env", return_value=storage)
     app.lambda_handler(event=sqs_records, context=lambda_context)
-    assert len(storage.data[customer_id]) == 2
+
+    # THEN
+    assert len(storage.data[loyalty_point.customerId]) == 2
