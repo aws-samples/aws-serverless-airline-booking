@@ -1,8 +1,8 @@
 {
-    "identityPoolName": "airlineworkshopb9c87969_identitypool_b9c87969",
+    "identityPoolName": "awsserverlessairline44ea6421_identitypool_44ea6421",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "airlinb9c87969",
-    "userPoolName": "airlineworkshopb9c87969_userpool_b9c87969",
+    "resourceNameTruncated": "awsser44ea6421",
+    "userPoolName": "awsserverlessairline44ea6421_userpool_44ea6421",
     "autoVerifiedAttributes": [
         "email"
     ],
@@ -28,9 +28,9 @@
     "userpoolClientReadAttributes": [
         "email"
     ],
-    "userpoolClientLambdaRole": "airlinb9c87969_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "awsser44ea6421_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "resourceName": "airlineworkshopb9c87969",
+    "resourceName": "awsserverlessairline44ea6421",
     "authSelections": "identityPoolAndUserPool",
     "authRoleArn": {
         "Fn::GetAtt": [
