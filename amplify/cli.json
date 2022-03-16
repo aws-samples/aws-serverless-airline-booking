@@ -1,51 +1,50 @@
 {
   "features": {
     "graphqltransformer": {
-      "addmissingownerfields": false,
+      "addmissingownerfields": true,
       "improvepluralization": false,
       "validatetypenamereservedwords": true,
-      "useexperimentalpipelinedtransformer": false,
-      "enableiterativegsiupdates": false,
-      "secondarykeyasgsi": false,
-      "skipoverridemutationinputtypes": false,
-      "transformerversion": 1,
+      "useexperimentalpipelinedtransformer": true,
+      "enableiterativegsiupdates": true,
+      "secondarykeyasgsi": true,
+      "skipoverridemutationinputtypes": true,
+      "transformerversion": 2,
       "suppressschemamigrationprompt": true,
-      "securityenhancementnotification": true,
-      "showfieldauthnotification": false,
-      "securityEnhancementNotification": false
+      "securityenhancementnotification": false,
+      "showfieldauthnotification": false
     },
     "frontend-ios": {
-      "enablexcodeintegration": false
+      "enablexcodeintegration": true
     },
     "auth": {
-      "enablecaseinsensitivity": false,
-      "useinclusiveterminology": false,
-      "breakcirculardependency": false,
+      "enablecaseinsensitivity": true,
+      "useinclusiveterminology": true,
+      "breakcirculardependency": true,
       "forcealiasattributes": false,
-      "useenabledmfas": false
+      "useenabledmfas": true
     },
     "codegen": {
-      "useappsyncmodelgenplugin": false,
-      "usedocsgeneratorplugin": false,
-      "usetypesgeneratorplugin": false,
-      "cleangeneratedmodelsdirectory": false,
-      "retaincasestyle": false,
-      "addtimestampfields": false,
-      "handlelistnullabilitytransparently": false,
-      "emitauthprovider": false,
-      "generateindexrules": false,
-      "enabledartnullsafety": false
+      "useappsyncmodelgenplugin": true,
+      "usedocsgeneratorplugin": true,
+      "usetypesgeneratorplugin": true,
+      "cleangeneratedmodelsdirectory": true,
+      "retaincasestyle": true,
+      "addtimestampfields": true,
+      "handlelistnullabilitytransparently": true,
+      "emitauthprovider": true,
+      "generateindexrules": true,
+      "enabledartnullsafety": true
     },
     "appsync": {
-      "generategraphqlpermissions": false
+      "generategraphqlpermissions": true
     },
     "latestregionsupport": {
-      "pinpoint": 0,
-      "translate": 0,
-      "transcribe": 0,
-      "rekognition": 0,
-      "textract": 0,
-      "comprehend": 0
+      "pinpoint": 1,
+      "translate": 1,
+      "transcribe": 1,
+      "rekognition": 1,
+      "textract": 1,
+      "comprehend": 1
     },
     "project": {
       "overrides": true
