@@ -3,25 +3,25 @@
     "baseUrl": ".",
     "paths": {
       "src/*": [
-        "src/*"
+        "*"
       ],
       "app/*": [
         "*"
       ],
       "components/*": [
-        "src/components/*"
+        "components/*"
       ],
       "layouts/*": [
-        "src/layouts/*"
+        "layouts/*"
       ],
       "pages/*": [
-        "src/pages/*"
+        "pages/*"
       ],
       "assets/*": [
-        "src/assets/*"
+        "assets/*"
       ],
       "boot/*": [
-        "src/boot/*"
+        "boot/*"
       ],
       "vue$": [
         "node_modules/vue/dist/vue.esm.js"
