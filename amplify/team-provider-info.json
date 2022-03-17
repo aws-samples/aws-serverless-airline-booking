@@ -17,6 +17,9 @@
           "appId": "dtp9yycfe65h4",
           "type": "manual"
         }
+      },
+      "auth": {
+        "awsserverlessairlineb7722ff6": {}
       }
     }
   }
