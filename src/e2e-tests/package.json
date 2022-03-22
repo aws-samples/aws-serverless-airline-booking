@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/aws-samples/aws-serverless-airline-booking#readme",
   "devDependencies": {
-    "cypress": "^4.11.0"
+    "cypress": "^8.6.0"
+  },
+  "resolutions": {
+    "lodash": ">=4.17.21"
   }
 }

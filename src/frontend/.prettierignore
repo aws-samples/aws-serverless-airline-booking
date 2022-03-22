@@ -1,2 +1,5 @@
 # auto-generated file on build contains non-compliant linting rules
 aws-exports.js
+*.md
+*.json
+*.d.ts

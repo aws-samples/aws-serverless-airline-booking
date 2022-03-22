@@ -1,7 +1,15 @@
 <template>
   <div class="bg-grey-2">
     <div
-      class="flight__toolbar container row text-left justify-around items-baseline text-subtitle1"
+      class="
+        flight__toolbar
+        container
+        row
+        text-left
+        justify-around
+        items-baseline
+        text-subtitle1
+      "
     >
       <div class="flight__filters--departure col">
         <q-select

@@ -629,7 +629,7 @@ TODO.md
 
 src/frontend/aws-exports.js
 
-#amplify
+#amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
 amplify/logs
@@ -643,7 +643,10 @@ node_modules/
 aws-exports.js
 awsconfiguration.json
 amplifyconfiguration.json
+amplifyconfiguration.dart
 amplify-build-config.json
 amplify-gradle-config.json
 amplifytools.xcconfig
 .secret-*
+**.sample
+#amplify-do-not-edit-end

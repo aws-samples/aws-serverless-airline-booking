@@ -2,7 +2,13 @@
   <q-dialog ref="modal">
     <div class="row booking__modal">
       <div
-        class="col-12 booking__modal--passenger booking__modal--highlighted text-center q-pa-sm bg-grey-3"
+        class="
+          col-12
+          booking__modal--passenger booking__modal--highlighted
+          text-center
+          q-pa-sm
+          bg-grey-3
+        "
       >
         <q-list separator>
           <q-item
@@ -63,7 +69,13 @@
       </div>
 
       <div
-        class="booking__modal--ctas booking__modal--highlighted row inline full-width bg-grey-1"
+        class="
+          booking__modal--ctas booking__modal--highlighted
+          row
+          inline
+          full-width
+          bg-grey-1
+        "
       >
         <div class="col-12 bg-primary">
           <q-btn

@@ -3,6 +3,7 @@ import csv
 import os
 import json
 import time
+import subprocess
 from zipfile import ZipFile 
 
 AWS_REGION = os.environ['AWS_REGION']
@@ -57,18 +58,18 @@ def download_reports(filePath):
         os.makedirs("./results")    
 
     sync_command = f"aws s3 sync s3://{S3_BUCKET}/results {filePath}"
-    os.system(sync_command)
+    subprocess.run(sync_command, shell=False)
 
     zip_files(filePath)
 
 def upload_results_s3():
     print(zipFileName)  
     sync_command = f"aws s3 cp {zipFileName} s3://{S3_BUCKET}/"
-    os.system(sync_command)
+    subprocess.run(sync_command, shell=False)
 
 def delete_gatling_reports():
     sync_command = f"aws s3 rm s3://{S3_BUCKET}/results --recursive"
-    os.system(sync_command)
+    subprocess.run(sync_command, shell=False)
 
 def main():
     try:        
