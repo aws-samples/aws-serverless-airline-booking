@@ -3,7 +3,7 @@ backend:
   phases:
     preBuild:
       commands:
-        - npm install -g @aws-amplify/cli@6.1.0 yarn # pinned known working version
+        - npm install -g @aws-amplify/cli@6.4.0 yarn # pinned known working version
         - make init # install OS packages  and dev tools (awscli, sam-cli, linters, etc.)
         - aws configure set cli_follow_urlparam false # fix for parameter store when storing URLs: https://github.com/aws/aws-cli/issues/2507
         - export AWS_BRANCH=$(echo ${AWS_BRANCH} | tr "/" "-" | cut -c1-20) # prevent common and long git branch names (feat/something) to create an invalid stack/resource name

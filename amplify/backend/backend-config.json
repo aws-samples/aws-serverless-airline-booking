@@ -17,11 +17,10 @@
             {
               "authenticationType": "API_KEY",
               "apiKeyConfig": {
-                "apiKeyExpirationDays": 1
+                "apiKeyExpirationDays": 1,
+                "apiKeyExpirationDate": "2022-03-30T06:59:41.199Z",
+                "description": "sample api key"
               }
-            },
-            {
-              "authenticationType": "AWS_IAM"
             }
           ],
           "defaultAuthentication": {
