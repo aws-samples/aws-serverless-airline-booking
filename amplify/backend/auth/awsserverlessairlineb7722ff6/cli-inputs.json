@@ -1,14 +1,16 @@
 {
-    "identityPoolName": "awsserverlessairline44ea6421_identitypool_44ea6421",
+  "version": "1",
+  "cognitoConfig": {
+    "identityPoolName": "awsserverlessairlineb7722ff6_identitypool_b7722ff6",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "awsser44ea6421",
-    "userPoolName": "awsserverlessairline44ea6421_userpool_44ea6421",
+    "resourceNameTruncated": "awsserb7722ff6",
+    "userPoolName": "awsserverlessairlineb7722ff6_userpool_b7722ff6",
     "autoVerifiedAttributes": [
-        "email"
+      "email"
     ],
     "mfaConfiguration": "OFF",
     "mfaTypes": [
-        "SMS Text Message"
+      "SMS Text Message"
     ],
     "smsAuthenticationMessage": "Your authentication code is {####}",
     "smsVerificationMessage": "Your verification code is {####}",
@@ -18,33 +20,26 @@
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [],
     "requiredAttributes": [
-        "email"
+      "email"
     ],
-    "userpoolClientGenerateSecret": true,
+    "aliasAttributes": [],
+    "userpoolClientGenerateSecret": false,
     "userpoolClientRefreshTokenValidity": 30,
     "userpoolClientWriteAttributes": [
-        "email"
+      "email"
     ],
     "userpoolClientReadAttributes": [
-        "email"
+      "email"
     ],
-    "userpoolClientLambdaRole": "awsser44ea6421_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "awsserb7722ff6_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "resourceName": "awsserverlessairline44ea6421",
+    "sharedId": "b7722ff6",
+    "resourceName": "awsserverlessairlineb7722ff6",
     "authSelections": "identityPoolAndUserPool",
-    "authRoleArn": {
-        "Fn::GetAtt": [
-            "AuthRole",
-            "Arn"
-        ]
-    },
-    "unauthRoleArn": {
-        "Fn::GetAtt": [
-            "UnauthRole",
-            "Arn"
-        ]
-    },
     "useDefault": "default",
     "userPoolGroupList": [],
-    "dependsOn": []
+    "serviceName": "Cognito",
+    "usernameCaseSensitive": false,
+    "useEnabledMfas": true
+  }
 }

@@ -1,17 +1,17 @@
 {
-    "providers": [
-        "awscloudformation"
-    ],
-    "projectName": "awsserverlessairline",
-    "version": "3.1",
-    "frontend": "javascript",
-    "javascript": {
-        "framework": "vue",
-        "config": {
-            "SourceDir": "src",
-            "DistributionDir": "src/dist",
-            "BuildCommand": "npm run-script build --prefix src",
-            "StartCommand": "npm run-script serve --prefix src"
-        }
+  "projectName": "awsserverlessairline",
+  "version": "3.1",
+  "frontend": "javascript",
+  "javascript": {
+    "framework": "none",
+    "config": {
+      "SourceDir": "src",
+      "DistributionDir": "dist",
+      "BuildCommand": "npm run-script build",
+      "StartCommand": "npm run-script start"
     }
+  },
+  "providers": [
+    "awscloudformation"
+  ]
 }
