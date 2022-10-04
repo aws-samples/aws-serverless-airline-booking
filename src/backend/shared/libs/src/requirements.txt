@@ -1,3 +1,5 @@
 aws-lambda-powertools==1.0.1
 boto3==1.14.16
 requests==2.24.0
+Jinja2==3.1.1
+Flask==2.0.3
