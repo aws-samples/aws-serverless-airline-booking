@@ -1,5 +1,0 @@
-{
-    "waitForAnimations": true,
-    "chromeWebSecurity": false,
-    "baseUrl": "https://airline.serverlessa.dev"
-}
