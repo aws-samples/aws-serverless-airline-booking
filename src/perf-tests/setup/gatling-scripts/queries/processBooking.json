@@ -1,9 +1,0 @@
-{
-    "query": "mutation ProcessBooking($input: CreateBookingInput!) {  processBooking(input: $input) {    id  }}",
-    "variables": {
-        "input": {
-            "paymentToken": "${chargeId}",
-            "bookingOutboundFlightId": "${bookingId}"
-        }
-    }
-}
