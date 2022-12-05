@@ -48,7 +48,7 @@ Change https://github.com/aws-samples/aws-serverless-airline-booking/blob/worksh
 ### Loyalty
 Change https://github.com/aws-samples/aws-serverless-airline-booking/blob/workshop/src/store/loyalty/actions.js#L40
 
-## Payments
+### Payments
 Change https://github.com/aws-samples/aws-serverless-airline-booking/blob/workshop/src/store/bookings/payment.js#L49
 
 You also need to add a Stripe API key in the frontend here: https://github.com/aws-samples/aws-serverless-airline-booking/blob/workshop/src/pages/FlightSelection.vue#LL227
