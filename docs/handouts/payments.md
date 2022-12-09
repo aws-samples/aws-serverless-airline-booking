@@ -1,6 +1,6 @@
 # Payments Service
 
-> **Warning*
+> **Warning**
 > Please do not enter any credit card information into this project other than one of the [Stripe test cards](https://stripe.com/docs/testing#cards)
 
 ## User Stories
