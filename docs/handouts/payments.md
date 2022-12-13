@@ -22,15 +22,18 @@ sequenceDiagram
 ```
 
 ## Info
-
 > **Note**
 > This project integrates with Stripe, an access key and secret key are required and can be provided. Alternatively, you can create an account  and produce your own _**test**_ keys.
 
+## Booking integration
+Front-end will request a pre-authorization charge before making a booking. If a booking is successful, booking will then call Payment service to collect payment from a given pre-authorization token - You have to work with Booking to define a contract and authorisation for collecting payments.
+
+## Frontend Integration
 The frontend will [pre-authorise](https://stripe.com/docs/payments/place-a-hold-on-a-payment-method) the credit card for you. After it's performed the pre-authorization, the frontend will call the payments servie to notify it about the transaction.
 
 Whilst performing the booking, the booking service will notify the payment service to complete the transaction.
 
-## Initial OpenAPI
+### Initial OpenAPI
 The OpenAPI snippet will get you started for your service, other endpoints will need to be created by your team to complete the event.
 
 ```yaml
