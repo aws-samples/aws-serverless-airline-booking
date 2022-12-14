@@ -26,6 +26,13 @@ Once a booking has been confirmed, you have to agree with booking what data you 
 
 ## Frontend integration
 Front-end should only receive loyalty information for the current authorized user. As regards to the response, it expects the data in the following format:
+```json
+{
+      "points": 400,
+      "level": "bronze",
+      "remainingPoints":49600
+}
+```
 
 ### Initial OpenAPI
 ```yaml
@@ -51,8 +58,8 @@ paths:
                 $ref: '#/components/schemas/LoyaltyData'
       security:
         - users:
-            - write:payment
-            - read:payment
+            - write:loyalty
+            - read:loyalty
 components:
   schemas:
     LoyaltyData:
@@ -80,6 +87,6 @@ components:
         implicit:
           authorizationUrl: https://petstore3.swagger.io/oauth/authorize
           scopes:
-            write:payment:
-            read:payment:
+            write:loyalty:
+            read:loyalty:
 ```
