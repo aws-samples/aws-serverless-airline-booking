@@ -31,23 +31,44 @@ Booking may need to call Catalog to verify flight exists before making a booking
 Customers search using departure date (YYYY-MM-DD), departure airport (LGW) and arrival airport (MAD). If flights have been successfully found, it expects the response in the following format:
 ```json
 [
-    {
-        "id": "173ec46b-0e12-45fe-9ba1-511abde3d318",
-        "departureDate": "2019-01-16T08:00+0000",
-        "departureAirportCode": "LGW",
-        "departureAirportName": "London Gatwick",
-        "departureCity": "London",
-        "departureLocale": "Europe/London",
-        "arrivalDate": "2019-01-16T10:15+0000",
-        "arrivalAirportCode": "MAD",
-        "arrivalAirportName": "Madrid Barajas",
-        "arrivalCity": "Madrid",
-        "arrivalLocale": "Europe/Madrid",
-        "ticketPrice": 400,
-        "ticketCurrency": "EUR",
-        "flightNumber": 1812
-    }
+  {
+    "id": "173ec46b-0e12-45fe-9ba1-511abde3d318",
+    "departureDate": "2019-01-16T08:00+0000",
+    "departureAirportCode": "LGW",
+    "departureAirportName": "London Gatwick",
+    "departureCity": "London",
+    "departureLocale": "Europe/London",
+    "arrivalDate": "2019-01-16T10:15+0000",
+    "arrivalAirportCode": "MAD",
+    "arrivalAirportName": "Madrid Barajas",
+    "arrivalCity": "Madrid",
+    "arrivalLocale": "Europe/Madrid",
+    "ticketPrice": 400,
+    "ticketCurrency": "EUR",
+    "flightNumber": 1812
+  }
 ]
+```
+
+When returning a single flight, the expected response format is:
+Customers search using departure date (YYYY-MM-DD), departure airport (LGW) and arrival airport (MAD). If flights have been successfully found, it expects the response in the following format:
+```json
+  {
+      "id": "173ec46b-0e12-45fe-9ba1-511abde3d318",
+      "departureDate": "2019-01-16T08:00+0000",
+      "departureAirportCode": "LGW",
+      "departureAirportName": "London Gatwick",
+      "departureCity": "London",
+      "departureLocale": "Europe/London",
+      "arrivalDate": "2019-01-16T10:15+0000",
+      "arrivalAirportCode": "MAD",
+      "arrivalAirportName": "Madrid Barajas",
+      "arrivalCity": "Madrid",
+      "arrivalLocale": "Europe/Madrid",
+      "ticketPrice": 400,
+      "ticketCurrency": "EUR",
+      "flightNumber": 1812
+  }
 ```
 
 ### Initial OpenAPI
