@@ -33,6 +33,17 @@ The frontend will [pre-authorise](https://stripe.com/docs/payments/place-a-hold-
 
 Whilst performing the booking, the booking service will notify the payment service to complete the transaction.
 
+Data example:
+```json
+{
+  "amount": 100
+  "currency": "EUR",
+  "stripeToken": "abc123",
+  "description": "Payment by email@example.com",
+  "email": "email@example.com"
+}
+```
+
 ### Initial OpenAPI
 The OpenAPI snippet will get you started for your service, other endpoints will need to be created by your team to complete the event.
 
