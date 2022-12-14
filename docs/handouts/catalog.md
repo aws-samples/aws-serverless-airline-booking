@@ -78,9 +78,9 @@ info:
   title: Catalog API
   description: |-
     Catalog service
-externalDocs:
-  description: GitHub Repository
-  url: https://github.com/aws-samples/aws-serverless-airline-booking/tree/workshop
+  externalDocs:
+    description: GitHub Repository
+    url: https://github.com/aws-samples/aws-serverless-airline-booking/tree/workshop
 paths:
   /flights:
     get:
@@ -97,8 +97,8 @@ paths:
                   $ref: '#/components/schemas/Flight'
       security:
         - users:
-            - write:flights
-            - read:flights
+            - write:catalog
+            - read:catalog
   /flights/{flightId}:
     get:
       summary: Get a single flight
@@ -119,8 +119,8 @@ paths:
                 $ref: '#/components/schemas/Flight'
       security:
         - users:
-            - write:flights
-            - read:flights
+            - write:catalog
+            - read:catalog
 components:
   schemas:
     Flight:
@@ -176,6 +176,6 @@ components:
         implicit:
           authorizationUrl: https://petstore3.swagger.io/oauth/authorize
           scopes:
-            write:payment:
-            read:payment:
+            write:catalog:
+            read:catalog:
 ```
