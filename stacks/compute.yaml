@@ -1,0 +1,189 @@
+Parameters:
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html
+    Default: devbox
+
+  InstancesNeeded:
+    Type: Number
+    Default: 1
+
+
+Mappings:
+  Subnets:
+    VPC:
+      CIDR: '10.0.0.0/16'
+    PublicOne:
+      CIDR: '10.0.0.0/24'
+    PublicTwo:
+      CIDR: '10.0.1.0/24'
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !FindInMap [Subnets, VPC, CIDR]
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicOneSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !FindInMap [Subnets, PublicOne, CIDR]
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+         Fn::Select:
+         - 0
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+
+  PublicOneRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicOneRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicOneRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicOneRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicOneRouteTable
+      SubnetId: !Ref PublicOneSubnet
+
+  PublicTwoSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !FindInMap [Subnets, PublicTwo, CIDR]
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+         Fn::Select:
+         - 1
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+
+  PublicTwoRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicTwoRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicTwoRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicTwoRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicTwoRouteTable
+      SubnetId: !Ref PublicTwoSubnet
+
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  Profile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref Role
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        KeyName: !Ref KeyName
+        BlockDeviceMappings:
+          - Ebs:
+              VolumeSize: 100
+              VolumeType: gp3
+              DeleteOnTermination: true
+              Encrypted: true
+            DeviceName: /dev/sda1
+        Monitoring:
+          Enabled: true
+        ImageId: >-
+          {{resolve:ssm:/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id}}
+        InstanceType: c6g.4xlarge
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        IamInstanceProfile:
+          Arn: !Sub ${Profile.Arn}
+        UserData:
+           Fn::Base64:
+            !Sub |
+              #cloud-config
+              hostname: dev
+
+              runcmd:
+                - mkdir -p /workspaces && chown ubuntu:ubuntu /workspaces
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: devbox
+      SecurityGroupIngress:
+        - FromPort: 2376
+          ToPort: 2376
+          CidrIp: 0.0.0.0/0
+          IpProtocol: TCP
+        - FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          IpProtocol: TCP
+      VpcId: !Ref VPC
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: true
+    Properties:
+      MaxSize: !Ref InstancesNeeded
+      MinSize: !Ref InstancesNeeded
+      HealthCheckGracePeriod: 300
+      LaunchTemplate:
+        Version: !Sub ${LaunchTemplate.LatestVersionNumber}
+        LaunchTemplateId: !Ref LaunchTemplate
+      VPCZoneIdentifier:
+        - !Ref PublicOneSubnet
+        - !Ref PublicTwoSubnet
+      Tags:
+        - Key: Name
+          Value: devbox
+          PropagateAtLaunch: true

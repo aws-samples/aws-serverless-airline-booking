@@ -1,0 +1,141 @@
+Resources:
+  CodeRepository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: service
+      RepositoryDescription: My service repo
+
+  DevBoxDoc:
+    DependsOn: "CodeRepository"
+    Type: AWS::SSM::Document
+    Properties:
+      DocumentType: Command
+      Tags:
+        - Key: Kind
+          Value: devbox
+      TargetType: /AWS::EC2::Instance
+      Content:
+        schemaVersion: "2.2"
+        description: Install packages on Ubuntu
+        parameters:
+          arch:
+            type: String
+            default: arm64
+            description: Instance architecture type
+            allowedValues:
+              - arm64
+              - amd64
+          release:
+            type: String
+            default: jammy
+            allowedValues:
+              - focal
+              - bionic
+              - jammy
+          nodeVersion:
+            type: String
+            default: node_18.x
+        mainSteps:
+          - action: aws:runShellScript
+            name: InstallBasePackages
+            inputs:
+              runCommand:
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y software-properties-common build-essential curl unzip
+          - action: aws:runShellScript
+            name: InstallAWSCLIArm
+            precondition:
+              StringEquals:
+              - "{{ arch }}"
+              - arm64
+            inputs:
+              runCommand:
+                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+                - unzip -d /tmp /tmp/aws-cli.zip
+                - /tmp/aws/install
+                - rm -rf /tmp/aws
+          - action: aws:runShellScript
+            name: InstallAWSCLIIntel
+            precondition:
+              StringEquals:
+              - "{{ arch }}"
+              - amd64
+            inputs:
+              runCommand:
+                - curl -L -o /tmp/aws-cli.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+                - unzip -d /tmp /tmp/aws-cli.zip
+                - /tmp/aws/install
+                - rm -rf /tmp/aws
+          - action: aws:runShellScript
+            name: DevBoxInstallDocker
+            inputs:
+              runCommand:
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+                - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+                - echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu  {{ release }} stable" >> /etc/apt/sources.list.d/docker.list
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y docker-ce docker-ce-cli containerd.io
+                - usermod -aG docker ubuntu
+          - action: aws:runShellScript
+            name: InstallGit
+            inputs:
+              runCommand:
+                - add-apt-repository ppa:git-core/ppa
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y git
+          - action: aws:runShellScript
+            name: InstallGo
+            inputs:
+              runCommand:
+                - add-apt-repository ppa:longsleep/golang-backports
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y golang-go
+          - action: aws:runShellScript
+            name: InstallRust
+            inputs:
+              runCommand:
+                - add-apt-repository ppa:ubuntu-mozilla-security/rust-next
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y rustc cargo
+          - action: aws:runShellScript
+            name: InstallNode
+            inputs:
+              runCommand:
+                - curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource-keyring.gpg
+                - echo "deb [arch={{ arch }} signed-by=/usr/share/keyrings/nodesource-keyring.gpg] https://deb.nodesource.com/{{ nodeVersion }}  {{ release }} main" >> /etc/apt/sources.list.d/nodesource.list
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y nodejs
+          - action: aws:runShellScript
+            name: BuildPython
+            inputs:
+              runCommand:
+                - apt update
+                - DEBIAN_FRONTEND=noninteractive apt install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl llvm libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+                - git clone https://github.com/pyenv/pyenv.git /home/ubuntu/.pyenv
+                - chown ubuntu:ubuntu /home/ubuntu/.pyenv
+                - echo "export PYENV_ROOT=\"\$HOME/.pyenv\"" >> /home/ubuntu/.profile
+                - echo "command -v pyenv >/dev/null || export PATH=\"\$PYENV_ROOT/bin:$PATH\"" >> /home/ubuntu/.profile
+                - echo "eval \"\$(pyenv init -)\"" >> /home/ubuntu/.profile
+                - sudo -u ubuntu /home/ubuntu/.pyenv/bin/pyenv install 3.9
+                - echo "3.9" > /home/ubuntu/.pyenv/version
+                - chown ubuntu:ubuntu /home/ubuntu/.pyenv
+          - action: aws:runShellScript
+            name: CloneRepo
+            inputs:
+              runCommand:
+                - sudo -u ubuntu --login pip install git-remote-codecommit
+                - !Sub sudo -u ubuntu --login git clone codecommit::${AWS::Region}://service /home/ubuntu/service
+
+
+  DevBoxAssoc:
+    Type: AWS::SSM::Association
+    Properties:
+      Name: !Ref DevBoxDoc
+      DocumentVersion: $LATEST
+      MaxConcurrency: 100
+      MaxErrors: 100
+      Targets:
+        - Key: tag:Name
+          Values:
+            - devbox
