@@ -194,7 +194,7 @@ const logger = new Logger('Search')
  * @return {boolean} - Boolean whether given airport is a valid IATA airport from airport list
  */
 const isAirport = (value) => {
-  value = value ?? ''
+  value = value || ''
 
   if (value.length < 3) {
     return false

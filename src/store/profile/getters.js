@@ -9,13 +9,13 @@ export const isAuthenticated = (state) => {
 }
 
 export const firstName = (state) => {
-  return state.user.attributes?.given_name ?? 'First'
+  return state.user.attributes.given_name || 'First'
 }
 
 export const lastName = (state) => {
-  return state.user.attributes?.family_name ?? 'Last Name'
+  return state.user.attributes.family_name || 'Last Name'
 }
 
 export const userAttributes = (state) => {
-  return state.user.attributes ?? 'no attributes'
+  return state.user.attributes || 'no attributes'
 }

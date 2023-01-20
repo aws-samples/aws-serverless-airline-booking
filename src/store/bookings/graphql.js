@@ -3,7 +3,7 @@ export const processBooking = `mutation ProcessBooking($input: CreateBookingInpu
     id
   }
 }
-`;
+`
 
 export const getBookingByStatus = `query GetBookingByStatus(
   $customer: String
@@ -51,4 +51,4 @@ export const getBookingByStatus = `query GetBookingByStatus(
     nextToken
   }
 }
-`;
+`
