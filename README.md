@@ -4,9 +4,13 @@ Serverless Airline Booking is a complete web application that provides Flight Se
 
 For more up-to-date information on what's being implemented, take a look at our current [Boards](https://github.com/aws-samples/aws-serverless-airline-booking/projects).
 
-> UPDATE 2021: I'm [redesigning the Airline example](https://www.figma.com/file/Xtdkg865tOPTU3pdCvwMcn/Airline-App?node-id=0%3A1), including improvements like using latest features, improve security, fix domain boundaries, recreate Continuous Deployment, and a ton of performance improvements (pending Quasar v2 GA). 
-> 
-> Planning for Q4 2021 along with a public workshop based on this project - ping [@heitor_lessa](https://twitter.com/heitor_lessa) on Twitter if you ever get stuck.
+> **Note**
+>
+> This project is currently being worked on behind the scenes. We're doing work to the `workshop` branch at the moment to convert it into something customers will enjoy participating in.
+>
+> There are also plans to rewrite the entire project this year to make it more modern.
+>
+> Feel free to ping [@sthulb](https://twitter.com/sthulb] on Twitter, or create an issue if you want info or need help.
 
 ![Serverless Airline Booking sample](./media/prototype-web.png)
 
