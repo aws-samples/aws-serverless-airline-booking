@@ -162,7 +162,7 @@ crt = ["awscrt (==0.12.5)"]
 
 [[package]]
 name = "certifi"
-version = "2021.10.8"
+version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
@@ -452,6 +452,9 @@ python-versions = "*"
 files = [
     {file = "flake8_variables_names-0.0.4.tar.gz", hash = "sha256:d6fa0571a807c72940b5773827c5760421ea6f8206595ff0a8ecfa01e42bf2cf"},
 ]
+
+[package.dependencies]
+setuptools = "*"
 
 [package.dependencies]
 setuptools = "*"
