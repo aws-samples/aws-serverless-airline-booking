@@ -19,7 +19,7 @@
     "tslint": "^6.1.0",
     "typescript": "^3.8.3",
     "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "test": "jest",
