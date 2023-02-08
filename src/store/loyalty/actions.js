@@ -25,19 +25,30 @@ import axios from 'axios'
  *    }
  * }
  */
-export async function fetchLoyalty({ commit }) {
+export async function fetchLoyalty({ commit, rootGetters }) {
   Loading.show({
     message: 'Loading profile...'
   })
-
   console.group('store/loyalty/actions/fetchLoyalty')
+
+  const credentials = {
+    idToken: rootGetters['profile/idToken'],
+    accessToken: rootGetters['profile/accessToken']
+  }
+
   try {
     console.log('Fetching loyalty data')
     // const {
     //   // @ts-ignore
     //   data: { getLoyalty: loyaltyData }
     // } = await API.graphql(graphqlOperation(getLoyalty))
-    const { data: loyaltyData } = await axios.get('/mocks/loyalty.json')
+    // const { data: loyaltyData } = await axios.get('/mocks/loyalty.json')
+    const { data: loyaltyData } = await axios.get(window.Config.LOYALTY_FETCH, {
+      headers: {
+        Authorization: credentials.accessToken,
+        'Content-Type': 'application/json'
+      }
+    })
     const loyalty = new Loyalty(loyaltyData)
 
     console.log(loyalty)

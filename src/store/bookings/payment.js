@@ -26,7 +26,8 @@ const paymentEndpoint =
 export async function processPayment({
   paymentToken,
   outboundFlight,
-  customerEmail
+  customerEmail,
+  accessToken
 }) {
   console.group('store/bookings/actions/processPayment')
   Loading.show({
@@ -46,12 +47,17 @@ export async function processPayment({
   console.log('Charge data to be processed')
   console.log(chargeData)
   try {
-    const data = await axios.post(paymentEndpoint, chargeData)
     const {
       data: {
         createdCharge: { id: chargeId }
       }
-    } = data
+    } = await axios.get(window.Config.PAYMENT_PREAUTH, {
+      data: chargeData,
+      headers: {
+        Authorization: accessToken,
+        'Content-Type': 'application/json'
+      }
+    })
 
     Loading.show({
       message: 'Payment authorized successfully...'

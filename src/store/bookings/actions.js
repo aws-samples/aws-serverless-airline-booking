@@ -48,6 +48,11 @@ export async function fetchBooking(
 
   var nextToken = paginationToken || null
 
+  const credentials = {
+    idToken: rootGetters['profile/idToken'],
+    accessToken: rootGetters['profile/accessToken']
+  }
+
   try {
     const customerId = rootGetters['profile/userAttributes'].sub
     const bookingFilter = {
@@ -68,7 +73,13 @@ export async function fetchBooking(
     //   }
     // } = await API.graphql(graphqlOperation(getBookingByStatus, bookingFilter))
 
-    const { data: bookingData } = await axios.get('/mocks/bookings.json')
+    const { data: bookingData } = await axios.get(window.Config.BOOKING_FETCH, {
+      headers: {
+        Authorization: credentials.accessToken,
+        'Content-Type': 'application/json'
+      }
+    })
+
     let bookings = bookingData.map((booking) => new Booking(booking))
 
     console.table(bookings)
@@ -120,20 +131,29 @@ export async function fetchBooking(
  *        }
  */
 export async function createBooking(
-  { rootState },
+  { rootState, rootGetters },
   { paymentToken, outboundFlight }
 ) {
   console.group('store/bookings/actions/createBooking')
+
+  const credentials = {
+    idToken: rootGetters['profile/idToken'],
+    accessToken: rootGetters['profile/accessToken']
+  }
+
   try {
     const customerEmail = rootState.profile.user.attributes.email
 
     console.info(
       `Processing payment before proceeding to book flight ${outboundFlight}`
     )
+    let accessToken = credentials.accessToken
+
     let chargeToken = await processPayment({
       paymentToken,
       outboundFlight,
-      customerEmail
+      customerEmail,
+      accessToken
     })
 
     console.info(
@@ -143,11 +163,11 @@ export async function createBooking(
     Loading.show({ message: 'Creating a new booking...' })
 
     const processBookingInput = {
-      input: {
-        paymentToken: chargeToken,
-        bookingOutboundFlightId: outboundFlight.id
-      }
+      chargeToken: chargeToken,
+      outboundFlight: outboundFlight.id
     }
+
+    axios.put(window.Config.BOOKING_CREATE, processBookingInput)
 
     // const {
     //   // @ts-ignore

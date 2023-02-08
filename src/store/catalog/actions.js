@@ -60,7 +60,7 @@ export async function fetchFlights(
 
     // const result = await axios({
     //   url: catalogEndpoint,
-    //   method: 'post',
+    //   method: 'GET',
     //   data: {
     //     query: listFlightsQuery,
     //     variables: {
@@ -93,7 +93,17 @@ export async function fetchFlights(
     // })
 
     // [Mock-Example]
-    const { data: flightData } = await axios.get('/mocks/flights.json')
+    const { data: flightData } = await axios.get(window.Config.CATALOG_LIST, {
+      params: {
+        departureDate: date,
+        departureAirportCode: departure,
+        arrivalAirportCode: arrival
+      },
+      headers: {
+        Authorization: credentials.accessToken,
+        'Content-Type': 'application/json'
+      }
+    })
     const flights = flightData.map((flight) => new Flight(flight))
 
     console.info('Committing Flights to the store...')
@@ -171,9 +181,15 @@ export async function fetchByFlightId({ commit, rootGetters }, { flightId }) {
     // })
 
     // [Mock-Example]
-    var { data: flightData } = await axios.get('/mocks/flights.json')
-
-    flightData = flightData.find((flight) => flight.id === flightId)
+    const { data: flightData } = await axios.get(window.Config.CATALOG_FETCH, {
+      params: {
+        id: flight.id
+      },
+      headers: {
+        Authorization: credentials.accessToken,
+        'Content-Type': 'application/json'
+      }
+    })
 
     console.info('Flight received from Catalog...')
     console.log(flightData)

@@ -1,3 +1,5 @@
+import { isTargetNameAssociation } from '@aws-amplify/datastore'
+
 /**
  * Profile [Vuex Module getter](https://vuex.vuejs.org/guide/getters.html) - isAuthenticated
  * @param {object} state - Profile state
@@ -18,4 +20,12 @@ export const lastName = (state) => {
 
 export const userAttributes = (state) => {
   return state.user.attributes || 'no attributes'
+}
+
+export const idToken = (state) => {
+  return state.user.signInUserSession.idToken.jwtToken
+}
+
+export const accessToken = (state) => {
+  return state.user.signInUserSession.accessToken.jwtToken
 }
