@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Loyalty service to collection airmiles",
   "dependencies": {
-    "aws-sdk": "^2.814.0",
+    "aws-sdk": "^2.1354.0",
     "aws-xray-sdk-core": "^2.5.0",
     "uuid": "^7.0.2"
   },
